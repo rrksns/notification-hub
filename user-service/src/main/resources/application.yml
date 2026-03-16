@@ -1,0 +1,42 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3307/user_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: nhub
+    password: nhub1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    user:
+      name: actuator
+      password: actuator
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n
+  access-token-expire-ms: 3600000
+  refresh-token-expire-ms: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true

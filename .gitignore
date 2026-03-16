@@ -1,0 +1,40 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# IDE
+.idea/
+*.iml
+.eclipse/
+.settings/
+.classpath
+.project
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+*.pid
+spring.log
+
+# Claude / AI
+.claude/
+CLAUDE.md
+.cursorrules
+.copilot/
+.continue/
+
+# Environment
+.env
+.env.*
+*.local
+
+# Docker volumes (local data)
+docker/data/
