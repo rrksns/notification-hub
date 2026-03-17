@@ -1,7 +1,6 @@
 package com.notificationhub.notification.infrastructure.persistence.entity;
 
 import com.notificationhub.notification.domain.model.Channel;
-import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.model.NotificationStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -28,20 +27,25 @@ public class NotificationEntity {
 
     protected NotificationEntity() {}
 
-    public static NotificationEntity from(Notification n) {
-        NotificationEntity e = new NotificationEntity();
-        e.id = n.getId();
-        e.tenantId = n.getTenantId();
-        e.channel = n.getChannel();
-        e.recipient = n.getRecipient();
-        e.content = n.getContent();
-        e.idempotencyKey = n.getIdempotencyKey();
-        e.status = n.getStatus();
-        e.createdAt = n.getCreatedAt();
-        return e;
+    public NotificationEntity(String id, String tenantId, Channel channel, String recipient,
+                               String content, String idempotencyKey, NotificationStatus status,
+                               LocalDateTime createdAt) {
+        this.id = id;
+        this.tenantId = tenantId;
+        this.channel = channel;
+        this.recipient = recipient;
+        this.content = content;
+        this.idempotencyKey = idempotencyKey;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public Notification toDomain() {
-        return Notification.reconstruct(id, tenantId, channel, recipient, content, idempotencyKey, status, createdAt);
-    }
+    public String getId() { return id; }
+    public String getTenantId() { return tenantId; }
+    public Channel getChannel() { return channel; }
+    public String getRecipient() { return recipient; }
+    public String getContent() { return content; }
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public NotificationStatus getStatus() { return status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

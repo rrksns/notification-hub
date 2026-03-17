@@ -1,6 +1,5 @@
 package com.notificationhub.user.infrastructure.persistence.entity;
 
-import com.notificationhub.user.domain.model.ApiKey;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,22 +21,22 @@ public class ApiKeyEntity {
 
     protected ApiKeyEntity() {}
 
-    public static ApiKeyEntity from(ApiKey apiKey) {
-        ApiKeyEntity e = new ApiKeyEntity();
-        e.id = apiKey.getId();
-        e.tenantId = apiKey.getTenantId();
-        e.name = apiKey.getName();
-        e.keyValue = apiKey.getKeyValue();
-        e.expiresAt = apiKey.getExpiresAt();
-        e.revoked = apiKey.isRevoked();
-        e.createdAt = apiKey.getCreatedAt();
-        return e;
+    public ApiKeyEntity(String id, String tenantId, String name, String keyValue,
+                        LocalDateTime expiresAt, boolean revoked, LocalDateTime createdAt) {
+        this.id = id;
+        this.tenantId = tenantId;
+        this.name = name;
+        this.keyValue = keyValue;
+        this.expiresAt = expiresAt;
+        this.revoked = revoked;
+        this.createdAt = createdAt;
     }
 
-    public ApiKey toDomain() {
-        return ApiKey.reconstruct(id, tenantId, name, keyValue, expiresAt, revoked, createdAt);
-    }
-
-    public String getKeyValue() { return keyValue; }
+    public String getId() { return id; }
     public String getTenantId() { return tenantId; }
+    public String getName() { return name; }
+    public String getKeyValue() { return keyValue; }
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public boolean isRevoked() { return revoked; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

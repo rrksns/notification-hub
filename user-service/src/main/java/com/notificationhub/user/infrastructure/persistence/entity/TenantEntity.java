@@ -1,7 +1,6 @@
 package com.notificationhub.user.infrastructure.persistence.entity;
 
 import com.notificationhub.user.domain.model.SubscriptionPlan;
-import com.notificationhub.user.domain.model.Tenant;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,21 +21,19 @@ public class TenantEntity {
 
     protected TenantEntity() {}
 
-    public static TenantEntity from(Tenant tenant) {
-        TenantEntity e = new TenantEntity();
-        e.id = tenant.getId();
-        e.name = tenant.getName();
-        e.email = tenant.getEmail();
-        e.plan = tenant.getPlan();
-        e.active = tenant.isActive();
-        e.createdAt = tenant.getCreatedAt();
-        return e;
-    }
-
-    public Tenant toDomain() {
-        return Tenant.reconstruct(id, name, email, plan, active, createdAt);
+    public TenantEntity(String id, String name, String email, SubscriptionPlan plan, boolean active, LocalDateTime createdAt) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.plan = plan;
+        this.active = active;
+        this.createdAt = createdAt;
     }
 
     public String getId() { return id; }
+    public String getName() { return name; }
     public String getEmail() { return email; }
+    public SubscriptionPlan getPlan() { return plan; }
+    public boolean isActive() { return active; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

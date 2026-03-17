@@ -1,6 +1,5 @@
 package com.notificationhub.user.infrastructure.persistence.entity;
 
-import com.notificationhub.user.domain.model.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -21,20 +20,19 @@ public class UserEntity {
 
     protected UserEntity() {}
 
-    public static UserEntity from(User user) {
-        UserEntity e = new UserEntity();
-        e.id = user.getId();
-        e.tenantId = user.getTenantId();
-        e.email = user.getEmail();
-        e.encodedPassword = user.getEncodedPassword();
-        e.role = user.getRole();
-        e.createdAt = user.getCreatedAt();
-        return e;
+    public UserEntity(String id, String tenantId, String email, String encodedPassword, String role, LocalDateTime createdAt) {
+        this.id = id;
+        this.tenantId = tenantId;
+        this.email = email;
+        this.encodedPassword = encodedPassword;
+        this.role = role;
+        this.createdAt = createdAt;
     }
 
-    public User toDomain() {
-        return User.reconstruct(id, tenantId, email, encodedPassword, role, createdAt);
-    }
-
+    public String getId() { return id; }
+    public String getTenantId() { return tenantId; }
     public String getEmail() { return email; }
+    public String getEncodedPassword() { return encodedPassword; }
+    public String getRole() { return role; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

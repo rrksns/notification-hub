@@ -2,7 +2,7 @@ package com.notificationhub.notification.infrastructure.persistence.adapter;
 
 import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
-import com.notificationhub.notification.infrastructure.persistence.entity.NotificationEntity;
+import com.notificationhub.notification.infrastructure.persistence.mapper.NotificationMapper;
 import com.notificationhub.notification.infrastructure.persistence.repository.NotificationJpaRepository;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
@@ -18,16 +18,16 @@ public class NotificationRepositoryAdapter implements NotificationRepository {
 
     @Override
     public Notification save(Notification notification) {
-        return jpaRepository.save(NotificationEntity.from(notification)).toDomain();
+        return NotificationMapper.toDomain(jpaRepository.save(NotificationMapper.toEntity(notification)));
     }
 
     @Override
     public Optional<Notification> findById(String id) {
-        return jpaRepository.findById(id).map(NotificationEntity::toDomain);
+        return jpaRepository.findById(id).map(NotificationMapper::toDomain);
     }
 
     @Override
     public Optional<Notification> findByIdAndTenantId(String id, String tenantId) {
-        return jpaRepository.findByIdAndTenantId(id, tenantId).map(NotificationEntity::toDomain);
+        return jpaRepository.findByIdAndTenantId(id, tenantId).map(NotificationMapper::toDomain);
     }
 }

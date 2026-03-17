@@ -2,7 +2,7 @@ package com.notificationhub.user.infrastructure.persistence.adapter;
 
 import com.notificationhub.user.domain.model.Tenant;
 import com.notificationhub.user.domain.port.out.TenantRepository;
-import com.notificationhub.user.infrastructure.persistence.entity.TenantEntity;
+import com.notificationhub.user.infrastructure.persistence.mapper.TenantMapper;
 import com.notificationhub.user.infrastructure.persistence.repository.TenantJpaRepository;
 import org.springframework.stereotype.Component;
 
@@ -19,17 +19,17 @@ public class TenantRepositoryAdapter implements TenantRepository {
 
     @Override
     public Tenant save(Tenant tenant) {
-        return jpaRepository.save(TenantEntity.from(tenant)).toDomain();
+        return TenantMapper.toDomain(jpaRepository.save(TenantMapper.toEntity(tenant)));
     }
 
     @Override
     public Optional<Tenant> findById(String id) {
-        return jpaRepository.findById(id).map(TenantEntity::toDomain);
+        return jpaRepository.findById(id).map(TenantMapper::toDomain);
     }
 
     @Override
     public Optional<Tenant> findByEmail(String email) {
-        return jpaRepository.findByEmail(email).map(TenantEntity::toDomain);
+        return jpaRepository.findByEmail(email).map(TenantMapper::toDomain);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.notificationhub.user.infrastructure.persistence.adapter;
 
 import com.notificationhub.user.domain.model.ApiKey;
 import com.notificationhub.user.domain.port.out.ApiKeyRepository;
-import com.notificationhub.user.infrastructure.persistence.entity.ApiKeyEntity;
+import com.notificationhub.user.infrastructure.persistence.mapper.ApiKeyMapper;
 import com.notificationhub.user.infrastructure.persistence.repository.ApiKeyJpaRepository;
 import org.springframework.stereotype.Component;
 
@@ -20,18 +20,18 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
 
     @Override
     public ApiKey save(ApiKey apiKey) {
-        return jpaRepository.save(ApiKeyEntity.from(apiKey)).toDomain();
+        return ApiKeyMapper.toDomain(jpaRepository.save(ApiKeyMapper.toEntity(apiKey)));
     }
 
     @Override
     public Optional<ApiKey> findByKeyValue(String keyValue) {
-        return jpaRepository.findByKeyValue(keyValue).map(ApiKeyEntity::toDomain);
+        return jpaRepository.findByKeyValue(keyValue).map(ApiKeyMapper::toDomain);
     }
 
     @Override
     public List<ApiKey> findByTenantId(String tenantId) {
         return jpaRepository.findByTenantId(tenantId).stream()
-                .map(ApiKeyEntity::toDomain)
+                .map(ApiKeyMapper::toDomain)
                 .toList();
     }
 }
