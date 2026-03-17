@@ -8,6 +8,7 @@ import com.notificationhub.notification.domain.port.in.CreateNotificationUseCase
 import com.notificationhub.notification.domain.port.out.IdempotencyPort;
 import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
+import com.notificationhub.notification.infrastructure.metrics.NotificationMetrics;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,18 +17,22 @@ public class CreateNotificationService implements CreateNotificationUseCase {
     private final NotificationRepository notificationRepository;
     private final IdempotencyPort idempotencyPort;
     private final NotificationEventPublisher eventPublisher;
+    private final NotificationMetrics metrics;
 
     public CreateNotificationService(NotificationRepository notificationRepository,
                                      IdempotencyPort idempotencyPort,
-                                     NotificationEventPublisher eventPublisher) {
+                                     NotificationEventPublisher eventPublisher,
+                                     NotificationMetrics metrics) {
         this.notificationRepository = notificationRepository;
         this.idempotencyPort = idempotencyPort;
         this.eventPublisher = eventPublisher;
+        this.metrics = metrics;
     }
 
     @Override
     public Result create(Command command) {
         if (idempotencyPort.isDuplicate(command.idempotencyKey())) {
+            metrics.incrementDuplicate();
             throw new BusinessException(ErrorCode.DUPLICATE_NOTIFICATION);
         }
 
@@ -44,6 +49,7 @@ public class CreateNotificationService implements CreateNotificationUseCase {
 
         idempotencyPort.save(command.idempotencyKey());
         eventPublisher.publish(saved);
+        metrics.incrementSent();
 
         return new Result(saved.getId(), saved.getStatus().name());
     }
