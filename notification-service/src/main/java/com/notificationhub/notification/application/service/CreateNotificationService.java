@@ -31,7 +31,7 @@ public class CreateNotificationService implements CreateNotificationUseCase {
 
     @Override
     public Result create(Command command) {
-        if (idempotencyPort.isDuplicate(command.idempotencyKey())) {
+        if (idempotencyPort.isDuplicate(command.tenantId(), command.idempotencyKey())) {
             metrics.incrementDuplicate();
             throw new BusinessException(ErrorCode.DUPLICATE_NOTIFICATION);
         }
@@ -47,7 +47,7 @@ public class CreateNotificationService implements CreateNotificationUseCase {
         notification.publish();
         Notification saved = notificationRepository.save(notification);
 
-        idempotencyPort.save(command.idempotencyKey());
+        idempotencyPort.save(command.tenantId(), command.idempotencyKey());
         eventPublisher.publish(saved);
         metrics.incrementSent();
 

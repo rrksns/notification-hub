@@ -19,12 +19,12 @@ public class RedisIdempotencyAdapter implements IdempotencyPort {
     }
 
     @Override
-    public boolean isDuplicate(String idempotencyKey) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(KEY_PREFIX + idempotencyKey));
+    public boolean isDuplicate(String tenantId, String idempotencyKey) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(KEY_PREFIX + tenantId + ":" + idempotencyKey));
     }
 
     @Override
-    public void save(String idempotencyKey) {
-        redisTemplate.opsForValue().set(KEY_PREFIX + idempotencyKey, "1", TTL);
+    public void save(String tenantId, String idempotencyKey) {
+        redisTemplate.opsForValue().set(KEY_PREFIX + tenantId + ":" + idempotencyKey, "1", TTL);
     }
 }

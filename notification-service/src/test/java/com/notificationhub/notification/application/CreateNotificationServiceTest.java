@@ -38,7 +38,7 @@ class CreateNotificationServiceTest {
     @Test
     @DisplayName("정상 알림 생성 — 저장 + Kafka 이벤트 발행")
     void create_success() {
-        given(idempotencyPort.isDuplicate("key-001")).willReturn(false);
+        given(idempotencyPort.isDuplicate("tenant-1", "key-001")).willReturn(false);
         given(notificationRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
@@ -47,14 +47,14 @@ class CreateNotificationServiceTest {
         CreateNotificationUseCase.Result result = useCase.create(cmd);
 
         assertThat(result.notificationId()).isNotBlank();
-        then(idempotencyPort).should().save("key-001");
+        then(idempotencyPort).should().save("tenant-1", "key-001");
         then(eventPublisher).should().publish(any(Notification.class));
     }
 
     @Test
     @DisplayName("동일 idempotencyKey 재요청 시 예외 발생")
     void create_duplicateKey_throws() {
-        given(idempotencyPort.isDuplicate("key-001")).willReturn(true);
+        given(idempotencyPort.isDuplicate("tenant-1", "key-001")).willReturn(true);
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
                 "tenant-1", "EMAIL", "user@test.com", "Hello", "key-001"
@@ -67,7 +67,7 @@ class CreateNotificationServiceTest {
     @Test
     @DisplayName("알림 저장 후 상태가 PUBLISHED로 변경됨")
     void create_statusBecomesPublished() {
-        given(idempotencyPort.isDuplicate("key-002")).willReturn(false);
+        given(idempotencyPort.isDuplicate("tenant-1", "key-002")).willReturn(false);
         given(notificationRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(

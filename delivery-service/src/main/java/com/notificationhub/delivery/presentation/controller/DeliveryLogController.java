@@ -19,7 +19,7 @@ public class DeliveryLogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<DeliveryLogResponse>> getById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<DeliveryLogResponse>> getById(@PathVariable("id") String id) {
         return deliveryLogRepository.findById(id)
                 .map(log -> ResponseEntity.ok(ApiResponse.ok(DeliveryLogResponse.from(log))))
                 .orElse(ResponseEntity.notFound().build());

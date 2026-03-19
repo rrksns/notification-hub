@@ -37,7 +37,7 @@ public class NotificationController {
     @GetMapping("/{id}")
     public ApiResponse<Notification> getById(
             @RequestHeader("X-Tenant-Id") String tenantId,
-            @PathVariable String id
+            @PathVariable("id") String id
     ) {
         return ApiResponse.ok(getNotificationUseCase.getById(id, tenantId));
     }
