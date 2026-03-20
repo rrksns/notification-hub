@@ -25,7 +25,7 @@ public class AnalyticsController {
     @GetMapping("/daily")
     public ApiResponse<DailyStatsResponse> getDaily(
             @RequestHeader("X-Tenant-Id") String tenantId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         return ApiResponse.ok(DailyStatsResponse.from(getDailyStatsUseCase.getByTenantAndDate(tenantId, date)));
     }
