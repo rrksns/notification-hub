@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface DailyStatsRepository {
     DailyStats save(DailyStats dailyStats);
     Optional<DailyStats> findByTenantIdAndDate(String tenantId, LocalDate date);
+    void incrementSuccess(String tenantId, LocalDate date, String channel);
+    void incrementFailure(String tenantId, LocalDate date, String channel);
 }

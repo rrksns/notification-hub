@@ -10,6 +10,7 @@ import com.notificationhub.notification.domain.port.out.NotificationEventPublish
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
 import com.notificationhub.notification.infrastructure.metrics.NotificationMetrics;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateNotificationService implements CreateNotificationUseCase {
@@ -30,6 +31,7 @@ public class CreateNotificationService implements CreateNotificationUseCase {
     }
 
     @Override
+    @Transactional
     public Result create(Command command) {
         if (idempotencyPort.isDuplicate(command.tenantId(), command.idempotencyKey())) {
             metrics.incrementDuplicate();

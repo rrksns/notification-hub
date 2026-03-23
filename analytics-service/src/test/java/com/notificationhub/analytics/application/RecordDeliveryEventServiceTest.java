@@ -1,7 +1,6 @@
 package com.notificationhub.analytics.application;
 
 import com.notificationhub.analytics.application.service.RecordDeliveryEventService;
-import com.notificationhub.analytics.domain.model.DailyStats;
 import com.notificationhub.analytics.domain.model.DeliveryEvent;
 import com.notificationhub.analytics.domain.port.in.RecordDeliveryEventUseCase;
 import com.notificationhub.analytics.domain.port.out.DailyStatsRepository;
@@ -16,9 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
@@ -37,12 +34,9 @@ class RecordDeliveryEventServiceTest {
     }
 
     @Test
-    @DisplayName("성공 이벤트 기록 — MongoDB 저장 + Redis 카운터 증가")
+    @DisplayName("성공 이벤트 기록 — MongoDB 저장 + DailyStats 원자적 증가 + Redis 카운터 증가")
     void record_successEvent_savesAndIncrementsCounter() {
         given(deliveryEventRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(dailyStatsRepository.findByTenantIdAndDate(anyString(), any()))
-                .willReturn(Optional.empty());
-        given(dailyStatsRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         RecordDeliveryEventUseCase.Command cmd = new RecordDeliveryEventUseCase.Command(
                 "log-1", "notif-1", "tenant-1", "EMAIL", "SUCCESS", null,
@@ -51,17 +45,14 @@ class RecordDeliveryEventServiceTest {
         useCase.record(cmd);
 
         then(deliveryEventRepository).should().save(any(DeliveryEvent.class));
+        then(dailyStatsRepository).should().incrementSuccess("tenant-1", LocalDate.of(2026, 3, 17), "EMAIL");
         then(realtimeCounterPort).should().incrementSuccess("tenant-1", "EMAIL");
-        then(dailyStatsRepository).should().save(any(DailyStats.class));
     }
 
     @Test
-    @DisplayName("실패 이벤트 기록 — Redis 실패 카운터 증가")
+    @DisplayName("실패 이벤트 기록 — DailyStats 원자적 증가 + Redis 실패 카운터 증가")
     void record_failureEvent_incrementsFailureCounter() {
         given(deliveryEventRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(dailyStatsRepository.findByTenantIdAndDate(anyString(), any()))
-                .willReturn(Optional.empty());
-        given(dailyStatsRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         RecordDeliveryEventUseCase.Command cmd = new RecordDeliveryEventUseCase.Command(
                 "log-2", "notif-2", "tenant-1", "SMS", "FAILED", "Timeout",
@@ -69,17 +60,14 @@ class RecordDeliveryEventServiceTest {
         );
         useCase.record(cmd);
 
+        then(dailyStatsRepository).should().incrementFailure("tenant-1", LocalDate.of(2026, 3, 17), "SMS");
         then(realtimeCounterPort).should().incrementFailure("tenant-1", "SMS");
     }
 
     @Test
-    @DisplayName("기존 DailyStats가 있으면 업데이트")
-    void record_existingDailyStats_updatesInsteadOfCreate() {
-        DailyStats existing = DailyStats.create("tenant-1", LocalDate.of(2026, 3, 17));
+    @DisplayName("성공 이벤트 — MongoDB 원자적 upsert로 DailyStats 갱신")
+    void record_successEvent_usesAtomicIncrement() {
         given(deliveryEventRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-        given(dailyStatsRepository.findByTenantIdAndDate("tenant-1", LocalDate.of(2026, 3, 17)))
-                .willReturn(Optional.of(existing));
-        given(dailyStatsRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         RecordDeliveryEventUseCase.Command cmd = new RecordDeliveryEventUseCase.Command(
                 "log-3", "notif-3", "tenant-1", "PUSH", "SUCCESS", null,
@@ -87,6 +75,8 @@ class RecordDeliveryEventServiceTest {
         );
         useCase.record(cmd);
 
-        then(dailyStatsRepository).should().save(argThat(s -> s.getTotalSuccess() == 1));
+        then(dailyStatsRepository).should().incrementSuccess("tenant-1", LocalDate.of(2026, 3, 17), "PUSH");
+        then(dailyStatsRepository).should(never()).save(any());
+        then(dailyStatsRepository).should(never()).findByTenantIdAndDate(any(), any());
     }
 }

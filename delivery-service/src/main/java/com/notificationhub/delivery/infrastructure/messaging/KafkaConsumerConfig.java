@@ -24,7 +24,7 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, NotificationEvent> consumerFactory() {
         JsonDeserializer<NotificationEvent> deserializer = new JsonDeserializer<>(NotificationEvent.class);
         deserializer.setRemoveTypeHeaders(false);
-        deserializer.addTrustedPackages("*");
+        deserializer.addTrustedPackages("com.notificationhub.common.event");
         deserializer.setUseTypeMapperForKey(true);
 
         Map<String, Object> props = new HashMap<>();

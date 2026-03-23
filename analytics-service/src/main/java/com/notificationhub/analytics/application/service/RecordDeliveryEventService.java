@@ -1,6 +1,5 @@
 package com.notificationhub.analytics.application.service;
 
-import com.notificationhub.analytics.domain.model.DailyStats;
 import com.notificationhub.analytics.domain.model.DeliveryEvent;
 import com.notificationhub.analytics.domain.port.in.RecordDeliveryEventUseCase;
 import com.notificationhub.analytics.domain.port.out.DailyStatsRepository;
@@ -31,18 +30,12 @@ public class RecordDeliveryEventService implements RecordDeliveryEventUseCase {
         );
         deliveryEventRepository.save(event);
 
-        DailyStats stats = dailyStatsRepository
-                .findByTenantIdAndDate(command.tenantId(), command.occurredAt().toLocalDate())
-                .orElseGet(() -> DailyStats.create(command.tenantId(), command.occurredAt().toLocalDate()));
-
         if (event.isSuccess()) {
-            stats.recordSuccess(command.channel());
+            dailyStatsRepository.incrementSuccess(command.tenantId(), command.occurredAt().toLocalDate(), command.channel());
             realtimeCounterPort.incrementSuccess(command.tenantId(), command.channel());
         } else {
-            stats.recordFailure(command.channel());
+            dailyStatsRepository.incrementFailure(command.tenantId(), command.occurredAt().toLocalDate(), command.channel());
             realtimeCounterPort.incrementFailure(command.tenantId(), command.channel());
         }
-
-        dailyStatsRepository.save(stats);
     }
 }

@@ -4,14 +4,16 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_user_tenant_email", columnNames = {"tenantId", "email"})
+})
 public class UserEntity {
 
     @Id
     private String id;
     @Column(nullable = false)
     private String tenantId;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
     @Column(nullable = false)
     private String encodedPassword;

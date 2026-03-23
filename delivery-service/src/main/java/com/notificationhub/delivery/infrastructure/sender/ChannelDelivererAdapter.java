@@ -32,6 +32,7 @@ public class ChannelDelivererAdapter implements ChannelDelivererPort {
 
     void deliverFallback(ChannelType channel, String recipient, String content, Throwable t) {
         log.warn("[FALLBACK] Circuit OPEN — channel={}, recipient={}, reason={}", channel, recipient, t.getMessage());
+        throw new RuntimeException("Delivery failed after circuit breaker fallback: " + t.getMessage(), t);
     }
 
     private void sendEmail(String recipient, String content) {

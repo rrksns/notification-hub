@@ -6,7 +6,7 @@ spring:
     name: analytics-service
   data:
     mongodb:
-      uri: mongodb://nhub:nhub1234@localhost:27017/analytics?authSource=admin
+      uri: mongodb://${MONGO_USER:nhub}:${MONGO_PASSWORD:nhub1234}@localhost:27017/analytics?authSource=admin
     redis:
       host: localhost
       port: 6379
@@ -14,7 +14,7 @@ spring:
     bootstrap-servers: localhost:9092
 
 jwt:
-  secret: bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n
+  secret: ${JWT_SECRET:bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n}
   access-token-expire-ms: 3600000
   refresh-token-expire-ms: 86400000
 

@@ -23,7 +23,7 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, DeliveryResultEvent> consumerFactory() {
         JsonDeserializer<DeliveryResultEvent> deserializer = new JsonDeserializer<>(DeliveryResultEvent.class);
         deserializer.setRemoveTypeHeaders(false);
-        deserializer.addTrustedPackages("*");
+        deserializer.addTrustedPackages("com.notificationhub.common.event");
         deserializer.setUseTypeMapperForKey(true);
         return new DefaultKafkaConsumerFactory<>(Map.of(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,

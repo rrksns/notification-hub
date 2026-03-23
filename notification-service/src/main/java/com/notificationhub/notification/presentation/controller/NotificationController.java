@@ -1,10 +1,10 @@
 package com.notificationhub.notification.presentation.controller;
 
 import com.notificationhub.common.response.ApiResponse;
-import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.port.in.CreateNotificationUseCase;
 import com.notificationhub.notification.domain.port.in.GetNotificationUseCase;
 import com.notificationhub.notification.presentation.dto.CreateNotificationRequest;
+import com.notificationhub.notification.presentation.dto.GetNotificationResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +35,10 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Notification> getById(
+    public ApiResponse<GetNotificationResponse> getById(
             @RequestHeader("X-Tenant-Id") String tenantId,
             @PathVariable("id") String id
     ) {
-        return ApiResponse.ok(getNotificationUseCase.getById(id, tenantId));
+        return ApiResponse.ok(GetNotificationResponse.from(getNotificationUseCase.getById(id, tenantId)));
     }
 }

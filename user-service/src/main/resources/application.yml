@@ -6,12 +6,12 @@ spring:
     name: user-service
   datasource:
     url: jdbc:mysql://localhost:3307/user_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: nhub
-    password: nhub1234
+    username: ${DB_USERNAME:nhub}
+    password: ${DB_PASSWORD:nhub1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:update}
     show-sql: false
     properties:
       hibernate:
@@ -27,7 +27,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 jwt:
-  secret: bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n
+  secret: ${JWT_SECRET:bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n}
   access-token-expire-ms: 3600000
   refresh-token-expire-ms: 86400000
 

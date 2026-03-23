@@ -6,10 +6,16 @@ import com.notificationhub.delivery.domain.port.in.ProcessDeliveryUseCase;
 import com.notificationhub.delivery.domain.port.out.ChannelDelivererPort;
 import com.notificationhub.delivery.domain.port.out.DeliveryLogRepository;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ProcessDeliveryService implements ProcessDeliveryUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessDeliveryService.class);
 
     private final DeliveryLogRepository deliveryLogRepository;
     private final ChannelDelivererPort channelDelivererPort;
@@ -25,27 +31,34 @@ public class ProcessDeliveryService implements ProcessDeliveryUseCase {
 
     @Override
     public Result process(Command command) {
+        List<DeliveryLog> existing = deliveryLogRepository.findByNotificationId(command.notificationId());
+        if (!existing.isEmpty()) {
+            log.warn("Duplicate delivery skipped: notificationId={}", command.notificationId());
+            DeliveryLog first = existing.get(0);
+            return new Result(first.getId(), first.getStatus().name());
+        }
+
         ChannelType channelType = ChannelType.from(command.channel());
 
-        DeliveryLog log = DeliveryLog.create(
+        DeliveryLog deliveryLog = DeliveryLog.create(
                 command.notificationId(),
                 command.tenantId(),
                 channelType,
                 command.recipient()
         );
-        deliveryLogRepository.save(log);
+        deliveryLogRepository.save(deliveryLog);
 
         try {
             channelDelivererPort.deliver(channelType, command.recipient(), command.content());
-            log.markSuccess();
-            deliveryLogRepository.save(log);
-            deliveryResultPublisher.publishSuccess(log);
+            deliveryLog.markSuccess();
+            deliveryLogRepository.save(deliveryLog);
+            deliveryResultPublisher.publishSuccess(deliveryLog);
         } catch (Exception e) {
-            log.markFailed(e.getMessage());
-            deliveryLogRepository.save(log);
-            deliveryResultPublisher.publishFailure(log);
+            deliveryLog.markFailed(e.getMessage());
+            deliveryLogRepository.save(deliveryLog);
+            deliveryResultPublisher.publishFailure(deliveryLog);
         }
 
-        return new Result(log.getId(), log.getStatus().name());
+        return new Result(deliveryLog.getId(), deliveryLog.getStatus().name());
     }
 }

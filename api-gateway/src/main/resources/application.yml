@@ -57,7 +57,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 jwt:
-  secret: bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n
+  secret: ${JWT_SECRET:bm90aWZpY2F0aW9uaHViLXNlY3JldC1rZXktZm9yLWp3dC1zaWduaW5n}
   access-token-expire-ms: 3600000
   refresh-token-expire-ms: 86400000
 
