@@ -4,7 +4,7 @@ metadata:
   name: api-gateway
   namespace: notification-hub
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api-gateway
@@ -15,6 +15,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
+          imagePullPolicy: Never
           image: notification-hub/api-gateway:latest
           ports:
             - containerPort: 8080
@@ -33,18 +34,18 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 5
           resources:
             requests:
               cpu: "200m"
-              memory: "256Mi"
+              memory: "128Mi"
             limits:
               cpu: "1000m"
-              memory: "512Mi"
+              memory: "384Mi"

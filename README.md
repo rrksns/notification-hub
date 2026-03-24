@@ -470,6 +470,115 @@ docker compose down -v
 
 ---
 
+## Kubernetes 실행 방법
+
+### 사전 준비
+
+- OrbStack (Kubernetes 활성화, 메모리 6GB 이상 권장)
+- `kubectl`, `docker` 설치
+
+### 1단계 — 이미지 빌드
+
+```bash
+# JAR 빌드
+mvn clean package -DskipTests
+
+# Docker 이미지 빌드 및 태깅
+for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
+  docker build -t notification-hub/${svc}atest:latest ./$svc
+  docker tag notification-hub/${svc}atest:latest notification-hub/$svc:latest
+done
+```
+
+### 2단계 — 인프라 배포
+
+```bash
+kubectl apply -f k8s/infra/
+
+# 인프라 Ready 대기
+kubectl wait --for=condition=ready pod -l app=mysql -n notification-hub --timeout=120s
+kubectl wait --for=condition=ready pod -l app=redis -n notification-hub --timeout=60s
+kubectl wait --for=condition=ready pod -l app=mongodb -n notification-hub --timeout=60s
+kubectl wait --for=condition=ready pod -l app=kafka -n notification-hub --timeout=120s
+```
+
+### 3단계 — DB 초기화
+
+```bash
+kubectl exec -n notification-hub deployment/mysql -- mysql -u root -proot1234 -e "
+  CREATE DATABASE IF NOT EXISTS notification_service;
+  CREATE DATABASE IF NOT EXISTS user_service;
+  CREATE DATABASE IF NOT EXISTS delivery_service;
+  GRANT ALL PRIVILEGES ON notification_service.* TO 'nhub'@'%';
+  GRANT ALL PRIVILEGES ON user_service.* TO 'nhub'@'%';
+  GRANT ALL PRIVILEGES ON delivery_service.* TO 'nhub'@'%';
+  FLUSH PRIVILEGES;
+"
+```
+
+### 4단계 — 앱 서비스 배포
+
+```bash
+kubectl apply -f k8s/configmap.yaml -f k8s/secret.yaml
+kubectl apply -f k8s/discovery-service/ -f k8s/api-gateway/ \
+  -f k8s/user-service/ -f k8s/notification-service/ \
+  -f k8s/delivery-service/ -f k8s/analytics-service/
+```
+
+### 5단계 — 파드 상태 확인
+
+```bash
+# 전체 Running 확인 (약 2~3분 소요)
+kubectl get pods -n notification-hub
+```
+
+### 6단계 — HPA 및 메트릭 서버 (선택)
+
+```bash
+# metrics-server 설치
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl patch deployment metrics-server -n kube-system --type='json' \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+# HPA 배포
+kubectl apply -f k8s/notification-service/hpa.yaml -f k8s/user-service/hpa.yaml
+
+# HPA 상태 확인
+kubectl get hpa -n notification-hub
+```
+
+### Grafana 모니터링 (k8s 환경)
+
+```bash
+# k8s 서비스를 로컬 포트에 노출
+kubectl port-forward -n notification-hub svc/discovery-service 8761:8761 &
+kubectl port-forward -n notification-hub svc/api-gateway 8080:8080 &
+kubectl port-forward -n notification-hub svc/user-service 8081:8081 &
+kubectl port-forward -n notification-hub svc/notification-service 8082:8082 &
+kubectl port-forward -n notification-hub svc/delivery-service 8083:8083 &
+kubectl port-forward -n notification-hub svc/analytics-service 8084:8084 &
+
+# Grafana + Prometheus 기동
+docker compose up -d grafana prometheus
+```
+
+Grafana: `http://localhost:3000` (admin / admin1234)
+
+### 종료
+
+```bash
+# port-forward 종료
+pkill -f "kubectl port-forward"
+
+# 모니터링 종료
+docker compose down
+
+# k8s 전체 종료
+kubectl delete namespace notification-hub
+```
+
+---
+
 ## 테스트
 
 ### 단위 테스트 커버리지

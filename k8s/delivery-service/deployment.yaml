@@ -4,7 +4,7 @@ metadata:
   name: delivery-service
   namespace: notification-hub
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: delivery-service
@@ -19,6 +19,7 @@ spec:
     spec:
       containers:
         - name: delivery-service
+          imagePullPolicy: Never
           image: notification-hub/delivery-service:latest
           ports:
             - containerPort: 8083
@@ -44,18 +45,18 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 8083
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8083
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 5
           resources:
             requests:
               cpu: "200m"
-              memory: "256Mi"
+              memory: "128Mi"
             limits:
               cpu: "1000m"
-              memory: "512Mi"
+              memory: "384Mi"

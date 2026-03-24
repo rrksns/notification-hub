@@ -4,7 +4,7 @@ metadata:
   name: analytics-service
   namespace: notification-hub
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: analytics-service
@@ -19,6 +19,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
+          imagePullPolicy: Never
           image: notification-hub/analytics-service:latest
           ports:
             - containerPort: 8084
@@ -34,18 +35,18 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 8084
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8084
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 5
           resources:
             requests:
               cpu: "200m"
-              memory: "256Mi"
+              memory: "128Mi"
             limits:
               cpu: "1000m"
-              memory: "512Mi"
+              memory: "384Mi"
