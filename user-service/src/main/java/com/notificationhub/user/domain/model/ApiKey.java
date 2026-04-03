@@ -1,6 +1,7 @@
 package com.notificationhub.user.domain.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class ApiKey {
@@ -26,7 +27,7 @@ public class ApiKey {
         return new ApiKey(
             UUID.randomUUID().toString(), tenantId, name,
             "nhub_" + UUID.randomUUID().toString().replace("-", ""),
-            null, false, LocalDateTime.now()
+            null, false, LocalDateTime.now(ZoneOffset.UTC)
         );
     }
 
@@ -34,7 +35,7 @@ public class ApiKey {
         return new ApiKey(
             UUID.randomUUID().toString(), tenantId, name,
             "nhub_" + UUID.randomUUID().toString().replace("-", ""),
-            expiresAt, false, LocalDateTime.now()
+            expiresAt, false, LocalDateTime.now(ZoneOffset.UTC)
         );
     }
 
@@ -45,7 +46,7 @@ public class ApiKey {
     public void revoke() { this.revoked = true; }
 
     public boolean isExpired() {
-        return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
+        return expiresAt != null && LocalDateTime.now(ZoneOffset.UTC).isAfter(expiresAt);
     }
 
     public String getId() { return id; }

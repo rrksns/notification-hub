@@ -3,6 +3,7 @@ package com.notificationhub.user.domain.model;
 import com.notificationhub.user.domain.exception.InvalidTenantException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class Tenant {
@@ -25,7 +26,7 @@ public class Tenant {
     public static Tenant create(String name, String email, SubscriptionPlan plan) {
         if (name == null || name.isBlank()) throw new InvalidTenantException("Tenant name is required");
         if (email == null || email.isBlank()) throw new InvalidTenantException("Tenant email is required");
-        return new Tenant(UUID.randomUUID().toString(), name, email, plan, true, LocalDateTime.now());
+        return new Tenant(UUID.randomUUID().toString(), name, email, plan, true, LocalDateTime.now(ZoneOffset.UTC));
     }
 
     public static Tenant reconstruct(String id, String name, String email, SubscriptionPlan plan, boolean active, LocalDateTime createdAt) {

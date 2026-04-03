@@ -10,6 +10,7 @@ import com.notificationhub.user.domain.port.out.PasswordEncoder;
 import com.notificationhub.user.domain.port.out.TenantRepository;
 import com.notificationhub.user.domain.port.out.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TenantService implements RegisterTenantUseCase {
@@ -25,6 +26,7 @@ public class TenantService implements RegisterTenantUseCase {
     }
 
     @Override
+    @Transactional
     public Result register(Command command) {
         if (tenantRepository.existsByEmail(command.email())) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);

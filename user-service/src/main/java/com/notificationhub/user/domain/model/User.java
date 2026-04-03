@@ -3,6 +3,7 @@ package com.notificationhub.user.domain.model;
 import com.notificationhub.user.domain.exception.InvalidUserException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class User {
@@ -25,7 +26,7 @@ public class User {
     public static User create(String tenantId, String email, String encodedPassword) {
         if (email == null || email.isBlank()) throw new InvalidUserException("User email is required");
         if (encodedPassword == null || encodedPassword.isBlank()) throw new InvalidUserException("Password is required");
-        return new User(UUID.randomUUID().toString(), tenantId, email, encodedPassword, "ADMIN", LocalDateTime.now());
+        return new User(UUID.randomUUID().toString(), tenantId, email, encodedPassword, "ADMIN", LocalDateTime.now(ZoneOffset.UTC));
     }
 
     public static User reconstruct(String id, String tenantId, String email, String encodedPassword, String role, LocalDateTime createdAt) {

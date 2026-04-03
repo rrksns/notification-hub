@@ -1,6 +1,7 @@
 package com.notificationhub.delivery.domain.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class DeliveryLog {
@@ -41,7 +42,7 @@ public class DeliveryLog {
         return new DeliveryLog(
                 UUID.randomUUID().toString(),
                 notificationId, tenantId, channel, recipient,
-                DeliveryStatus.PENDING, null, 0, LocalDateTime.now()
+                DeliveryStatus.PENDING, null, 0, LocalDateTime.now(ZoneOffset.UTC)
         );
     }
 

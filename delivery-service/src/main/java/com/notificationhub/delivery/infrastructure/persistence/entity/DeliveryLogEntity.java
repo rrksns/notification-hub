@@ -8,7 +8,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "delivery_logs")
+@Table(name = "delivery_logs", indexes = {
+    @Index(name = "idx_delivery_notification_id", columnList = "notificationId"),
+    @Index(name = "idx_delivery_tenant_id", columnList = "tenantId")
+})
 public class DeliveryLogEntity {
 
     @Id

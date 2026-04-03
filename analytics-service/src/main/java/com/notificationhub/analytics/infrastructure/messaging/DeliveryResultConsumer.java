@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneOffset;
+
 @Component
 public class DeliveryResultConsumer {
 
@@ -28,7 +30,7 @@ public class DeliveryResultConsumer {
                 event.channel(),
                 event.status(),
                 event.failureReason(),
-                event.occurredAt().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+                event.occurredAt().atZone(ZoneOffset.UTC).toLocalDateTime()
         );
         recordDeliveryEventUseCase.record(cmd);
     }

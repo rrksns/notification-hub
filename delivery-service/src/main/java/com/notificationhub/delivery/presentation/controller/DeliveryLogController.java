@@ -1,7 +1,8 @@
 package com.notificationhub.delivery.presentation.controller;
 
 import com.notificationhub.common.response.ApiResponse;
-import com.notificationhub.delivery.domain.port.out.DeliveryLogRepository;
+import com.notificationhub.delivery.domain.model.DeliveryLog;
+import com.notificationhub.delivery.domain.port.in.GetDeliveryLogUseCase;
 import com.notificationhub.delivery.presentation.dto.DeliveryLogResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,23 +13,22 @@ import java.util.List;
 @RequestMapping("/api/deliveries")
 public class DeliveryLogController {
 
-    private final DeliveryLogRepository deliveryLogRepository;
+    private final GetDeliveryLogUseCase getDeliveryLogUseCase;
 
-    public DeliveryLogController(DeliveryLogRepository deliveryLogRepository) {
-        this.deliveryLogRepository = deliveryLogRepository;
+    public DeliveryLogController(GetDeliveryLogUseCase getDeliveryLogUseCase) {
+        this.getDeliveryLogUseCase = getDeliveryLogUseCase;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<DeliveryLogResponse>> getById(@PathVariable("id") String id) {
-        return deliveryLogRepository.findById(id)
-                .map(log -> ResponseEntity.ok(ApiResponse.ok(DeliveryLogResponse.from(log))))
-                .orElse(ResponseEntity.notFound().build());
+        DeliveryLog log = getDeliveryLogUseCase.getById(id);
+        return ResponseEntity.ok(ApiResponse.ok(DeliveryLogResponse.from(log)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<DeliveryLogResponse>>> getByTenant(
             @RequestHeader("X-Tenant-Id") String tenantId) {
-        List<DeliveryLogResponse> logs = deliveryLogRepository.findByTenantId(tenantId)
+        List<DeliveryLogResponse> logs = getDeliveryLogUseCase.getByTenantId(tenantId)
                 .stream().map(DeliveryLogResponse::from).toList();
         return ResponseEntity.ok(ApiResponse.ok(logs));
     }

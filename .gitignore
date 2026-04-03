@@ -38,3 +38,5 @@ CLAUDE.md
 
 # Docker volumes (local data)
 docker/data/
+
+.bkit

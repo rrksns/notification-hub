@@ -3,6 +3,7 @@ package com.notificationhub.notification.domain.model;
 import com.notificationhub.notification.domain.exception.InvalidNotificationException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class Notification {
@@ -31,7 +32,7 @@ public class Notification {
         if (recipient == null || recipient.isBlank()) throw new InvalidNotificationException("Recipient is required");
         if (content == null || content.isBlank()) throw new InvalidNotificationException("Content is required");
         return new Notification(UUID.randomUUID().toString(), tenantId, channel, recipient,
-                content, idempotencyKey, NotificationStatus.PENDING, LocalDateTime.now());
+                content, idempotencyKey, NotificationStatus.PENDING, LocalDateTime.now(ZoneOffset.UTC));
     }
 
     public static Notification reconstruct(String id, String tenantId, Channel channel, String recipient,

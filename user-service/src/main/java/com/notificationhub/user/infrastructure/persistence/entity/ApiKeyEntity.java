@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "api_keys")
+@Table(name = "api_keys", indexes = {
+    @Index(name = "idx_apikey_tenant_id", columnList = "tenantId")
+})
 public class ApiKeyEntity {
 
     @Id

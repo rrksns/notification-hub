@@ -33,23 +33,28 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             }
 
             String token = authHeader.substring(7);
-            if (!jwtTokenProvider.isValid(token)) {
+            try {
+                if (!jwtTokenProvider.isValid(token)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                    return exchange.getResponse().setComplete();
+                }
+
+                String tenantId = jwtTokenProvider.getTenantId(token);
+                String userId = jwtTokenProvider.getSubject(token);
+                return chain.filter(
+                    exchange.mutate()
+                        .request(r -> r.headers(headers -> {
+                            headers.remove("X-Tenant-Id");
+                            headers.remove("X-User-Id");
+                            headers.add("X-Tenant-Id", tenantId);
+                            headers.add("X-User-Id", userId);
+                        }))
+                        .build()
+                );
+            } catch (Exception e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
-
-            String tenantId = jwtTokenProvider.getTenantId(token);
-            String userId = jwtTokenProvider.getSubject(token);
-            return chain.filter(
-                exchange.mutate()
-                    .request(r -> r.headers(headers -> {
-                        headers.remove("X-Tenant-Id");
-                        headers.remove("X-User-Id");
-                        headers.add("X-Tenant-Id", tenantId);
-                        headers.add("X-User-Id", userId);
-                    }))
-                    .build()
-            );
         };
     }
 

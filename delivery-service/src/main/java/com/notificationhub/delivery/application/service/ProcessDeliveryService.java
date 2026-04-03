@@ -9,6 +9,7 @@ import com.notificationhub.delivery.domain.port.out.DeliveryResultPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,7 +31,11 @@ public class ProcessDeliveryService implements ProcessDeliveryUseCase {
     }
 
     @Override
+    @Transactional
     public Result process(Command command) {
+        // NOTE: Kafka publish is outside the JPA transaction boundary.
+        // If publish fails after DB commit, analytics will miss this event.
+        // Transactional Outbox Pattern would be the production solution.
         List<DeliveryLog> existing = deliveryLogRepository.findByNotificationId(command.notificationId());
         if (!existing.isEmpty()) {
             log.warn("Duplicate delivery skipped: notificationId={}", command.notificationId());
