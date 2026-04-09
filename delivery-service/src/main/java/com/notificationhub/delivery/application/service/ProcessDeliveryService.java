@@ -53,17 +53,18 @@ public class ProcessDeliveryService implements ProcessDeliveryUseCase {
         );
         deliveryLogRepository.save(deliveryLog);
 
+        DeliveryLog finalLog;
         try {
             channelDelivererPort.deliver(channelType, command.recipient(), command.content());
-            deliveryLog.markSuccess();
-            deliveryLogRepository.save(deliveryLog);
-            deliveryResultPublisher.publishSuccess(deliveryLog);
+            finalLog = deliveryLog.markSuccess();
+            deliveryLogRepository.save(finalLog);
+            deliveryResultPublisher.publishSuccess(finalLog);
         } catch (Exception e) {
-            deliveryLog.markFailed(e.getMessage());
-            deliveryLogRepository.save(deliveryLog);
-            deliveryResultPublisher.publishFailure(deliveryLog);
+            finalLog = deliveryLog.markFailed(e.getMessage());
+            deliveryLogRepository.save(finalLog);
+            deliveryResultPublisher.publishFailure(finalLog);
         }
 
-        return new Result(deliveryLog.getId(), deliveryLog.getStatus().name());
+        return new Result(finalLog.getId(), finalLog.getStatus().name());
     }
 }

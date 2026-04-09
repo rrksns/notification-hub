@@ -31,11 +31,12 @@ class DeliveryLogTest {
     void markSuccess_transitionToSuccess() {
         DeliveryLog log = DeliveryLog.create("notif-1", "tenant-1", ChannelType.EMAIL, "user@example.com");
 
-        log.markSuccess();
+        DeliveryLog succeeded = log.markSuccess();
 
-        assertThat(log.getStatus()).isEqualTo(DeliveryStatus.SUCCESS);
-        assertThat(log.getAttemptCount()).isEqualTo(1);
-        assertThat(log.getFailureReason()).isNull();
+        assertThat(succeeded.getStatus()).isEqualTo(DeliveryStatus.SUCCESS);
+        assertThat(succeeded.getAttemptCount()).isEqualTo(1);
+        assertThat(succeeded.getFailureReason()).isNull();
+        assertThat(log.getStatus()).isEqualTo(DeliveryStatus.PENDING);
     }
 
     @Test
@@ -43,20 +44,20 @@ class DeliveryLogTest {
     void markFailed_transitionToFailed() {
         DeliveryLog log = DeliveryLog.create("notif-1", "tenant-1", ChannelType.SMS, "+821012345678");
 
-        log.markFailed("SMTP connection timeout");
+        DeliveryLog failed = log.markFailed("SMTP connection timeout");
 
-        assertThat(log.getStatus()).isEqualTo(DeliveryStatus.FAILED);
-        assertThat(log.getAttemptCount()).isEqualTo(1);
-        assertThat(log.getFailureReason()).isEqualTo("SMTP connection timeout");
+        assertThat(failed.getStatus()).isEqualTo(DeliveryStatus.FAILED);
+        assertThat(failed.getAttemptCount()).isEqualTo(1);
+        assertThat(failed.getFailureReason()).isEqualTo("SMTP connection timeout");
     }
 
     @Test
     @DisplayName("이미 SUCCESS 상태에서 markSuccess 호출 시 예외")
     void markSuccess_alreadySuccess_throwsException() {
         DeliveryLog log = DeliveryLog.create("notif-1", "tenant-1", ChannelType.PUSH, "device-token-123");
-        log.markSuccess();
+        DeliveryLog succeeded = log.markSuccess();
 
-        assertThatThrownBy(log::markSuccess)
+        assertThatThrownBy(succeeded::markSuccess)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("SUCCESS");
     }

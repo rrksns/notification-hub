@@ -1,11 +1,12 @@
 package com.notificationhub.notification.infrastructure.metrics;
 
+import com.notificationhub.notification.domain.port.out.NotificationApplicationMetrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotificationMetrics {
+public class NotificationMetrics implements NotificationApplicationMetrics {
 
     private final Counter notificationSentCounter;
     private final Counter notificationDuplicateCounter;

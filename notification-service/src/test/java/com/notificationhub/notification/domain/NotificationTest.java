@@ -24,16 +24,17 @@ class NotificationTest {
     @DisplayName("PENDING → PUBLISHED 상태 전이 성공")
     void publish_changesStatusToPublished() {
         Notification n = Notification.create("tenant-1", Channel.EMAIL, "user@test.com", "Hello", "key-001");
-        n.publish();
-        assertThat(n.getStatus()).isEqualTo(NotificationStatus.PUBLISHED);
+        Notification published = n.publish();
+        assertThat(published.getStatus()).isEqualTo(NotificationStatus.PUBLISHED);
+        assertThat(n.getStatus()).isEqualTo(NotificationStatus.PENDING);
     }
 
     @Test
     @DisplayName("PUBLISHED 상태에서 다시 publish 시 예외")
     void publish_alreadyPublished_throws() {
         Notification n = Notification.create("tenant-1", Channel.EMAIL, "user@test.com", "Hello", "key-001");
-        n.publish();
-        assertThatThrownBy(n::publish).isInstanceOf(InvalidNotificationException.class);
+        Notification published = n.publish();
+        assertThatThrownBy(published::publish).isInstanceOf(InvalidNotificationException.class);
     }
 
     @Test

@@ -11,9 +11,9 @@ public class DeliveryLog {
     private final String tenantId;
     private final ChannelType channel;
     private final String recipient;
-    private DeliveryStatus status;
-    private String failureReason;
-    private int attemptCount;
+    private final DeliveryStatus status;
+    private final String failureReason;
+    private final int attemptCount;
     private final LocalDateTime createdAt;
 
     private DeliveryLog(String id, String notificationId, String tenantId,
@@ -54,21 +54,20 @@ public class DeliveryLog {
                 status, failureReason, attemptCount, createdAt);
     }
 
-    public void markSuccess() {
+    public DeliveryLog markSuccess() {
         if (this.status != DeliveryStatus.PENDING) {
             throw new IllegalStateException("Cannot mark SUCCESS from status: " + this.status);
         }
-        this.status = DeliveryStatus.SUCCESS;
-        this.attemptCount++;
+        return new DeliveryLog(id, notificationId, tenantId, channel, recipient,
+                DeliveryStatus.SUCCESS, failureReason, attemptCount + 1, createdAt);
     }
 
-    public void markFailed(String reason) {
+    public DeliveryLog markFailed(String reason) {
         if (this.status != DeliveryStatus.PENDING) {
             throw new IllegalStateException("Cannot mark FAILED from status: " + this.status);
         }
-        this.status = DeliveryStatus.FAILED;
-        this.failureReason = reason;
-        this.attemptCount++;
+        return new DeliveryLog(id, notificationId, tenantId, channel, recipient,
+                DeliveryStatus.FAILED, reason, attemptCount + 1, createdAt);
     }
 
     public String getId() { return id; }

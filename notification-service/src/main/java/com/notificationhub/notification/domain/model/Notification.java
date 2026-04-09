@@ -13,7 +13,7 @@ public class Notification {
     private final String recipient;
     private final String content;
     private final String idempotencyKey;
-    private NotificationStatus status;
+    private final NotificationStatus status;
     private final LocalDateTime createdAt;
 
     private Notification(String id, String tenantId, Channel channel, String recipient,
@@ -40,11 +40,12 @@ public class Notification {
         return new Notification(id, tenantId, channel, recipient, content, idempotencyKey, status, createdAt);
     }
 
-    public void publish() {
+    public Notification publish() {
         if (this.status != NotificationStatus.PENDING) {
             throw new InvalidNotificationException("Only PENDING notifications can be published, current: " + this.status);
         }
-        this.status = NotificationStatus.PUBLISHED;
+        return new Notification(id, tenantId, channel, recipient, content, idempotencyKey,
+                NotificationStatus.PUBLISHED, createdAt);
     }
 
     public String getId() { return id; }

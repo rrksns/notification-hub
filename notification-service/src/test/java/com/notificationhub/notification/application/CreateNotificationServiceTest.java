@@ -6,9 +6,9 @@ import com.notificationhub.notification.domain.model.Channel;
 import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.port.in.CreateNotificationUseCase;
 import com.notificationhub.notification.domain.port.out.IdempotencyPort;
+import com.notificationhub.notification.domain.port.out.NotificationApplicationMetrics;
 import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
-import com.notificationhub.notification.infrastructure.metrics.NotificationMetrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class CreateNotificationServiceTest {
     @Mock NotificationRepository notificationRepository;
     @Mock IdempotencyPort idempotencyPort;
     @Mock NotificationEventPublisher eventPublisher;
-    @Mock NotificationMetrics metrics;
+    @Mock NotificationApplicationMetrics metrics;
 
     CreateNotificationUseCase useCase;
 
