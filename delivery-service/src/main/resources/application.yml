@@ -23,6 +23,15 @@ jwt:
   access-token-expire-ms: 3600000
   refresh-token-expire-ms: 86400000
 
+email:
+  provider: ${EMAIL_PROVIDER:logging}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+  from-name: ${SENDGRID_FROM_NAME:Notification Hub}
+  api-url: ${SENDGRID_API_URL:https://api.sendgrid.com/v3/mail/send}
+
 eureka:
   client:
     service-url:
