@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.ResourceAccessException;
+
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
@@ -16,6 +19,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 
 class SendGridEmailSenderTest {
 
@@ -62,7 +66,7 @@ class SendGridEmailSenderTest {
 
     @Test
     @DisplayName("SendGrid 필수 설정이 비어 있으면 요청 전 예외를 던진다")
-    void send_missingRequiredSettings_throwsBeforeRequest() {
+    void send_missingApiKey_throwsBeforeRequest() {
         RestClient.Builder restClientBuilder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
         SendGridEmailSender sender = new SendGridEmailSender(
@@ -74,6 +78,42 @@ class SendGridEmailSenderTest {
         assertThatThrownBy(() -> sender.send("user@example.com", "Hello"))
                 .isInstanceOf(EmailDeliveryException.class)
                 .hasMessageContaining("SendGrid API key is required");
+
+        server.verify();
+    }
+
+    @Test
+    @DisplayName("SendGrid 발신자 이메일이 비어 있으면 요청 전 예외를 던진다")
+    void send_missingFromEmail_throwsBeforeRequest() {
+        RestClient.Builder restClientBuilder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        SendGridEmailSender sender = new SendGridEmailSender(
+                new SendGridProperties("SG.test-key", "", "Notification Hub",
+                        "https://api.sendgrid.com/v3/mail/send", "Notification Hub Alert"),
+                restClientBuilder
+        );
+
+        assertThatThrownBy(() -> sender.send("user@example.com", "Hello"))
+                .isInstanceOf(EmailDeliveryException.class)
+                .hasMessageContaining("SendGrid from email is required");
+
+        server.verify();
+    }
+
+    @Test
+    @DisplayName("SendGrid 네트워크 오류를 EmailDeliveryException으로 감싼다")
+    void send_networkError_wrapsEmailDeliveryException() {
+        RestClient.Builder restClientBuilder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        SendGridEmailSender sender = new SendGridEmailSender(properties(), restClientBuilder);
+
+        server.expect(requestTo("https://api.sendgrid.com/v3/mail/send"))
+                .andRespond(withException(new IOException("connection refused")));
+
+        assertThatThrownBy(() -> sender.send("user@example.com", "Hello"))
+                .isInstanceOf(EmailDeliveryException.class)
+                .hasMessageContaining("SendGrid delivery failed")
+                .hasCauseInstanceOf(ResourceAccessException.class);
 
         server.verify();
     }

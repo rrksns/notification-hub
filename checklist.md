@@ -32,3 +32,12 @@
 - [x] Verify focused SendGrid sender tests.
 - [x] Verify full delivery-service tests.
 - [x] Commit Phase 3 change.
+
+## Phase 4: Provider Failure Coverage
+
+- [x] Write RED tests for network errors and missing from-email.
+- [x] Run focused SendGrid sender test and confirm expected failure.
+- [x] Wrap non-response RestClient failures in `EmailDeliveryException`.
+- [x] Verify focused SendGrid sender tests.
+- [x] Verify full delivery-service tests.
+- [x] Commit Phase 4 change.

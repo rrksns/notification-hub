@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
@@ -43,6 +44,8 @@ public class SendGridEmailSender implements EmailSender {
             }
         } catch (RestClientResponseException e) {
             throw new EmailDeliveryException("SendGrid delivery failed: status=" + e.getStatusCode(), e);
+        } catch (RestClientException e) {
+            throw new EmailDeliveryException("SendGrid delivery failed: " + e.getMessage(), e);
         }
     }
 
