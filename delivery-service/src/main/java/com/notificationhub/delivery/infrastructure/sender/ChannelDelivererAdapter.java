@@ -18,6 +18,11 @@ import org.springframework.stereotype.Component;
 public class ChannelDelivererAdapter implements ChannelDelivererPort {
 
     private static final Logger log = LoggerFactory.getLogger(ChannelDelivererAdapter.class);
+    private final EmailSender emailSender;
+
+    public ChannelDelivererAdapter(EmailSender emailSender) {
+        this.emailSender = emailSender;
+    }
 
     @Override
     @CircuitBreaker(name = "channelDelivery", fallbackMethod = "deliverFallback")
@@ -36,8 +41,7 @@ public class ChannelDelivererAdapter implements ChannelDelivererPort {
     }
 
     private void sendEmail(String recipient, String content) {
-        // TODO: SendGrid / AWS SES 연동
-        log.info("[EMAIL] → {} : {}", recipient, content);
+        emailSender.send(recipient, content);
     }
 
     private void sendSms(String recipient, String content) {
