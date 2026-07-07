@@ -35,16 +35,16 @@
 
 ### Phase 2: Externalize SendGrid Configuration
 
-Add environment-backed properties for API key, sender email, sender name, and API URL. Do not place secrets in source control.
+Status: Complete. Added environment-backed properties for provider selection, SendGrid API key, sender email, sender name, API URL, and subject. Secrets are not stored in source control.
 
 ### Phase 3: Implement SendGrid REST Sender
 
-Create a SendGrid sender implementation that builds the `/v3/mail/send` request, handles non-2xx responses as failures, and lets existing retry/circuit breaker behavior apply.
+Status: Complete. Added `SendGridEmailSender` using Spring `RestClient`, conditional provider activation with `email.provider=sendgrid`, and SendGrid Mail Send request tests.
 
 ### Phase 4: Provider Tests and Failure Cases
 
-Cover successful request construction, provider 4xx/5xx responses, missing configuration, and network errors.
+Status: Complete. Covered successful request construction, provider 4xx/5xx responses, missing API key, missing sender email, and network errors.
 
 ### Phase 5: Documentation and Manual Verification
 
-Update README, PROCESS, and delivery-service flow docs to remove stale stub-only wording for EMAIL and document required environment variables.
+Status: Complete. Updated README, PROCESS, and delivery-service flow docs to remove stale stub-only wording for EMAIL and document required environment variables.

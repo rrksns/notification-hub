@@ -125,18 +125,28 @@ presentation/   → domain/port/in/ 호출
 ---
 
 ### Phase 4: delivery-service (TDD)
-**커밋**: `feat: Phase 4` (별도 Claude 세션에서 구현)
-**테스트**: 12/12 통과
+**커밋**: `feat: Phase 4` (별도 Claude 세션에서 구현), 이후 `feat: 이메일 발송 경계 분리`, `feat: SendGrid 설정 외부화`, `feat: SendGrid 이메일 발송 구현`, `test: SendGrid 실패 케이스 보강`
+**테스트**: 21/21 통과
 
 **주요 설계 포인트**:
 - `DeliveryLog` 상태전이: PENDING → SUCCESS / FAILED
 - **Kafka Consumer**: retry 3회 + 지수 백오프(1000ms, 2x) + DLQ(`notifications.dlq`)
-- **채널 발송 스텁**: `ChannelDelivererAdapter` — EMAIL/SMS/PUSH (TODO: SendGrid, Twilio, FCM 연동)
+- **채널 발송**: `ChannelDelivererAdapter` — EMAIL은 `EmailSender`로 위임, SMS/PUSH는 로그 스텁 유지
+- **SendGrid 연동**: `EMAIL_PROVIDER=sendgrid`일 때 `SendGridEmailSender`가 SendGrid Mail Send API(`/v3/mail/send`) 호출
+- **Provider 실패 처리**: SendGrid 4xx/5xx, 네트워크 오류, 필수 설정 누락은 `EmailDeliveryException`으로 통일하여 기존 FAILED 처리 흐름에 연결
 - 발송 결과 → `delivery-results` Kafka 토픽 발행
 
 **API**:
 - `GET /api/deliveries/{id}` → 배송 로그 조회
 - `GET /api/deliveries` → 테넌트별 전체 조회
+
+**SendGrid 환경변수**:
+- `EMAIL_PROVIDER=sendgrid`
+- `SENDGRID_API_KEY`
+- `SENDGRID_FROM_EMAIL`
+- `SENDGRID_FROM_NAME` (선택, 기본값: `Notification Hub`)
+- `SENDGRID_API_URL` (선택, 기본값: `https://api.sendgrid.com/v3/mail/send`)
+- `SENDGRID_SUBJECT` (선택, 기본값: `Notification Hub Alert`)
 
 ---
 
@@ -202,11 +212,11 @@ presentation/   → domain/port/in/ 호출
 
 | 서비스 | 테스트 수 | 커버 대상 |
 |--------|-----------|-----------|
-| user-service | 17 | domain(12) + application(5) |
+| user-service | 20 | domain + application |
 | notification-service | 12 | domain(9) + application(3) |
-| delivery-service | 12 | domain(8) + application(4) |
-| analytics-service | 8 | domain(5) + application(3) |
-| **합계** | **49** | domain + application 레이어 |
+| delivery-service | 21 | domain(8) + application(4) + infrastructure sender(9) |
+| analytics-service | 17 | domain + application |
+| **합계** | **70** | domain + application + delivery sender 레이어 |
 
 ---
 

@@ -5,7 +5,7 @@ B2B SaaS형 멀티테넌트 알림 발송 플랫폼입니다.
 
 Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어, 도메인 로직이 Spring/JPA에 의존하지 않는 순수 Java로 구현되어 있습니다.
 
-> 현재 채널 발송(Email/SMS/Push)은 스텁(로그 출력)으로 구현되어 있으며, 실제 외부 API(SendGrid, Twilio, FCM) 연동은 포함되어 있지 않습니다.
+> 현재 EMAIL 채널은 SendGrid Mail Send API 연동을 지원합니다. SMS/Push 채널은 아직 스텁(로그 출력)이며, Twilio/FCM 연동은 포함되어 있지 않습니다.
 
 ### 주요 설계 포인트
 
@@ -113,7 +113,9 @@ user-service (8081)             notification-service (8082)
                               │  key=tenantId, 파티션 3개
                               ▼
                      delivery-service (8083)
-                      · Kafka 소비 → 채널별 발송 (스텁)
+                      · Kafka 소비 → 채널별 발송
+                      · EMAIL: SendGrid 또는 logging provider
+                      · SMS/PUSH: 스텁
                       · @CircuitBreaker + @Retry
                       · 실패 시 재시도: 1s → 2s → DLQ
                               │
@@ -240,7 +242,12 @@ Kafka: notifications 토픽 수신
   ├─ ② ChannelDelivererAdapter.deliver(channel, recipient, content)
   │    ├─ @CircuitBreaker: 최근 10회 중 50% 실패 → OPEN (10초간 전체 차단)
   │    ├─ @Retry: 최대 3회, 지수 백오프 (1s → 2s → 4s)
-  │    └─ channel 분기: sendEmail() / sendSms() / sendPush() (현재 스텁)
+  │    └─ channel 분기:
+  │       ├─ EMAIL → `EmailSender`
+  │       │  ├─ `email.provider=logging` 또는 미설정: 로그 출력
+  │       │  └─ `email.provider=sendgrid`: SendGrid Mail Send API 호출
+  │       ├─ SMS → 로그 스텁
+  │       └─ PUSH → 로그 스텁
   │
   ├─ 발송 성공:
   │    ├─ ③ log.markSuccess() → MySQL 상태 업데이트 (SUCCESS)
@@ -276,6 +283,19 @@ CLOSED (정상) ──실패율 50% 초과──→ OPEN (차단: fallback에서
                                  ├─ 성공 → CLOSED
                                  └─ 실패 → OPEN
 ```
+
+**EMAIL Provider 설정:**
+
+| 환경변수 | 기본값 | 설명 |
+|----------|--------|------|
+| `EMAIL_PROVIDER` | `logging` | `logging` 또는 `sendgrid` |
+| `SENDGRID_API_KEY` | 빈 값 | SendGrid API Key. `EMAIL_PROVIDER=sendgrid`일 때 필수 |
+| `SENDGRID_FROM_EMAIL` | 빈 값 | SendGrid 발신자 이메일. `EMAIL_PROVIDER=sendgrid`일 때 필수 |
+| `SENDGRID_FROM_NAME` | `Notification Hub` | SendGrid 발신자 이름 |
+| `SENDGRID_API_URL` | `https://api.sendgrid.com/v3/mail/send` | SendGrid Mail Send 엔드포인트 |
+| `SENDGRID_SUBJECT` | `Notification Hub Alert` | 현재 단순 텍스트 메일에 사용하는 기본 제목 |
+
+`EMAIL_PROVIDER=sendgrid` 상태에서 SendGrid가 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `EmailDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
 
 ---
 
@@ -451,6 +471,20 @@ mvn spring-boot:run -pl delivery-service
 mvn spring-boot:run -pl analytics-service
 ```
 
+SendGrid로 실제 EMAIL을 발송하려면 delivery-service 실행 전에 환경변수를 설정합니다.
+
+```bash
+export EMAIL_PROVIDER=sendgrid
+export SENDGRID_API_KEY="{SendGrid API Key}"
+export SENDGRID_FROM_EMAIL="no-reply@example.com"
+export SENDGRID_FROM_NAME="Notification Hub"
+export SENDGRID_SUBJECT="Notification Hub Alert"
+
+mvn spring-boot:run -pl delivery-service
+```
+
+환경변수를 설정하지 않으면 기본값인 `EMAIL_PROVIDER=logging`으로 동작하며 EMAIL도 외부 발송 없이 로그만 출력합니다.
+
 ### 실행 순서 요약
 
 ```
@@ -587,7 +621,7 @@ kubectl delete namespace notification-hub
 |--------|-----------|--------------------------------|
 | user-service | 20/20 | 90.0% |
 | notification-service | 12/12 | 83.5% |
-| delivery-service | 12/12 | 93.4% |
+| delivery-service | 21/21 | 93.4% |
 | analytics-service | 17/17 | 94.7% |
 
 ```bash
@@ -619,6 +653,8 @@ curl -s -X POST http://localhost:8080/api/notifications \
   -d '{"channel":"EMAIL","recipient":"user@example.com","content":"Hello","idempotencyKey":"key-001"}'
 # → { notificationId, status: "PUBLISHED" }
 ```
+
+`EMAIL_PROVIDER=sendgrid`로 delivery-service를 실행 중이면 위 요청은 SendGrid Mail Send API 호출로 이어집니다. 기본값 `logging`에서는 외부 발송 없이 delivery-service 로그에 EMAIL 발송 내용만 출력됩니다.
 
 **3. 중복 발송 테스트 (같은 idempotencyKey)**
 
