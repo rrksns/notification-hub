@@ -619,10 +619,10 @@ kubectl delete namespace notification-hub
 
 | 서비스 | 테스트 수 | 커버리지 (domain + application) |
 |--------|-----------|--------------------------------|
-| user-service | 20/20 | 90.0% |
-| notification-service | 12/12 | 83.5% |
+| user-service | 21/21 | 90.0% |
+| notification-service | 13/13 | 83.5% |
 | delivery-service | 21/21 | 93.4% |
-| analytics-service | 17/17 | 94.7% |
+| analytics-service | 18/18 | 94.7% |
 
 ```bash
 # 전체 테스트 실행

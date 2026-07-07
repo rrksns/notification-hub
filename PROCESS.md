@@ -212,11 +212,11 @@ presentation/   → domain/port/in/ 호출
 
 | 서비스 | 테스트 수 | 커버 대상 |
 |--------|-----------|-----------|
-| user-service | 20 | domain + application |
-| notification-service | 12 | domain(9) + application(3) |
+| user-service | 21 | domain + application + architecture |
+| notification-service | 13 | domain + application + architecture |
 | delivery-service | 21 | domain(8) + application(4) + infrastructure sender(9) |
-| analytics-service | 17 | domain + application |
-| **합계** | **70** | domain + application + delivery sender 레이어 |
+| analytics-service | 18 | domain + application + architecture |
+| **합계** | **73** | domain + application + infrastructure sender + architecture |
 
 ---
 
