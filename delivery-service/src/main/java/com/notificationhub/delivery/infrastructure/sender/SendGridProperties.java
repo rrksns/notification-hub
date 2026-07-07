@@ -8,11 +8,13 @@ public record SendGridProperties(
         String apiKey,
         String fromEmail,
         String fromName,
-        String apiUrl
+        String apiUrl,
+        String subject
 ) {
 
     private static final String DEFAULT_API_URL = "https://api.sendgrid.com/v3/mail/send";
     private static final String DEFAULT_FROM_NAME = "Notification Hub";
+    private static final String DEFAULT_SUBJECT = "Notification Hub Alert";
 
     public SendGridProperties {
         if (apiKey == null) {
@@ -26,6 +28,9 @@ public record SendGridProperties(
         }
         if (apiUrl == null || apiUrl.isBlank()) {
             apiUrl = DEFAULT_API_URL;
+        }
+        if (subject == null || subject.isBlank()) {
+            subject = DEFAULT_SUBJECT;
         }
     }
 }

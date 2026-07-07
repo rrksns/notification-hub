@@ -21,3 +21,14 @@
 - [x] Verify focused property binding test.
 - [x] Verify full delivery-service tests.
 - [x] Commit Phase 2 change.
+
+## Phase 3: SendGrid REST Sender
+
+- [x] Write RED tests for SendGrid request, provider errors, and missing settings.
+- [x] Run focused SendGrid sender test and confirm expected failure.
+- [x] Add conditional `EmailSender` beans for logging and SendGrid providers.
+- [x] Implement `SendGridEmailSender` with Spring `RestClient`.
+- [x] Add `sendgrid.subject` environment-backed setting.
+- [x] Verify focused SendGrid sender tests.
+- [x] Verify full delivery-service tests.
+- [x] Commit Phase 3 change.

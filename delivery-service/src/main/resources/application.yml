@@ -31,6 +31,7 @@ sendgrid:
   from-email: ${SENDGRID_FROM_EMAIL:}
   from-name: ${SENDGRID_FROM_NAME:Notification Hub}
   api-url: ${SENDGRID_API_URL:https://api.sendgrid.com/v3/mail/send}
+  subject: ${SENDGRID_SUBJECT:Notification Hub Alert}
 
 eureka:
   client:
