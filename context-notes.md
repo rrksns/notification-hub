@@ -21,3 +21,4 @@
 - Phase 5 updates README, PROCESS, and `delivery-service/DELIVERY-SERVICE-FLOW.md` so EMAIL is documented as SendGrid-capable while SMS/PUSH remain stubs.
 - Full `mvn test` initially failed in user-service because Mockito inline mock maker cannot self-attach on the local JDK. The same subclass mock maker setting used in delivery-service is being applied to user, notification, and analytics tests.
 - Full `mvn test` then passed across all modules: user 21, notification 13, delivery 21, analytics 18.
+- SendGrid manual verification initially returned `403` because the sender address was not verified. After completing Sender Identity verification and refreshing `.env.local`, SendGrid returned `202 Accepted` and the recipient mailbox received the test email.

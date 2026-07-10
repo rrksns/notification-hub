@@ -148,6 +148,13 @@ presentation/   → domain/port/in/ 호출
 - `SENDGRID_API_URL` (선택, 기본값: `https://api.sendgrid.com/v3/mail/send`)
 - `SENDGRID_SUBJECT` (선택, 기본값: `Notification Hub Alert`)
 
+**실제 발송 검증**:
+- `SENDGRID_FROM_EMAIL`을 SendGrid Sender Identity로 인증한 뒤 `.env.local`에 반영
+- Sender Identity 인증 전 SendGrid 응답: `403`
+- Sender Identity 인증 후 SendGrid Mail Send API 직접 호출 결과: `202 Accepted`
+- 테스트 수신 메일함에서 실제 메일 수신 확인
+- API Key, 발신자/수신자 개인 주소는 문서와 커밋에 기록하지 않음
+
 ---
 
 ### Phase 5: analytics-service (TDD)

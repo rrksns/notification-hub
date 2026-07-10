@@ -104,6 +104,8 @@ Content-Type: application/json
 
 `202 Accepted`를 성공으로 처리합니다. SendGrid 4xx/5xx 응답, 네트워크 오류, 필수 설정 누락은 `EmailDeliveryException`으로 감싸져 기존 delivery 실패 흐름으로 전달됩니다.
 
+실제 SendGrid 계정 수동 검증에서는 Sender Identity 인증 전 `403` 응답이 발생했고, 인증 완료 후 동일 요청이 `202 Accepted`로 성공했습니다. 이후 테스트 수신 메일함에서 실제 메일 수신을 확인했습니다.
+
 ---
 
 ## 재시도와 실패 처리
@@ -181,3 +183,5 @@ delivery-service/src/main/java/com/notificationhub/delivery/
 mvn test -pl delivery-service
 mvn test -pl delivery-service -Dtest=SendGridEmailSenderTest
 ```
+
+실제 외부 발송 검증은 SendGrid API Key와 인증된 Sender Identity가 필요합니다. `.env.local`에 `EMAIL_PROVIDER=sendgrid`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`을 설정한 뒤 실행합니다.

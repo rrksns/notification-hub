@@ -1,7 +1,60 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
+
+---
+
+## SendGrid EMAIL 실제 발송 검증 (2026-07-11)
+
+### 목적
+
+delivery-service의 EMAIL provider가 SendGrid Mail Send API와 실제로 연동 가능한지 확인했습니다.
+
+### 사전 조건
+
+- SendGrid API Key 생성 완료
+- Sender Identity 인증 완료
+- `.env.local`에 `EMAIL_PROVIDER=sendgrid`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SENDGRID_SUBJECT` 설정
+- API Key와 개인 이메일 주소는 문서에 기록하지 않음
+
+### 검증 과정
+
+1. Sender Identity 인증 전 직접 Mail Send API 호출
+2. SendGrid 응답: `403`, `from address does not match a verified Sender Identity`
+3. SendGrid Sender Identity 인증 완료
+4. `.env`를 `.env.local`에 다시 반영
+5. 직접 Mail Send API 호출 재시도
+6. SendGrid 응답: `202 Accepted`
+7. 테스트 수신 메일함에서 실제 메일 수신 확인
+
+### 결과
+
+- [x] SendGrid API Key 동작 확인
+- [x] Sender Identity 인증 필요 조건 확인
+- [x] Sender Identity 인증 후 `202 Accepted` 확인
+- [x] 실제 수신 메일 확인
+
+### 직접 호출 명령 형태
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+jq -n \
+  --arg to "recipient@example.com" \
+  --arg from "$SENDGRID_FROM_EMAIL" \
+  --arg name "$SENDGRID_FROM_NAME" \
+  --arg subject "$SENDGRID_SUBJECT" \
+  --arg content "Notification Hub SendGrid actual delivery test." \
+  '{personalizations:[{to:[{email:$to}]}], from:{email:$from,name:$name}, subject:$subject, content:[{type:"text/plain", value:$content}]}' \
+| curl -sS -o /tmp/sendgrid-response.json -w "%{http_code}\n" \
+  -X POST "${SENDGRID_API_URL:-https://api.sendgrid.com/v3/mail/send}" \
+  -H "Authorization: Bearer ${SENDGRID_API_KEY}" \
+  -H "Content-Type: application/json" \
+  --data @-
+```
 
 ---
 

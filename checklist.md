@@ -59,3 +59,15 @@
 - [x] Re-run full multi-module `mvn test`.
 - [x] Update test-count documentation from full verification output.
 - [x] Commit final verification updates.
+
+## SendGrid Manual Verification
+
+- [x] Copy updated `.env` values into `.env.local`.
+- [x] Ensure `EMAIL_PROVIDER=sendgrid` is set locally.
+- [x] Confirm required SendGrid environment values load without printing secrets.
+- [x] Observe expected `403` before Sender Identity verification.
+- [x] Verify Sender Identity in SendGrid.
+- [x] Re-run direct SendGrid Mail Send API test.
+- [x] Confirm SendGrid returns `202 Accepted`.
+- [x] Confirm test recipient receives the email.
+- [x] Commit manual verification documentation.

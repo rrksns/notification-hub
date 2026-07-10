@@ -297,6 +297,8 @@ CLOSED (정상) ──실패율 50% 초과──→ OPEN (차단: fallback에서
 
 `EMAIL_PROVIDER=sendgrid` 상태에서 SendGrid가 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `EmailDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
 
+실제 SendGrid 계정으로 수동 발송 검증도 완료했습니다. 검증된 Sender Identity와 API Key를 `.env.local`에 설정한 뒤 SendGrid Mail Send API가 `202 Accepted`를 반환했고, 테스트 수신 메일함에서 메일 수신을 확인했습니다.
+
 ---
 
 ### 4단계 — 통계 집계 (analytics-service)
@@ -655,6 +657,28 @@ curl -s -X POST http://localhost:8080/api/notifications \
 ```
 
 `EMAIL_PROVIDER=sendgrid`로 delivery-service를 실행 중이면 위 요청은 SendGrid Mail Send API 호출로 이어집니다. 기본값 `logging`에서는 외부 발송 없이 delivery-service 로그에 EMAIL 발송 내용만 출력됩니다.
+
+SendGrid 실제 발송만 빠르게 확인하려면 아래처럼 Mail Send API를 직접 호출할 수도 있습니다. API Key는 커밋하거나 로그에 출력하지 마세요.
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+jq -n \
+  --arg to "recipient@example.com" \
+  --arg from "$SENDGRID_FROM_EMAIL" \
+  --arg name "$SENDGRID_FROM_NAME" \
+  --arg subject "$SENDGRID_SUBJECT" \
+  --arg content "Notification Hub SendGrid actual delivery test." \
+  '{personalizations:[{to:[{email:$to}]}], from:{email:$from,name:$name}, subject:$subject, content:[{type:"text/plain", value:$content}]}' \
+| curl -sS -o /tmp/sendgrid-response.json -w "%{http_code}\n" \
+  -X POST "${SENDGRID_API_URL:-https://api.sendgrid.com/v3/mail/send}" \
+  -H "Authorization: Bearer ${SENDGRID_API_KEY}" \
+  -H "Content-Type: application/json" \
+  --data @-
+# 성공 시 202
+```
 
 **3. 중복 발송 테스트 (같은 idempotencyKey)**
 
