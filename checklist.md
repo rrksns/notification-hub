@@ -71,3 +71,97 @@
 - [x] Confirm SendGrid returns `202 Accepted`.
 - [x] Confirm test recipient receives the email.
 - [x] Commit manual verification documentation.
+
+# SMS/PUSH Delivery Checklist
+
+## Phase 0: Design and Planning
+
+- [x] Confirm SMS Provider as Twilio.
+- [x] Confirm PUSH 1차 target as Android FCM.
+- [x] Defer iOS PUSH to a later FCM + APNs phase.
+- [x] Create SMS/PUSH design document.
+- [x] Create SMS/PUSH implementation plan document.
+- [x] Add SMS/PUSH checklist items.
+- [x] Add SMS/PUSH context notes.
+- [x] Commit Phase 0 documentation.
+
+## Phase 1: Sender Boundary Split
+
+- [ ] Write RED tests for SMS/PUSH sender delegation.
+- [ ] Run focused sender test and confirm expected failure.
+- [ ] Add `SmsSender` boundary.
+- [ ] Add `PushSender` boundary.
+- [ ] Add `LoggingSmsSender`.
+- [ ] Add `LoggingPushSender`.
+- [ ] Delegate SMS/PUSH branches through their senders.
+- [ ] Verify focused sender test.
+- [ ] Verify full delivery-service tests.
+- [ ] Update docs and checklist.
+- [ ] Commit Phase 1 change.
+
+## Phase 2: Twilio SMS Configuration
+
+- [ ] Write RED test for SMS provider and Twilio property binding.
+- [ ] Run focused property binding test and confirm expected failure.
+- [ ] Add `TwilioProperties`.
+- [ ] Add environment-backed SMS and Twilio values to `application.yml`.
+- [ ] Verify focused property binding test.
+- [ ] Verify full delivery-service tests.
+- [ ] Update docs and checklist.
+- [ ] Commit Phase 2 change.
+
+## Phase 3: Twilio SMS Sender
+
+- [ ] Write RED tests for Twilio request, provider errors, network errors, and missing settings.
+- [ ] Run focused Twilio sender test and confirm expected failure.
+- [ ] Add conditional SMS sender beans for logging and Twilio providers.
+- [ ] Implement `TwilioSmsSender` with Spring `RestClient`.
+- [ ] Add `SmsDeliveryException`.
+- [ ] Verify focused Twilio sender tests.
+- [ ] Verify full delivery-service tests.
+- [ ] Update docs and manual test instructions.
+- [ ] Commit Phase 3 change.
+
+## Phase 4: Android FCM Configuration
+
+- [ ] Write RED test for PUSH provider and FCM property binding.
+- [ ] Run focused property binding test and confirm expected failure.
+- [ ] Add `FcmProperties`.
+- [ ] Add environment-backed PUSH and FCM values to `application.yml`.
+- [ ] Document that PUSH `recipient` is an Android FCM registration token for 1차.
+- [ ] Verify focused property binding test.
+- [ ] Verify full delivery-service tests.
+- [ ] Update docs and checklist.
+- [ ] Commit Phase 4 change.
+
+## Phase 5: Android FCM Sender
+
+- [ ] Write RED tests for FCM request, auth token usage, provider errors, network errors, and missing settings.
+- [ ] Run focused FCM sender test and confirm expected failure.
+- [ ] Add conditional PUSH sender beans for logging and FCM providers.
+- [ ] Add `FcmAccessTokenProvider`.
+- [ ] Implement service account access token provider.
+- [ ] Implement `FcmPushSender` with Spring `RestClient`.
+- [ ] Add `PushDeliveryException`.
+- [ ] Verify focused FCM sender tests.
+- [ ] Verify full delivery-service tests.
+- [ ] Update docs and manual test instructions.
+- [ ] Commit Phase 5 change.
+
+## Phase 6: Failure Flow and Final Documentation
+
+- [ ] Review delivery failure tests for channel-agnostic coverage.
+- [ ] Add SMS/PUSH failure-flow tests if existing tests do not cover provider exceptions.
+- [ ] Run full delivery-service tests.
+- [ ] Run full multi-module `mvn test`.
+- [ ] Update README, PROCESS, delivery-service flow, and manual test docs.
+- [ ] Commit Phase 6 documentation and verification.
+
+## Phase 7: iOS PUSH Follow-Up
+
+- [ ] Register iOS app in Firebase.
+- [ ] Create or reuse APNs authentication key in Apple Developer.
+- [ ] Upload APNs authentication key to Firebase Cloud Messaging settings.
+- [ ] Define iOS FCM token collection contract.
+- [ ] Decide whether iOS needs platform-specific FCM payload handling.
+- [ ] Create separate implementation plan for iOS PUSH.

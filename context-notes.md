@@ -22,3 +22,13 @@
 - Full `mvn test` initially failed in user-service because Mockito inline mock maker cannot self-attach on the local JDK. The same subclass mock maker setting used in delivery-service is being applied to user, notification, and analytics tests.
 - Full `mvn test` then passed across all modules: user 21, notification 13, delivery 21, analytics 18.
 - SendGrid manual verification initially returned `403` because the sender address was not verified. After completing Sender Identity verification and refreshing `.env.local`, SendGrid returned `202 Accepted` and the recipient mailbox received the test email.
+
+## 2026-07-12
+
+- SMS/PUSH delivery will follow the EMAIL provider pattern instead of changing `ProcessDeliveryService` or `ChannelDelivererPort`.
+- SMS 1차 Provider is Twilio because the current delivery contract already has a single recipient string that maps cleanly to a phone number.
+- PUSH 1차 target is Android FCM. iOS is intentionally deferred because iOS delivery requires FCM plus APNs authentication setup in Firebase.
+- Android FCM 1차 keeps the contract simple: `recipient` is treated as an FCM registration token and `content` is treated as the notification body.
+- SMS/PUSH local defaults stay on `logging` so developers can run delivery-service without Twilio or Firebase secrets.
+- Twilio and FCM credentials must remain environment-backed and must not be committed to source control.
+- Provider-specific sender exceptions should flow into the existing delivery failure path so `DeliveryLog FAILED` and failure `DeliveryResultEvent` behavior remains consistent across EMAIL, SMS, and PUSH.
