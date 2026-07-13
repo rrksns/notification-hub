@@ -1,7 +1,9 @@
 package com.notificationhub.delivery;
 
 import com.notificationhub.delivery.infrastructure.sender.EmailDeliveryProperties;
+import com.notificationhub.delivery.infrastructure.sender.SmsDeliveryProperties;
 import com.notificationhub.delivery.infrastructure.sender.SendGridProperties;
+import com.notificationhub.delivery.infrastructure.sender.TwilioProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,7 +15,9 @@ import com.notificationhub.common.jwt.JwtProperties;
 @EnableConfigurationProperties({
         JwtProperties.class,
         EmailDeliveryProperties.class,
-        SendGridProperties.class
+        SendGridProperties.class,
+        SmsDeliveryProperties.class,
+        TwilioProperties.class
 })
 public class DeliveryServiceApplication {
     public static void main(String[] args) {

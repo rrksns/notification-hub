@@ -60,7 +60,9 @@
 **Goal:** Add SMS Provider selection and Twilio settings while keeping local startup on `logging`.
 
 **Files:**
+- Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/SmsDeliveryProperties.java`
 - Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/TwilioProperties.java`
+- Modify: `delivery-service/src/main/java/com/notificationhub/delivery/DeliveryServiceApplication.java`
 - Modify: `delivery-service/src/main/resources/application.yml`
 - Test: `delivery-service/src/test/java/com/notificationhub/delivery/infrastructure/sender/TwilioPropertiesTest.java`
 - Modify: `delivery-service/DELIVERY-SERVICE-FLOW.md`
@@ -70,14 +72,15 @@
 **Steps:**
 1. Write failing property binding tests for `sms.provider` and `twilio.*`.
 2. Run the focused test and confirm the expected failure.
-3. Add `TwilioProperties`.
-4. Register properties if required by the current Spring Boot configuration style.
-5. Add `sms.provider=${SMS_PROVIDER:logging}` to `application.yml`.
-6. Add environment-backed Twilio settings to `application.yml`.
-7. Run the focused property test.
-8. Run `mvn test -pl delivery-service`.
-9. Update docs and checklist.
-10. Commit Phase 2.
+3. Add `SmsDeliveryProperties`.
+4. Add `TwilioProperties`.
+5. Register properties in `DeliveryServiceApplication`.
+6. Add `sms.provider=${SMS_PROVIDER:logging}` to `application.yml`.
+7. Add environment-backed Twilio settings to `application.yml`.
+8. Run the focused property test.
+9. Run `mvn test -pl delivery-service`.
+10. Update docs and checklist.
+11. Commit Phase 2.
 
 ## Phase 3: Implement Twilio SMS Sender
 

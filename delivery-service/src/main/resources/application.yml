@@ -26,12 +26,22 @@ jwt:
 email:
   provider: ${EMAIL_PROVIDER:logging}
 
+sms:
+  provider: ${SMS_PROVIDER:logging}
+
 sendgrid:
   api-key: ${SENDGRID_API_KEY:}
   from-email: ${SENDGRID_FROM_EMAIL:}
   from-name: ${SENDGRID_FROM_NAME:Notification Hub}
   api-url: ${SENDGRID_API_URL:https://api.sendgrid.com/v3/mail/send}
   subject: ${SENDGRID_SUBJECT:Notification Hub Alert}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  from-number: ${TWILIO_FROM_NUMBER:}
+  messaging-service-sid: ${TWILIO_MESSAGING_SERVICE_SID:}
+  api-url: ${TWILIO_API_URL:https://api.twilio.com/2010-04-01}
 
 eureka:
   client:

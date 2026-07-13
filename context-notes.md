@@ -39,3 +39,10 @@
 - `ChannelDelivererAdapterTest` continues using manual recording doubles instead of Mockito to avoid the local JDK inline mock maker issue.
 - RED verification failed at test compilation because `SmsSender`, `PushSender`, and the three-sender `ChannelDelivererAdapter` constructor did not exist, which matched the intended missing boundary.
 - `LoggingSmsSender` and `LoggingPushSender` preserve the previous log-only behavior behind provider-specific sender interfaces.
+
+## 2026-07-14
+
+- Phase 2 adds configuration binding only. Twilio API calls, credential validation, and SMS send error handling stay in Phase 3.
+- `SmsDeliveryProperties` mirrors `EmailDeliveryProperties` so `SMS_PROVIDER` can select `logging` or `twilio`.
+- `TwilioProperties` stores account SID, auth token, from number, Messaging Service SID, and API URL with empty secret defaults to keep local startup working.
+- The Twilio API URL default is `https://api.twilio.com/2010-04-01`; the concrete Messages endpoint will be composed in the Twilio sender phase.

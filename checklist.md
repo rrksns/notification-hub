@@ -101,14 +101,16 @@
 
 ## Phase 2: Twilio SMS Configuration
 
-- [ ] Write RED test for SMS provider and Twilio property binding.
-- [ ] Run focused property binding test and confirm expected failure.
-- [ ] Add `TwilioProperties`.
-- [ ] Add environment-backed SMS and Twilio values to `application.yml`.
-- [ ] Verify focused property binding test.
-- [ ] Verify full delivery-service tests.
-- [ ] Update docs and checklist.
-- [ ] Commit Phase 2 change.
+- [x] Write RED test for SMS provider and Twilio property binding.
+- [x] Run focused property binding test and confirm expected failure.
+- [x] Add `SmsDeliveryProperties`.
+- [x] Add `TwilioProperties`.
+- [x] Register SMS and Twilio properties in delivery-service.
+- [x] Add environment-backed SMS and Twilio values to `application.yml`.
+- [x] Verify focused property binding test.
+- [x] Verify full delivery-service tests.
+- [x] Update docs and checklist.
+- [x] Commit Phase 2 change.
 
 ## Phase 3: Twilio SMS Sender
 
