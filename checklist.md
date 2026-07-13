@@ -87,17 +87,17 @@
 
 ## Phase 1: Sender Boundary Split
 
-- [ ] Write RED tests for SMS/PUSH sender delegation.
-- [ ] Run focused sender test and confirm expected failure.
-- [ ] Add `SmsSender` boundary.
-- [ ] Add `PushSender` boundary.
-- [ ] Add `LoggingSmsSender`.
-- [ ] Add `LoggingPushSender`.
-- [ ] Delegate SMS/PUSH branches through their senders.
-- [ ] Verify focused sender test.
-- [ ] Verify full delivery-service tests.
-- [ ] Update docs and checklist.
-- [ ] Commit Phase 1 change.
+- [x] Write RED tests for SMS/PUSH sender delegation.
+- [x] Run focused sender test and confirm expected failure.
+- [x] Add `SmsSender` boundary.
+- [x] Add `PushSender` boundary.
+- [x] Add `LoggingSmsSender`.
+- [x] Add `LoggingPushSender`.
+- [x] Delegate SMS/PUSH branches through their senders.
+- [x] Verify focused sender test.
+- [x] Verify full delivery-service tests.
+- [x] Update docs and checklist.
+- [x] Commit Phase 1 change.
 
 ## Phase 2: Twilio SMS Configuration
 

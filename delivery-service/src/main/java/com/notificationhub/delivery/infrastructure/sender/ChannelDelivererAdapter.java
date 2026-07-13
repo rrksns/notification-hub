@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 /**
  * 채널별 발송 어댑터.
  * 실제 환경에서는 SendGrid(EMAIL), Twilio(SMS), FCM(PUSH)를 주입받아 사용합니다.
- * 현재는 로그 출력 stub으로 구현되어 있습니다.
+ * 각 채널별 sender 구현체로 발송을 위임합니다.
  * Circuit Breaker + Retry: application.yml의 channelDelivery 인스턴스 설정 적용.
  */
 @Component
@@ -19,9 +19,13 @@ public class ChannelDelivererAdapter implements ChannelDelivererPort {
 
     private static final Logger log = LoggerFactory.getLogger(ChannelDelivererAdapter.class);
     private final EmailSender emailSender;
+    private final SmsSender smsSender;
+    private final PushSender pushSender;
 
-    public ChannelDelivererAdapter(EmailSender emailSender) {
+    public ChannelDelivererAdapter(EmailSender emailSender, SmsSender smsSender, PushSender pushSender) {
         this.emailSender = emailSender;
+        this.smsSender = smsSender;
+        this.pushSender = pushSender;
     }
 
     @Override
@@ -45,12 +49,10 @@ public class ChannelDelivererAdapter implements ChannelDelivererPort {
     }
 
     private void sendSms(String recipient, String content) {
-        // TODO: Twilio 연동
-        log.info("[SMS] → {} : {}", recipient, content);
+        smsSender.send(recipient, content);
     }
 
     private void sendPush(String recipient, String content) {
-        // TODO: Firebase Cloud Messaging 연동
-        log.info("[PUSH] → {} : {}", recipient, content);
+        pushSender.send(recipient, content);
     }
 }

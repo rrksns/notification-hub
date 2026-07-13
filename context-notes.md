@@ -32,3 +32,10 @@
 - SMS/PUSH local defaults stay on `logging` so developers can run delivery-service without Twilio or Firebase secrets.
 - Twilio and FCM credentials must remain environment-backed and must not be committed to source control.
 - Provider-specific sender exceptions should flow into the existing delivery failure path so `DeliveryLog FAILED` and failure `DeliveryResultEvent` behavior remains consistent across EMAIL, SMS, and PUSH.
+
+## 2026-07-13
+
+- Phase 1 splits SMS/PUSH sender boundaries only. It deliberately does not add Twilio or FCM API calls yet.
+- `ChannelDelivererAdapterTest` continues using manual recording doubles instead of Mockito to avoid the local JDK inline mock maker issue.
+- RED verification failed at test compilation because `SmsSender`, `PushSender`, and the three-sender `ChannelDelivererAdapter` constructor did not exist, which matched the intended missing boundary.
+- `LoggingSmsSender` and `LoggingPushSender` preserve the previous log-only behavior behind provider-specific sender interfaces.
