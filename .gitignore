@@ -26,6 +26,7 @@ spring.log
 
 # Claude / AI
 .claude/
+.worktrees/
 CLAUDE.md
 .cursorrules
 .copilot/
