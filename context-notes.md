@@ -46,3 +46,11 @@
 - `SmsDeliveryProperties` mirrors `EmailDeliveryProperties` so `SMS_PROVIDER` can select `logging` or `twilio`.
 - `TwilioProperties` stores account SID, auth token, from number, Messaging Service SID, and API URL with empty secret defaults to keep local startup working.
 - The Twilio API URL default is `https://api.twilio.com/2010-04-01`; the concrete Messages endpoint will be composed in the Twilio sender phase.
+
+## 2026-07-15
+
+- Phase 3 implements `TwilioSmsSender` using Twilio's Messages API path `/Accounts/{AccountSid}/Messages.json`.
+- Twilio requests use HTTP Basic Auth with Account SID and Auth Token and send form-urlencoded fields `To`, `Body`, and either `From` or `MessagingServiceSid`.
+- `TwilioSmsSender` treats `201 Created` as success and wraps provider responses and network failures in `SmsDeliveryException`.
+- Required setting validation happens before the request: account SID, auth token, and either from number or Messaging Service SID.
+- Actual Twilio SMS delivery is not manually verified yet because it requires real Twilio credentials and a test recipient phone number.

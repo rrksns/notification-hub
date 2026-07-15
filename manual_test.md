@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -55,6 +55,65 @@ jq -n \
   -H "Content-Type: application/json" \
   --data @-
 ```
+
+---
+
+## Twilio SMS 실제 발송 준비 (2026-07-15)
+
+### 목적
+
+delivery-service의 SMS provider가 Twilio Messages API와 연동 가능한 구조인지 확인하기 위한 수동 검증 절차입니다.
+
+### 사전 조건
+
+- Twilio Account SID 확인
+- Twilio Auth Token 확인
+- Twilio 발신 번호 또는 Messaging Service SID 준비
+- 테스트 수신 전화번호 준비
+- `.env.local`에 `SMS_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID` 설정
+- API Key와 개인 전화번호는 문서에 기록하지 않음
+
+### 직접 호출 명령 형태
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+curl -sS -o /tmp/twilio-response.json -w "%{http_code}\n" \
+  -X POST "${TWILIO_API_URL:-https://api.twilio.com/2010-04-01}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json" \
+  -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" \
+  --data-urlencode "To=+821012345678" \
+  --data-urlencode "Body=Notification Hub Twilio actual delivery test." \
+  --data-urlencode "From=${TWILIO_FROM_NUMBER}"
+```
+
+Messaging Service를 사용하는 경우 `From` 대신 `MessagingServiceSid`를 사용합니다.
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+curl -sS -o /tmp/twilio-response.json -w "%{http_code}\n" \
+  -X POST "${TWILIO_API_URL:-https://api.twilio.com/2010-04-01}/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json" \
+  -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" \
+  --data-urlencode "To=+821012345678" \
+  --data-urlencode "Body=Notification Hub Twilio actual delivery test." \
+  --data-urlencode "MessagingServiceSid=${TWILIO_MESSAGING_SERVICE_SID}"
+```
+
+### 예상 결과
+
+- Twilio API 성공 응답은 `201 Created`
+- 실패 시 `/tmp/twilio-response.json`에서 Twilio 오류 메시지 확인
+- 실제 수신 전화번호로 SMS 수신 확인
+
+### 현재 상태
+
+- [x] Twilio sender 단위 테스트로 요청 형식, Basic Auth, 오류 처리를 검증
+- [ ] 실제 Twilio 계정으로 SMS 발송 검증
+- [ ] 테스트 수신 전화번호에서 SMS 수신 확인
 
 ---
 

@@ -114,15 +114,15 @@
 
 ## Phase 3: Twilio SMS Sender
 
-- [ ] Write RED tests for Twilio request, provider errors, network errors, and missing settings.
-- [ ] Run focused Twilio sender test and confirm expected failure.
-- [ ] Add conditional SMS sender beans for logging and Twilio providers.
-- [ ] Implement `TwilioSmsSender` with Spring `RestClient`.
-- [ ] Add `SmsDeliveryException`.
-- [ ] Verify focused Twilio sender tests.
-- [ ] Verify full delivery-service tests.
-- [ ] Update docs and manual test instructions.
-- [ ] Commit Phase 3 change.
+- [x] Write RED tests for Twilio request, provider errors, network errors, and missing settings.
+- [x] Run focused Twilio sender test and confirm expected failure.
+- [x] Add conditional SMS sender beans for logging and Twilio providers.
+- [x] Implement `TwilioSmsSender` with Spring `RestClient`.
+- [x] Add `SmsDeliveryException`.
+- [x] Verify focused Twilio sender tests.
+- [x] Verify full delivery-service tests.
+- [x] Update docs and manual test instructions.
+- [x] Commit Phase 3 change.
 
 ## Phase 4: Android FCM Configuration
 
