@@ -114,7 +114,9 @@
 **Goal:** Add PUSH Provider selection and Android FCM settings while keeping local startup on `logging`.
 
 **Files:**
+- Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/PushDeliveryProperties.java`
 - Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/FcmProperties.java`
+- Modify: `delivery-service/src/main/java/com/notificationhub/delivery/DeliveryServiceApplication.java`
 - Modify: `delivery-service/src/main/resources/application.yml`
 - Test: `delivery-service/src/test/java/com/notificationhub/delivery/infrastructure/sender/FcmPropertiesTest.java`
 - Modify: `delivery-service/DELIVERY-SERVICE-FLOW.md`
@@ -124,14 +126,16 @@
 **Steps:**
 1. Write failing property binding tests for `push.provider` and `fcm.*`.
 2. Run the focused test and confirm the expected failure.
-3. Add `FcmProperties`.
-4. Add `push.provider=${PUSH_PROVIDER:logging}` to `application.yml`.
-5. Add environment-backed FCM settings to `application.yml`.
-6. Document that `recipient` is treated as an Android FCM registration token in Phase 4 and Phase 5.
-7. Run the focused property test.
-8. Run `mvn test -pl delivery-service`.
-9. Update docs and checklist.
-10. Commit Phase 4.
+3. Add `PushDeliveryProperties`.
+4. Add `FcmProperties`.
+5. Register properties in `DeliveryServiceApplication`.
+6. Add `push.provider=${PUSH_PROVIDER:logging}` to `application.yml`.
+7. Add environment-backed FCM settings to `application.yml`.
+8. Document that `recipient` is treated as an Android FCM registration token in Phase 4 and Phase 5.
+9. Run the focused property test.
+10. Run `mvn test -pl delivery-service`.
+11. Update docs and checklist.
+12. Commit Phase 4.
 
 ## Phase 5: Implement Android FCM Sender
 

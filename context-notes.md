@@ -54,3 +54,11 @@
 - `TwilioSmsSender` treats `201 Created` as success and wraps provider responses and network failures in `SmsDeliveryException`.
 - Required setting validation happens before the request: account SID, auth token, and either from number or Messaging Service SID.
 - Actual Twilio SMS delivery is not manually verified yet because it requires real Twilio credentials and a test recipient phone number.
+
+## 2026-07-16
+
+- Phase 4 adds Android FCM configuration binding only. FCM HTTP v1 calls, service account token creation, and provider error handling stay in Phase 5.
+- `PushDeliveryProperties` mirrors `EmailDeliveryProperties` and `SmsDeliveryProperties` so `PUSH_PROVIDER` can select `logging` or `fcm`.
+- `FcmProperties` stores Firebase project id, service account JSON, service account path, FCM API URL, and default notification title.
+- `GOOGLE_APPLICATION_CREDENTIALS` is mapped into `fcm.credentials-path` to match common Firebase service account usage without committing credential files.
+- PUSH 1차 keeps the simple contract from the design: `recipient` is an Android FCM registration token.

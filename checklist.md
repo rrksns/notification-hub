@@ -126,15 +126,17 @@
 
 ## Phase 4: Android FCM Configuration
 
-- [ ] Write RED test for PUSH provider and FCM property binding.
-- [ ] Run focused property binding test and confirm expected failure.
-- [ ] Add `FcmProperties`.
-- [ ] Add environment-backed PUSH and FCM values to `application.yml`.
-- [ ] Document that PUSH `recipient` is an Android FCM registration token for 1차.
-- [ ] Verify focused property binding test.
-- [ ] Verify full delivery-service tests.
-- [ ] Update docs and checklist.
-- [ ] Commit Phase 4 change.
+- [x] Write RED test for PUSH provider and FCM property binding.
+- [x] Run focused property binding test and confirm expected failure.
+- [x] Add `PushDeliveryProperties`.
+- [x] Add `FcmProperties`.
+- [x] Register PUSH and FCM properties in delivery-service.
+- [x] Add environment-backed PUSH and FCM values to `application.yml`.
+- [x] Document that PUSH `recipient` is an Android FCM registration token for 1차.
+- [x] Verify focused property binding test.
+- [x] Verify full delivery-service tests.
+- [x] Update docs and checklist.
+- [x] Commit Phase 4 change.
 
 ## Phase 5: Android FCM Sender
 

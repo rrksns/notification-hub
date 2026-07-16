@@ -29,6 +29,9 @@ email:
 sms:
   provider: ${SMS_PROVIDER:logging}
 
+push:
+  provider: ${PUSH_PROVIDER:logging}
+
 sendgrid:
   api-key: ${SENDGRID_API_KEY:}
   from-email: ${SENDGRID_FROM_EMAIL:}
@@ -42,6 +45,13 @@ twilio:
   from-number: ${TWILIO_FROM_NUMBER:}
   messaging-service-sid: ${TWILIO_MESSAGING_SERVICE_SID:}
   api-url: ${TWILIO_API_URL:https://api.twilio.com/2010-04-01}
+
+fcm:
+  project-id: ${FCM_PROJECT_ID:}
+  credentials-json: ${FCM_CREDENTIALS_JSON:}
+  credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
+  api-url: ${FCM_API_URL:https://fcm.googleapis.com/v1}
+  title: ${FCM_TITLE:Notification Hub}
 
 eureka:
   client:

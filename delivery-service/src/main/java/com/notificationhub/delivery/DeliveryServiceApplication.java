@@ -1,6 +1,8 @@
 package com.notificationhub.delivery;
 
 import com.notificationhub.delivery.infrastructure.sender.EmailDeliveryProperties;
+import com.notificationhub.delivery.infrastructure.sender.FcmProperties;
+import com.notificationhub.delivery.infrastructure.sender.PushDeliveryProperties;
 import com.notificationhub.delivery.infrastructure.sender.SmsDeliveryProperties;
 import com.notificationhub.delivery.infrastructure.sender.SendGridProperties;
 import com.notificationhub.delivery.infrastructure.sender.TwilioProperties;
@@ -17,7 +19,9 @@ import com.notificationhub.common.jwt.JwtProperties;
         EmailDeliveryProperties.class,
         SendGridProperties.class,
         SmsDeliveryProperties.class,
-        TwilioProperties.class
+        TwilioProperties.class,
+        PushDeliveryProperties.class,
+        FcmProperties.class
 })
 public class DeliveryServiceApplication {
     public static void main(String[] args) {
