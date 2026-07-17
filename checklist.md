@@ -140,17 +140,17 @@
 
 ## Phase 5: Android FCM Sender
 
-- [ ] Write RED tests for FCM request, auth token usage, provider errors, network errors, and missing settings.
-- [ ] Run focused FCM sender test and confirm expected failure.
-- [ ] Add conditional PUSH sender beans for logging and FCM providers.
-- [ ] Add `FcmAccessTokenProvider`.
-- [ ] Implement service account access token provider.
-- [ ] Implement `FcmPushSender` with Spring `RestClient`.
-- [ ] Add `PushDeliveryException`.
-- [ ] Verify focused FCM sender tests.
-- [ ] Verify full delivery-service tests.
-- [ ] Update docs and manual test instructions.
-- [ ] Commit Phase 5 change.
+- [x] Write RED tests for FCM request, auth token usage, provider errors, network errors, and missing settings.
+- [x] Run focused FCM sender test and confirm expected failure.
+- [x] Add conditional PUSH sender beans for logging and FCM providers.
+- [x] Add `FcmAccessTokenProvider`.
+- [x] Implement service account access token provider.
+- [x] Implement `FcmPushSender` with Spring `RestClient`.
+- [x] Add `PushDeliveryException`.
+- [x] Verify focused FCM sender tests.
+- [x] Verify full delivery-service tests.
+- [x] Update docs and manual test instructions.
+- [x] Commit Phase 5 change.
 
 ## Phase 6: Failure Flow and Final Documentation
 

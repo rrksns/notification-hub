@@ -142,6 +142,8 @@
 **Goal:** Send real Android push notifications through FCM HTTP v1 when `PUSH_PROVIDER=fcm`.
 
 **Files:**
+- Modify: `pom.xml`
+- Modify: `delivery-service/pom.xml`
 - Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/FcmPushSender.java`
 - Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/FcmAccessTokenProvider.java`
 - Create: `delivery-service/src/main/java/com/notificationhub/delivery/infrastructure/sender/GoogleServiceAccountAccessTokenProvider.java`

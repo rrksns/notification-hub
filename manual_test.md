@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -114,6 +114,69 @@ curl -sS -o /tmp/twilio-response.json -w "%{http_code}\n" \
 - [x] Twilio sender 단위 테스트로 요청 형식, Basic Auth, 오류 처리를 검증
 - [ ] 실제 Twilio 계정으로 SMS 발송 검증
 - [ ] 테스트 수신 전화번호에서 SMS 수신 확인
+
+---
+
+## Android FCM 실제 발송 준비 (2026-07-17)
+
+### 목적
+
+delivery-service의 PUSH provider가 Android FCM HTTP v1 API와 연동 가능한 구조인지 확인하기 위한 수동 검증 절차입니다.
+
+### 사전 조건
+
+- Firebase project id 확인
+- FCM HTTP v1 API 활성화
+- Firebase service account JSON 준비
+- Android 앱에서 발급된 FCM registration token 준비
+- `.env.local`에 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `FCM_TITLE` 설정
+- service account JSON과 registration token은 문서에 기록하지 않음
+
+### 직접 호출 명령 형태
+
+`ACCESS_TOKEN`은 Firebase service account로 발급한 `https://www.googleapis.com/auth/firebase.messaging` scope의 OAuth access token입니다.
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+jq -n \
+  --arg token "ANDROID_FCM_REGISTRATION_TOKEN" \
+  --arg title "${FCM_TITLE:-Notification Hub}" \
+  --arg body "Notification Hub Android FCM actual delivery test." \
+  '{message:{token:$token, notification:{title:$title, body:$body}}}' \
+| curl -sS -o /tmp/fcm-response.json -w "%{http_code}\n" \
+  -X POST "${FCM_API_URL:-https://fcm.googleapis.com/v1}/projects/${FCM_PROJECT_ID}/messages:send" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  --data @-
+```
+
+### 애플리케이션 경유 검증 형태
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+mvn spring-boot:run -pl delivery-service
+```
+
+notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATION_TOKEN`으로 알림을 발행하면 delivery-service가 Android FCM token 대상으로 발송합니다.
+
+### 예상 결과
+
+- FCM API 성공 응답은 `200 OK`
+- 실패 시 `/tmp/fcm-response.json`에서 FCM 오류 메시지 확인
+- 실제 Android 기기에서 PUSH 알림 수신 확인
+
+### 현재 상태
+
+- [x] FCM sender 단위 테스트로 요청 형식, Bearer token, 오류 처리를 검증
+- [x] Google service account 기반 access token provider 구현
+- [ ] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
+- [ ] Android 기기에서 PUSH 알림 수신 확인
 
 ---
 

@@ -62,3 +62,14 @@
 - `FcmProperties` stores Firebase project id, service account JSON, service account path, FCM API URL, and default notification title.
 - `GOOGLE_APPLICATION_CREDENTIALS` is mapped into `fcm.credentials-path` to match common Firebase service account usage without committing credential files.
 - PUSH 1차 keeps the simple contract from the design: `recipient` is an Android FCM registration token.
+
+## 2026-07-17
+
+- Phase 5 implements Android FCM HTTP v1 sender using `POST /v1/projects/{projectId}/messages:send`.
+- `FcmPushSender` sends `recipient` as `message.token`, `fcm.title` as `notification.title`, and `content` as `notification.body`.
+- `FcmAccessTokenProvider` separates OAuth access token creation from request construction so sender tests do not need real Firebase credentials.
+- `GoogleServiceAccountAccessTokenProvider` uses Google Auth Library with the `https://www.googleapis.com/auth/firebase.messaging` scope.
+- Token provider credential lookup order is inline service account JSON, service account file path, then Application Default Credentials.
+- `GoogleServiceAccountAccessTokenProvider` caches scoped credentials and uses `refreshIfExpired()` so each push send does not force a token refresh request.
+- Added `google-auth-library-oauth2-http` because FCM HTTP v1 requests require OAuth 2.0 bearer tokens.
+- Actual Android FCM delivery is not manually verified yet because it requires a Firebase project, service account, and Android registration token.
