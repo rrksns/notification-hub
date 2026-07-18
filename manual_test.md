@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -177,6 +177,29 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 - [x] Google service account 기반 access token provider 구현
 - [ ] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
 - [ ] Android 기기에서 PUSH 알림 수신 확인
+
+---
+
+## SMS/PUSH 실패 흐름 검증 (2026-07-18)
+
+### 목적
+
+SMS/PUSH provider 예외가 기존 delivery 실패 흐름으로 연결되는지 확인했습니다.
+
+### 검증 기준
+
+- `ChannelDelivererPort.deliver()`에서 발생한 예외는 채널 종류와 무관하게 `ProcessDeliveryService`에서 처리
+- 실패 시 `DeliveryLog`는 `FAILED`로 저장
+- 실패 시 `DeliveryResultEvent.failure`가 `delivery-results` 토픽 발행 포트로 전달
+
+### 검증 결과
+
+- [x] `ProcessDeliveryServiceTest.process_deliveryFails_savesFailedAndPublishes`가 채널 공통 provider 실패 흐름을 검증
+- [x] SMS provider 예외는 `SmsDeliveryException`으로 기존 실패 흐름에 연결
+- [x] PUSH provider 예외는 `PushDeliveryException`으로 기존 실패 흐름에 연결
+- [x] `mvn test -pl delivery-service` 결과 39개 테스트 통과
+
+새 SMS/PUSH 전용 실패 테스트는 추가하지 않았습니다. 실패 처리 로직이 채널별 분기가 아니라 `ChannelDelivererPort` 예외를 공통으로 받는 구조라서 기존 애플리케이션 테스트가 같은 동작을 이미 검증하기 때문입니다.
 
 ---
 

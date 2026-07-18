@@ -73,3 +73,13 @@
 - `GoogleServiceAccountAccessTokenProvider` caches scoped credentials and uses `refreshIfExpired()` so each push send does not force a token refresh request.
 - Added `google-auth-library-oauth2-http` because FCM HTTP v1 requests require OAuth 2.0 bearer tokens.
 - Actual Android FCM delivery is not manually verified yet because it requires a Firebase project, service account, and Android registration token.
+
+## 2026-07-18
+
+- Phase 6 reviewed `ProcessDeliveryServiceTest` before adding any new tests.
+- `ProcessDeliveryService` catches exceptions from `ChannelDelivererPort.deliver()` after the channel-specific sender layer, so EMAIL, SMS, and PUSH provider failures share the same failure path.
+- The existing `process_deliveryFails_savesFailedAndPublishes` test already verifies that a provider exception stores `DeliveryLog FAILED` and publishes a failure `DeliveryResultEvent`.
+- No SMS/PUSH-specific failure-flow application test was added because it would duplicate the same channel-agnostic behavior without increasing coverage.
+- `mvn test -pl delivery-service` passed with 39 tests after Phase 6 documentation updates.
+- Full multi-module `mvn test` passed after Phase 6 documentation updates. Verified counts are user 21, notification 13, delivery 39, and analytics 18.
+- README, PROCESS, delivery-service flow, and manual test docs now document SendGrid, Twilio, and Android FCM provider support separately from actual external manual verification status.

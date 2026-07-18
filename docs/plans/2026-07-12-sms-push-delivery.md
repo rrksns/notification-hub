@@ -190,6 +190,13 @@
 5. Update README, PROCESS, flow docs, and manual test docs.
 6. Commit Phase 6.
 
+**Result:**
+- Existing `ProcessDeliveryServiceTest` failure coverage was sufficient because provider exceptions are handled through the channel-agnostic `ChannelDelivererPort` boundary.
+- No duplicate SMS/PUSH-specific application failure test was added.
+- `mvn test -pl delivery-service` passed with 39 tests.
+- Full multi-module `mvn test` passed.
+- README, PROCESS, delivery-service flow, manual test docs, checklist, and context notes were updated.
+
 ## Phase 7: iOS PUSH Follow-Up
 
 **Goal:** Extend PUSH support to iOS after Android FCM is working.
