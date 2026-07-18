@@ -125,15 +125,17 @@ presentation/   → domain/port/in/ 호출
 ---
 
 ### Phase 4: delivery-service (TDD)
-**커밋**: `feat: Phase 4` (별도 Claude 세션에서 구현), 이후 `feat: 이메일 발송 경계 분리`, `feat: SendGrid 설정 외부화`, `feat: SendGrid 이메일 발송 구현`, `test: SendGrid 실패 케이스 보강`
-**테스트**: 21/21 통과
+**커밋**: `feat: Phase 4` (별도 Claude 세션에서 구현), 이후 `feat: 이메일 발송 경계 분리`, `feat: SendGrid 설정 외부화`, `feat: SendGrid 이메일 발송 구현`, `feat: Twilio SMS 발송 구현`, `feat: Android FCM 발송 구현`
+**테스트**: 39/39 통과
 
 **주요 설계 포인트**:
 - `DeliveryLog` 상태전이: PENDING → SUCCESS / FAILED
 - **Kafka Consumer**: retry 3회 + 지수 백오프(1000ms, 2x) + DLQ(`notifications.dlq`)
-- **채널 발송**: `ChannelDelivererAdapter` — EMAIL은 `EmailSender`로 위임, SMS/PUSH는 로그 스텁 유지
+- **채널 발송**: `ChannelDelivererAdapter` — EMAIL은 `EmailSender`, SMS는 `SmsSender`, PUSH는 `PushSender`로 위임
 - **SendGrid 연동**: `EMAIL_PROVIDER=sendgrid`일 때 `SendGridEmailSender`가 SendGrid Mail Send API(`/v3/mail/send`) 호출
-- **Provider 실패 처리**: SendGrid 4xx/5xx, 네트워크 오류, 필수 설정 누락은 `EmailDeliveryException`으로 통일하여 기존 FAILED 처리 흐름에 연결
+- **Twilio 연동**: `SMS_PROVIDER=twilio`일 때 `TwilioSmsSender`가 Twilio Messages API(`/Accounts/{AccountSid}/Messages.json`) 호출
+- **Android FCM 연동**: `PUSH_PROVIDER=fcm`일 때 `FcmPushSender`가 FCM HTTP v1 API(`/projects/{projectId}/messages:send`) 호출
+- **Provider 실패 처리**: SendGrid/Twilio/FCM 4xx/5xx, 네트워크 오류, 필수 설정 누락은 채널별 delivery exception으로 통일하여 기존 FAILED 처리 흐름에 연결
 - 발송 결과 → `delivery-results` Kafka 토픽 발행
 
 **API**:
@@ -154,6 +156,26 @@ presentation/   → domain/port/in/ 호출
 - Sender Identity 인증 후 SendGrid Mail Send API 직접 호출 결과: `202 Accepted`
 - 테스트 수신 메일함에서 실제 메일 수신 확인
 - API Key, 발신자/수신자 개인 주소는 문서와 커밋에 기록하지 않음
+
+**Twilio SMS 환경변수**:
+- `SMS_PROVIDER=twilio`
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`
+- `TWILIO_API_URL` (선택, 기본값: `https://api.twilio.com/2010-04-01`)
+
+**Android FCM 환경변수**:
+- `PUSH_PROVIDER=fcm`
+- `FCM_PROJECT_ID`
+- `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`
+- `FCM_API_URL` (선택, 기본값: `https://fcm.googleapis.com/v1`)
+- `FCM_TITLE` (선택, 기본값: `Notification Hub`)
+
+**SMS/PUSH 검증 상태**:
+- Twilio sender 단위 테스트로 request body, Basic Auth, provider 오류, 네트워크 오류를 검증
+- FCM sender 단위 테스트로 request body, Bearer token, provider 오류, 네트워크 오류를 검증
+- `ProcessDeliveryService`의 채널 공통 실패 테스트로 provider 예외가 `DeliveryLog FAILED`와 실패 `DeliveryResultEvent`로 이어지는 흐름을 검증
+- 실제 Twilio 계정 SMS 발송과 Android 기기 PUSH 수신은 별도 수동 검증으로 남겨둠
 
 ---
 
@@ -221,9 +243,9 @@ presentation/   → domain/port/in/ 호출
 |--------|-----------|-----------|
 | user-service | 21 | domain + application + architecture |
 | notification-service | 13 | domain + application + architecture |
-| delivery-service | 21 | domain(8) + application(4) + infrastructure sender(9) |
+| delivery-service | 39 | domain(8) + application(4) + infrastructure sender(26) + architecture(1) |
 | analytics-service | 18 | domain + application + architecture |
-| **합계** | **73** | domain + application + infrastructure sender + architecture |
+| **합계** | **91** | domain + application + infrastructure sender + architecture |
 
 ---
 

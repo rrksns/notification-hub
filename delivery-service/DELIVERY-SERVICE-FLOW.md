@@ -247,6 +247,8 @@ Kafka @RetryableTopic
   └─ notifications.dlq
 ```
 
+`ProcessDeliveryService`의 실패 처리는 채널별 예외 타입에 의존하지 않습니다. `ChannelDelivererPort.deliver()`에서 발생한 `EmailDeliveryException`, `SmsDeliveryException`, `PushDeliveryException`은 모두 같은 catch 경로로 들어가며, `DeliveryLog FAILED` 저장과 실패 `DeliveryResultEvent` 발행으로 이어집니다.
+
 ---
 
 ## Kafka 토픽 구조
@@ -316,6 +318,7 @@ delivery-service/src/main/java/com/notificationhub/delivery/
 
 ```bash
 mvn test -pl delivery-service
+mvn test
 mvn test -pl delivery-service -Dtest=ChannelDelivererAdapterTest
 mvn test -pl delivery-service -Dtest=SendGridEmailSenderTest
 mvn test -pl delivery-service -Dtest=TwilioPropertiesTest
@@ -323,6 +326,8 @@ mvn test -pl delivery-service -Dtest=TwilioSmsSenderTest
 mvn test -pl delivery-service -Dtest=FcmPropertiesTest
 mvn test -pl delivery-service -Dtest=FcmPushSenderTest
 ```
+
+2026-07-18 기준 `mvn test -pl delivery-service`는 39개 테스트가 모두 통과했습니다. SMS/PUSH provider 실패 흐름은 `ProcessDeliveryServiceTest`의 채널 공통 실패 테스트로 검증합니다.
 
 실제 외부 발송 검증은 SendGrid API Key와 인증된 Sender Identity가 필요합니다. `.env.local`에 `EMAIL_PROVIDER=sendgrid`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`을 설정한 뒤 실행합니다.
 Twilio 실제 외부 발송 검증은 Twilio Account SID, Auth Token, 발신 번호 또는 Messaging Service SID, 수신 가능한 테스트 전화번호가 필요합니다. `.env.local`에 `SMS_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`를 설정한 뒤 실행합니다.
