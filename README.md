@@ -5,7 +5,7 @@ B2B SaaS형 멀티테넌트 알림 발송 플랫폼입니다.
 
 Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어, 도메인 로직이 Spring/JPA에 의존하지 않는 순수 Java로 구현되어 있습니다.
 
-> 현재 EMAIL 채널은 SendGrid Mail Send API, SMS 채널은 Twilio Messages API, PUSH 채널은 Android FCM HTTP v1 연동을 지원합니다. 각 채널은 기본값으로 logging provider를 사용하므로 외부 시크릿 없이도 로컬 실행이 가능합니다.
+> 현재 EMAIL 채널은 SendGrid Mail Send API, SMS 채널은 Twilio Messages API, PUSH 채널은 FCM HTTP v1 연동을 지원합니다. 각 채널은 기본값으로 logging provider를 사용하므로 외부 시크릿 없이도 로컬 실행이 가능합니다.
 
 ### 주요 설계 포인트
 
@@ -116,7 +116,7 @@ user-service (8081)             notification-service (8082)
                       · Kafka 소비 → 채널별 발송
                       · EMAIL: SendGrid 또는 logging provider
                       · SMS: Twilio 또는 logging provider
-                      · PUSH: Android FCM 또는 logging provider
+                      · PUSH: FCM 또는 logging provider
                       · @CircuitBreaker + @Retry
                       · 실패 시 재시도: 1s → 2s → DLQ
                               │
@@ -252,7 +252,7 @@ Kafka: notifications 토픽 수신
   │       │  └─ `sms.provider=twilio`: Twilio Messages API 호출
   │       └─ PUSH → `PushSender`
   │          ├─ `push.provider=logging` 또는 미설정: 로그 출력
-  │          └─ `push.provider=fcm`: Android FCM HTTP v1 API 호출
+  │          └─ `push.provider=fcm`: FCM HTTP v1 API 호출
   │
   ├─ 발송 성공:
   │    ├─ ③ log.markSuccess() → MySQL 상태 업데이트 (SUCCESS)
@@ -317,7 +317,7 @@ CLOSED (정상) ──실패율 50% 초과──→ OPEN (차단: fallback에서
 
 `SMS_PROVIDER=twilio` 상태에서 Twilio가 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `SmsDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
 
-**Android FCM Provider 설정:**
+**FCM Provider 설정:**
 
 | 환경변수 | 기본값 | 설명 |
 |----------|--------|------|
@@ -328,7 +328,7 @@ CLOSED (정상) ──실패율 50% 초과──→ OPEN (차단: fallback에서
 | `FCM_API_URL` | `https://fcm.googleapis.com/v1` | FCM HTTP v1 API 엔드포인트 |
 | `FCM_TITLE` | `Notification Hub` | 기본 PUSH 알림 제목 |
 
-Android PUSH 1차 구현에서는 `recipient`를 Android FCM registration token으로 해석합니다. `PUSH_PROVIDER=fcm` 상태에서 FCM이 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `PushDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
+PUSH 구현에서는 `recipient`를 Android 또는 iOS FCM registration token으로 해석합니다. iOS 발송은 Firebase iOS 앱 등록과 APNs 인증 설정이 완료된 뒤 같은 FCM provider로 검증합니다. `PUSH_PROVIDER=fcm` 상태에서 FCM이 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `PushDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
 
 ---
 
@@ -531,7 +531,7 @@ mvn spring-boot:run -pl delivery-service
 
 Messaging Service를 사용하는 경우 `TWILIO_FROM_NUMBER` 대신 `TWILIO_MESSAGING_SERVICE_SID`를 설정합니다.
 
-Android FCM으로 실제 PUSH를 발송하려면 delivery-service 실행 전에 환경변수를 설정합니다.
+FCM으로 실제 PUSH를 발송하려면 delivery-service 실행 전에 환경변수를 설정합니다.
 
 ```bash
 export PUSH_PROVIDER=fcm
@@ -542,7 +542,7 @@ export FCM_TITLE="Notification Hub"
 mvn spring-boot:run -pl delivery-service
 ```
 
-service account JSON 문자열로 실행해야 하는 환경에서는 `GOOGLE_APPLICATION_CREDENTIALS` 대신 `FCM_CREDENTIALS_JSON`을 설정합니다.
+service account JSON 문자열로 실행해야 하는 환경에서는 `GOOGLE_APPLICATION_CREDENTIALS` 대신 `FCM_CREDENTIALS_JSON`을 설정합니다. iOS는 Firebase 콘솔에서 iOS 앱과 APNs authentication key를 먼저 연결한 뒤 iOS 앱이 발급한 FCM registration token을 `recipient`로 사용합니다.
 
 ### 실행 순서 요약
 
@@ -713,7 +713,7 @@ curl -s -X POST http://localhost:8080/api/notifications \
 # → { notificationId, status: "PUBLISHED" }
 ```
 
-`EMAIL_PROVIDER=sendgrid`로 delivery-service를 실행 중이면 위 요청은 SendGrid Mail Send API 호출로 이어집니다. `SMS_PROVIDER=twilio`는 Twilio Messages API, `PUSH_PROVIDER=fcm`은 Android FCM HTTP v1 API로 이어집니다. 기본값 `logging`에서는 외부 발송 없이 delivery-service 로그에 발송 내용만 출력됩니다.
+`EMAIL_PROVIDER=sendgrid`로 delivery-service를 실행 중이면 위 요청은 SendGrid Mail Send API 호출로 이어집니다. `SMS_PROVIDER=twilio`는 Twilio Messages API, `PUSH_PROVIDER=fcm`은 FCM HTTP v1 API로 이어집니다. 기본값 `logging`에서는 외부 발송 없이 delivery-service 로그에 발송 내용만 출력됩니다.
 
 SendGrid 실제 발송만 빠르게 확인하려면 아래처럼 Mail Send API를 직접 호출할 수도 있습니다. API Key는 커밋하거나 로그에 출력하지 마세요.
 

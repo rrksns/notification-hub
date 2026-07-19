@@ -202,7 +202,12 @@
 **Goal:** Extend PUSH support to iOS after Android FCM is working.
 
 **Files:**
-- Modify later after Android implementation is verified.
+- Modify: `README.md`
+- Modify: `delivery-service/DELIVERY-SERVICE-FLOW.md`
+- Modify: `manual_test.md`
+- Modify: `checklist.md`
+- Modify: `context-notes.md`
+- Create: `docs/plans/2026-07-19-ios-push-delivery.md`
 
 **Steps:**
 1. Register the iOS app in Firebase.
@@ -211,3 +216,10 @@
 4. Define the iOS FCM token collection contract.
 5. Decide whether iOS needs a platform-specific payload branch.
 6. Implement only after Android FCM sender is verified.
+
+**Result:**
+- Local Phase 7 planning and documentation were completed on 2026-07-19.
+- iOS uses the same backend contract as Android: `channel=PUSH`, `recipient=FCM registration token`, `content=notification body`.
+- No platform-specific payload branch is required for the first iOS delivery verification.
+- Firebase iOS app registration, APNs authentication key setup, and actual iOS device delivery verification remain external manual steps.
+- Detailed follow-up plan: `docs/plans/2026-07-19-ios-push-delivery.md`.

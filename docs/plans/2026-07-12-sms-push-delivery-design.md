@@ -87,6 +87,8 @@ iOS는 Android 1차 구현 이후 별도 Phase로 진행한다.
 
 iOS 수신은 FCM만으로 끝나지 않고 Firebase 프로젝트에 APNs authentication key가 연결되어 있어야 한다. 백엔드 발송 API는 FCM HTTP v1을 유지할 수 있지만, iOS 앱 등록, APNs key 업로드, iOS FCM token 수집 계약이 추가로 필요하다.
 
+Phase 7에서 iOS 1차 계약을 확정했다. 백엔드는 Android와 동일하게 `channel=PUSH`, `recipient=FCM registration token`, `content=notification body`를 사용한다. Firebase iOS 앱과 APNs 설정이 완료되면 같은 `FcmPushSender`로 iOS FCM token에 발송할 수 있으므로, 첫 iOS 검증 전에는 platform-specific payload 분기를 추가하지 않는다.
+
 ## Error Handling
 
 Provider 오류는 채널별 예외로 감싼다.

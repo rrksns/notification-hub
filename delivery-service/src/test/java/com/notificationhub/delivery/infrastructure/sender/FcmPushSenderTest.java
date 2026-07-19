@@ -24,7 +24,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class FcmPushSenderTest {
 
     @Test
-    @DisplayName("FCM HTTP v1 형식으로 Android PUSH를 발송한다")
+    @DisplayName("FCM HTTP v1 형식으로 PUSH를 발송한다")
     void send_postsFcmMessageRequest() {
         RestClient.Builder restClientBuilder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(restClientBuilder).build();
@@ -34,14 +34,14 @@ class FcmPushSenderTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-access-token"))
                 .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message.token").value("android-fcm-token"))
+                .andExpect(jsonPath("$.message.token").value("fcm-registration-token"))
                 .andExpect(jsonPath("$.message.notification.title").value("Notification Hub"))
                 .andExpect(jsonPath("$.message.notification.body").value("Hello"))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{\"name\":\"projects/notification-hub-test/messages/test-message-id\"}"));
 
-        sender.send("android-fcm-token", "Hello");
+        sender.send("fcm-registration-token", "Hello");
 
         server.verify();
     }

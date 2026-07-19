@@ -134,7 +134,7 @@ presentation/   → domain/port/in/ 호출
 - **채널 발송**: `ChannelDelivererAdapter` — EMAIL은 `EmailSender`, SMS는 `SmsSender`, PUSH는 `PushSender`로 위임
 - **SendGrid 연동**: `EMAIL_PROVIDER=sendgrid`일 때 `SendGridEmailSender`가 SendGrid Mail Send API(`/v3/mail/send`) 호출
 - **Twilio 연동**: `SMS_PROVIDER=twilio`일 때 `TwilioSmsSender`가 Twilio Messages API(`/Accounts/{AccountSid}/Messages.json`) 호출
-- **Android FCM 연동**: `PUSH_PROVIDER=fcm`일 때 `FcmPushSender`가 FCM HTTP v1 API(`/projects/{projectId}/messages:send`) 호출
+- **FCM 연동**: `PUSH_PROVIDER=fcm`일 때 `FcmPushSender`가 FCM HTTP v1 API(`/projects/{projectId}/messages:send`) 호출
 - **Provider 실패 처리**: SendGrid/Twilio/FCM 4xx/5xx, 네트워크 오류, 필수 설정 누락은 채널별 delivery exception으로 통일하여 기존 FAILED 처리 흐름에 연결
 - 발송 결과 → `delivery-results` Kafka 토픽 발행
 
@@ -164,7 +164,7 @@ presentation/   → domain/port/in/ 호출
 - `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`
 - `TWILIO_API_URL` (선택, 기본값: `https://api.twilio.com/2010-04-01`)
 
-**Android FCM 환경변수**:
+**FCM 환경변수**:
 - `PUSH_PROVIDER=fcm`
 - `FCM_PROJECT_ID`
 - `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`
@@ -176,6 +176,7 @@ presentation/   → domain/port/in/ 호출
 - FCM sender 단위 테스트로 request body, Bearer token, provider 오류, 네트워크 오류를 검증
 - `ProcessDeliveryService`의 채널 공통 실패 테스트로 provider 예외가 `DeliveryLog FAILED`와 실패 `DeliveryResultEvent`로 이어지는 흐름을 검증
 - 실제 Twilio 계정 SMS 발송과 Android 기기 PUSH 수신은 별도 수동 검증으로 남겨둠
+- iOS PUSH는 동일한 FCM registration token 계약을 사용하며, Firebase iOS 앱 등록과 APNs authentication key 업로드 후 별도 backend 분기 없이 1차 검증 가능
 
 ---
 
