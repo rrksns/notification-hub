@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -200,6 +200,75 @@ SMS/PUSH provider 예외가 기존 delivery 실패 흐름으로 연결되는지 
 - [x] `mvn test -pl delivery-service` 결과 39개 테스트 통과
 
 새 SMS/PUSH 전용 실패 테스트는 추가하지 않았습니다. 실패 처리 로직이 채널별 분기가 아니라 `ChannelDelivererPort` 예외를 공통으로 받는 구조라서 기존 애플리케이션 테스트가 같은 동작을 이미 검증하기 때문입니다.
+
+---
+
+## iOS FCM 실제 발송 준비 (2026-07-19)
+
+### 목적
+
+iOS PUSH를 기존 FCM HTTP v1 provider로 발송할 수 있도록 필요한 외부 설정과 수동 검증 절차를 정의했습니다.
+
+### 사전 조건
+
+- Firebase project에 iOS 앱 등록
+- Apple Developer에서 APNs authentication key 생성 또는 기존 key 확인
+- Firebase Cloud Messaging 설정에 APNs key 업로드
+- iOS 앱에서 발급된 FCM registration token 준비
+- `.env.local`에 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `FCM_TITLE` 설정
+- APNs key, service account JSON, registration token은 문서에 기록하지 않음
+
+### 계약
+
+- `channel`은 `PUSH`
+- `recipient`는 iOS FCM registration token
+- `content`는 알림 본문
+- `FCM_TITLE`은 알림 제목
+
+Android와 iOS 모두 FCM registration token을 `recipient`로 받기 때문에 1차 iOS 검증에는 별도 backend payload 분기가 필요하지 않습니다.
+
+### 직접 호출 명령 형태
+
+`ACCESS_TOKEN`은 Firebase service account로 발급한 `https://www.googleapis.com/auth/firebase.messaging` scope의 OAuth access token입니다.
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+jq -n \
+  --arg token "IOS_FCM_REGISTRATION_TOKEN" \
+  --arg title "${FCM_TITLE:-Notification Hub}" \
+  --arg body "Notification Hub iOS FCM actual delivery test." \
+  '{message:{token:$token, notification:{title:$title, body:$body}}}' \
+| curl -sS -o /tmp/fcm-ios-response.json -w "%{http_code}\n" \
+  -X POST "${FCM_API_URL:-https://fcm.googleapis.com/v1}/projects/${FCM_PROJECT_ID}/messages:send" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  --data @-
+```
+
+### 애플리케이션 경유 검증 형태
+
+```bash
+set -a
+. ./.env.local
+set +a
+
+mvn spring-boot:run -pl delivery-service
+```
+
+notification-service를 통해 `channel=PUSH`, `recipient=IOS_FCM_REGISTRATION_TOKEN`으로 알림을 발행하면 delivery-service가 iOS FCM token 대상으로 발송합니다.
+
+### 현재 상태
+
+- [x] iOS FCM token 계약 정의
+- [x] iOS 1차에서는 platform-specific payload 분기 불필요로 결정
+- [x] 별도 iOS PUSH 구현 계획 문서 작성
+- [ ] Firebase iOS 앱 등록
+- [ ] APNs authentication key 업로드
+- [ ] 실제 iOS registration token으로 PUSH 발송 검증
+- [ ] iOS 기기에서 PUSH 알림 수신 확인
 
 ---
 

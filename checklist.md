@@ -166,6 +166,9 @@
 - [ ] Register iOS app in Firebase.
 - [ ] Create or reuse APNs authentication key in Apple Developer.
 - [ ] Upload APNs authentication key to Firebase Cloud Messaging settings.
-- [ ] Define iOS FCM token collection contract.
-- [ ] Decide whether iOS needs platform-specific FCM payload handling.
-- [ ] Create separate implementation plan for iOS PUSH.
+- [x] Define iOS FCM token collection contract.
+- [x] Decide whether iOS needs platform-specific FCM payload handling.
+- [x] Create separate implementation plan for iOS PUSH.
+- [x] Update README, delivery-service flow, manual test docs, checklist, and context notes.
+- [x] Verify delivery-service tests after Phase 7 documentation update.
+- [x] Commit Phase 7 iOS PUSH follow-up documentation.

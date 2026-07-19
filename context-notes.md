@@ -83,3 +83,13 @@
 - `mvn test -pl delivery-service` passed with 39 tests after Phase 6 documentation updates.
 - Full multi-module `mvn test` passed after Phase 6 documentation updates. Verified counts are user 21, notification 13, delivery 39, and analytics 18.
 - README, PROCESS, delivery-service flow, and manual test docs now document SendGrid, Twilio, and Android FCM provider support separately from actual external manual verification status.
+
+## 2026-07-19
+
+- Phase 7 remaining work is iOS PUSH follow-up.
+- Firebase iOS app registration, APNs authentication key creation, and APNs key upload are external console tasks and cannot be completed from the local repository.
+- The current `FcmPushSender` uses FCM HTTP v1 `message.token` and `notification` payload, so it is platform-neutral at the backend boundary.
+- iOS 1차 contract keeps `channel=PUSH`, `recipient=iOS FCM registration token`, `content=notification body`, and `FCM_TITLE=notification title`.
+- No platform-specific FCM payload branch is needed before the first iOS delivery test.
+- A separate iOS PUSH follow-up plan was added at `docs/plans/2026-07-19-ios-push-delivery.md`.
+- `mvn test -pl delivery-service` passed with 39 tests after the Phase 7 documentation and FCM naming update.

@@ -1,4 +1,4 @@
-// FCM HTTP v1 API로 Android PUSH를 발송하는 어댑터
+// FCM HTTP v1 API로 PUSH 알림을 발송하는 어댑터
 package com.notificationhub.delivery.infrastructure.sender;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
