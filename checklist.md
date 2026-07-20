@@ -172,3 +172,18 @@
 - [x] Update README, delivery-service flow, manual test docs, checklist, and context notes.
 - [x] Verify delivery-service tests after Phase 7 documentation update.
 - [x] Commit Phase 7 iOS PUSH follow-up documentation.
+
+## Android FCM Actual Verification
+
+- [x] Create Android FCM manual verification plan.
+- [x] Add Android FCM environment preflight script.
+- [x] Document Firebase console setup steps.
+- [x] Document Android registration token setup steps.
+- [ ] Add FCM values to local `.env.local`.
+- [x] Run Android FCM environment preflight and record missing local values.
+- [ ] Run Android FCM environment preflight successfully.
+- [x] Verify delivery-service tests before actual external send.
+- [ ] Send actual Android PUSH through FCM.
+- [ ] Confirm Android device receives PUSH notification.
+- [ ] Update manual test result after actual send.
+- [ ] Commit Android FCM verification documentation.
