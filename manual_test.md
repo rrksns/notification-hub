@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -132,6 +132,45 @@ delivery-service의 PUSH provider가 Android FCM HTTP v1 API와 연동 가능한
 - `.env.local`에 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `FCM_TITLE` 설정
 - service account JSON과 registration token은 문서에 기록하지 않음
 
+### Firebase 콘솔 준비 순서
+
+1. Firebase console에서 대상 프로젝트를 선택
+2. Project settings > General에서 Project ID 확인
+3. Project settings > Cloud Messaging에서 Firebase Cloud Messaging API HTTP v1 활성 상태 확인
+4. Project settings > Service accounts에서 Generate new private key 실행
+5. 내려받은 service account JSON을 repository 밖 경로에 저장
+
+### Android 앱 준비 순서
+
+1. Android 앱을 Firebase 프로젝트에 연결
+2. 실제 기기 또는 Google APIs가 포함된 Android emulator에서 앱 실행
+3. 앱에서 현재 FCM registration token을 확인
+4. token은 `.env.local`에만 저장하고 git에는 기록하지 않음
+
+### 로컬 환경 변수 형태
+
+```bash
+PUSH_PROVIDER=fcm
+FCM_PROJECT_ID={Firebase project id}
+GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
+FCM_TITLE=Notification Hub
+ANDROID_FCM_REGISTRATION_TOKEN={Android FCM registration token}
+```
+
+`FCM_CREDENTIALS_JSON`을 사용할 수도 있지만, 로컬 검증에서는 `GOOGLE_APPLICATION_CREDENTIALS` 파일 경로 방식이 누락 여부를 확인하기 쉽습니다.
+
+### 사전 점검 명령
+
+```bash
+scripts/verify-android-fcm-env.sh .env.local
+```
+
+예상 결과입니다.
+
+```text
+Android FCM verification environment is ready.
+```
+
 ### 직접 호출 명령 형태
 
 `ACCESS_TOKEN`은 Firebase service account로 발급한 `https://www.googleapis.com/auth/firebase.messaging` scope의 OAuth access token입니다.
@@ -175,6 +214,10 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 
 - [x] FCM sender 단위 테스트로 요청 형식, Bearer token, 오류 처리를 검증
 - [x] Google service account 기반 access token provider 구현
+- [x] Android FCM 실제 발송 계획 문서 작성
+- [x] Android FCM 환경변수 사전 점검 스크립트 추가
+- [x] 2026-07-20 사전 점검 실행 결과, 로컬 `.env.local`에 FCM 필수 값이 아직 없음
+- [ ] `.env.local`에 FCM project id, service account, Android registration token 설정
 - [ ] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
 - [ ] Android 기기에서 PUSH 알림 수신 확인
 

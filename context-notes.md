@@ -93,3 +93,15 @@
 - No platform-specific FCM payload branch is needed before the first iOS delivery test.
 - A separate iOS PUSH follow-up plan was added at `docs/plans/2026-07-19-ios-push-delivery.md`.
 - `mvn test -pl delivery-service` passed with 39 tests after the Phase 7 documentation and FCM naming update.
+
+## 2026-07-20
+
+- Apple Developer Program paid enrollment is deferred.
+- The next practical external verification target is Android FCM because it does not require Apple Developer or APNs setup.
+- Firebase official docs confirm FCM HTTP v1 sends to a device registration token at `POST https://fcm.googleapis.com/v1/projects/{projectId}/messages:send`.
+- Firebase official docs recommend `GOOGLE_APPLICATION_CREDENTIALS` for local service account authorization, and the required OAuth scope is `https://www.googleapis.com/auth/firebase.messaging`.
+- Android FCM actual delivery still requires a Firebase project id, service account JSON, and Android FCM registration token in local-only `.env.local`.
+- Added `scripts/verify-android-fcm-env.sh` so missing local FCM settings can be checked without printing secret values.
+- Preflight against the repository root `.env.local` reported missing `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, service account credentials, and `ANDROID_FCM_REGISTRATION_TOKEN`.
+- `bash -n scripts/verify-android-fcm-env.sh` passed.
+- `mvn test -pl delivery-service` passed with 39 tests after the Android FCM verification documentation update.

@@ -332,3 +332,4 @@ mvn test -pl delivery-service -Dtest=FcmPushSenderTest
 실제 외부 발송 검증은 SendGrid API Key와 인증된 Sender Identity가 필요합니다. `.env.local`에 `EMAIL_PROVIDER=sendgrid`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`을 설정한 뒤 실행합니다.
 Twilio 실제 외부 발송 검증은 Twilio Account SID, Auth Token, 발신 번호 또는 Messaging Service SID, 수신 가능한 테스트 전화번호가 필요합니다. `.env.local`에 `SMS_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`를 설정한 뒤 실행합니다.
 FCM 실제 외부 발송 검증은 Firebase project id, service account 인증 정보, Android 또는 iOS FCM registration token이 필요합니다. iOS는 Firebase 콘솔에서 iOS 앱과 APNs authentication key를 먼저 연결해야 합니다. `.env.local`에 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `FCM_TITLE`을 설정한 뒤 실행합니다.
+Android 실제 발송 전에는 `scripts/verify-android-fcm-env.sh .env.local`로 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, service account 인증 정보, `ANDROID_FCM_REGISTRATION_TOKEN` 준비 여부를 확인합니다.

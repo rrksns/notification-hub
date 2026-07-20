@@ -544,6 +544,14 @@ mvn spring-boot:run -pl delivery-service
 
 service account JSON 문자열로 실행해야 하는 환경에서는 `GOOGLE_APPLICATION_CREDENTIALS` 대신 `FCM_CREDENTIALS_JSON`을 설정합니다. iOS는 Firebase 콘솔에서 iOS 앱과 APNs authentication key를 먼저 연결한 뒤 iOS 앱이 발급한 FCM registration token을 `recipient`로 사용합니다.
 
+Android FCM 실제 발송 전 로컬 환경 준비 상태는 아래 명령으로 확인합니다.
+
+```bash
+scripts/verify-android-fcm-env.sh .env.local
+```
+
+검증에 필요한 값은 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `ANDROID_FCM_REGISTRATION_TOKEN`입니다. service account JSON과 registration token은 커밋하지 않습니다.
+
 ### 실행 순서 요약
 
 ```
