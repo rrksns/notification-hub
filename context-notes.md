@@ -105,3 +105,12 @@
 - Preflight against the repository root `.env.local` reported missing `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, service account credentials, and `ANDROID_FCM_REGISTRATION_TOKEN`.
 - `bash -n scripts/verify-android-fcm-env.sh` passed.
 - `mvn test -pl delivery-service` passed with 39 tests after the Android FCM verification documentation update.
+
+## 2026-07-23
+
+- Android FCM preflight passed after `.env.local` received FCM provider, project id, service account credentials, and Android registration token.
+- The first retry failed because `GOOGLE_APPLICATION_CREDENTIALS` pointed to Android `google-services.json`, which does not contain `client_email` or `private_key`.
+- After switching to Firebase service account private key JSON, OAuth access token issuance succeeded.
+- Direct FCM HTTP v1 send returned `200 OK` and a message name for project `notification-hub-c680b`.
+- Android device receipt still needs user-side confirmation.
+- Added `.gitignore` patterns for Firebase admin SDK and service account JSON files because a private key JSON was placed inside the repository path.

@@ -36,6 +36,8 @@ CLAUDE.md
 .env
 .env.*
 *.local
+*firebase-adminsdk*.json
+service-account*.json
 
 # Docker volumes (local data)
 docker/data/

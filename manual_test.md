@@ -217,9 +217,19 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 - [x] Android FCM 실제 발송 계획 문서 작성
 - [x] Android FCM 환경변수 사전 점검 스크립트 추가
 - [x] 2026-07-20 사전 점검 실행 결과, 로컬 `.env.local`에 FCM 필수 값이 아직 없음
-- [ ] `.env.local`에 FCM project id, service account, Android registration token 설정
-- [ ] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
+- [x] `.env.local`에 FCM project id, service account, Android registration token 설정
+- [x] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
 - [ ] Android 기기에서 PUSH 알림 수신 확인
+
+### 실제 발송 결과
+
+2026-07-23에 service account JSON과 Android FCM registration token을 `.env.local`에 설정한 뒤 직접 FCM HTTP v1 API를 호출했습니다.
+
+- OAuth access token 발급 성공
+- FCM HTTP v1 응답: `200 OK`
+- FCM message name 반환 확인
+- service account JSON과 registration token은 문서에 기록하지 않음
+- Android 기기 알림 수신 여부는 사용자 확인 필요
 
 ---
 

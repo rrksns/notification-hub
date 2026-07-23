@@ -179,11 +179,11 @@
 - [x] Add Android FCM environment preflight script.
 - [x] Document Firebase console setup steps.
 - [x] Document Android registration token setup steps.
-- [ ] Add FCM values to local `.env.local`.
+- [x] Add FCM values to local `.env.local`.
 - [x] Run Android FCM environment preflight and record missing local values.
-- [ ] Run Android FCM environment preflight successfully.
+- [x] Run Android FCM environment preflight successfully.
 - [x] Verify delivery-service tests before actual external send.
-- [ ] Send actual Android PUSH through FCM.
+- [x] Send actual Android PUSH through FCM.
 - [ ] Confirm Android device receives PUSH notification.
-- [ ] Update manual test result after actual send.
-- [ ] Commit Android FCM verification documentation.
+- [x] Update manual test result after actual send.
+- [x] Commit Android FCM verification documentation.
