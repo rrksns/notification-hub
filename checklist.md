@@ -184,6 +184,6 @@
 - [x] Run Android FCM environment preflight successfully.
 - [x] Verify delivery-service tests before actual external send.
 - [x] Send actual Android PUSH through FCM.
-- [ ] Confirm Android device receives PUSH notification.
+- [x] Confirm Android device receives PUSH notification.
 - [x] Update manual test result after actual send.
 - [x] Commit Android FCM verification documentation.

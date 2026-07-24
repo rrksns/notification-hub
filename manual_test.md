@@ -219,7 +219,7 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 - [x] 2026-07-20 사전 점검 실행 결과, 로컬 `.env.local`에 FCM 필수 값이 아직 없음
 - [x] `.env.local`에 FCM project id, service account, Android registration token 설정
 - [x] 실제 Firebase project와 Android registration token으로 PUSH 발송 검증
-- [ ] Android 기기에서 PUSH 알림 수신 확인
+- [x] Android 기기에서 PUSH 알림 수신 확인
 
 ### 실제 발송 결과
 
@@ -229,7 +229,14 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 - FCM HTTP v1 응답: `200 OK`
 - FCM message name 반환 확인
 - service account JSON과 registration token은 문서에 기록하지 않음
-- Android 기기 알림 수신 여부는 사용자 확인 필요
+- Android 기기에서 PUSH 알림 수신 확인
+
+2026-07-24에 Android 단말 대상으로 `안녕?울트라?` 메시지를 직접 발송했습니다.
+
+- OAuth access token 발급 성공
+- FCM HTTP v1 응답: `200 OK`
+- FCM message name 반환 확인
+- Android 기기에서 `안녕?울트라?` 알림 수신 확인
 
 ---
 

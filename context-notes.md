@@ -114,3 +114,10 @@
 - Direct FCM HTTP v1 send returned `200 OK` and a message name for project `notification-hub-c680b`.
 - Android device receipt still needs user-side confirmation.
 - Added `.gitignore` patterns for Firebase admin SDK and service account JSON files because a private key JSON was placed inside the repository path.
+
+## 2026-07-24
+
+- Sent a direct Android FCM notification with body `안녕?울트라?`.
+- OAuth access token issuance succeeded.
+- FCM HTTP v1 send returned `200 OK` and message name `projects/notification-hub-c680b/messages/0:1784885378031120%54b6692d54b6692d`.
+- User confirmed the Android device received the `안녕?울트라?` notification.
