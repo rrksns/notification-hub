@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-03-24 (P0/P1 전체 수정 완료, 빌드 + 테스트 61/61 통과)
+**최종 수정**: 2026-08-02 (P2 일부 반영 상태 재점검, 전체 테스트 91개 통과)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -65,23 +65,24 @@
 ## P2 — 개선하면 좋음 (운영/코드 품질)
 
 즉시 문제가 되지는 않지만, 실무 경험을 어필하는 데 도움이 되는 항목들입니다.
+2026-08-02 재점검 결과, 일부 항목은 후속 작업 중 이미 코드에 반영되었습니다.
 
 | # | 서비스 | 이슈 | 현재 상태 | 수정 방향 | 상태 |
 |---|--------|------|----------|----------|------|
-| 13 | 전체 (JPA) | DB 인덱스 누락 | tenantId, email 등 조회 빈도 높은 컬럼에 인덱스 없음 | `@Index` 어노테이션 추가 | 미착수 |
+| 13 | 전체 (JPA) | DB 인덱스 누락 | notification, delivery, api key의 주요 tenant 조회 인덱스와 tenant/email 유니크 제약 일부 반영 | 남은 조회 패턴 기준으로 인덱스 추가 여부 재점검 | 부분 완료 |
 | 14 | 전체 (JPA) | `@Version` 미적용 | 동시 업데이트 시 데이터 덮어쓰기 가능 | 엔티티에 `@Version private Long version` 추가 | 미착수 |
 | 15 | user | Tenant ↔ User ↔ ApiKey FK 없음 | tenantId가 String — 참조 무결성 없음 | FK 제약 또는 최소한 애플리케이션 레벨 검증 | 미착수 |
-| 16 | analytics | `Long.parseLong()` 예외 미처리 | Redis 값 비정상 시 NumberFormatException | try-catch + 기본값 0L 반환 | 미착수 |
-| 17 | analytics | `ZoneId.systemDefault()` 사용 | 컨테이너 환경에서 시스템 타임존 보장 안 됨 | `ZoneId.of("UTC")` 또는 `ZoneOffset.UTC` 명시 | 미착수 |
+| 16 | analytics | `Long.parseLong()` 예외 미처리 | `RedisRealtimeCounterAdapter.parseLongSafe()`에서 경고 로그 후 0L 반환 | 유지 | 완료 |
+| 17 | analytics | `ZoneId.systemDefault()` 사용 | 주요 시간 변환과 도메인 생성이 `ZoneOffset.UTC` 기준으로 정리됨 | 유지 | 완료 |
 | 18 | analytics | DailyStats 내부 `long[]` 배열 | index 0/1이 성공/실패인지 코드로만 파악 가능 | `ChannelCounter(long success, long failure)` 객체로 교체 | 미착수 |
 | 19 | api-gateway | IP 기반 Rate Limiting만 존재 | NAT/프록시 뒤에서 동일 IP로 집계, X-Forwarded-For 미처리 | 테넌트별 Rate Limiting 추가, X-Forwarded-For 파싱 | 미착수 |
 | 20 | api-gateway | Circuit Breaker fallback 미구현 | `forward:/fallback` 설정만 있고 실제 컨트롤러 없음 | FallbackController 구현 (503 Service Unavailable 반환) | 미착수 |
-| 21 | notification | content 길이 제한 없음 | 수 MB 데이터 전송 가능 | `@Size(max = 2000)` 추가 | 미착수 |
+| 21 | notification | content 길이 제한 없음 | `CreateNotificationRequest.content`에 `@Size(max = 2000)` 반영 | 유지 | 완료 |
 | 22 | user | 비밀번호 복잡도 검증 없음 | `@Size(min=8)` 만 적용 | 정규식 또는 passay 라이브러리로 복잡도 규칙 추가 | 미착수 |
 | 23 | analytics | `findByTenantId()` 페이징 없음 | 수백만 건 조회 시 OOM 위험 | `Pageable` 파라미터 추가 | 미착수 |
-| 24 | delivery | `@Transactional` 누락 | DB 저장 → Kafka 발행 사이 불일치 가능 | 서비스 메서드에 트랜잭션 적용 | 미착수 |
+| 24 | delivery | `@Transactional` 누락 | `ProcessDeliveryService.process()`에 `@Transactional` 반영 | 유지 | 완료 |
 | 25 | 전체 | SecurityConfig `permitAll()` | 서비스 직접 호출 시 인증 없이 접근 가능 | 각 서비스에도 JWT 필터 적용 또는 K8s NetworkPolicy로 격리 | 미착수 |
-| 26 | api-gateway | JwtAuthenticationFilter 예외 처리 | 토큰 파싱 실패 시 500 에러 | try-catch로 401 반환 | 미착수 |
+| 26 | api-gateway | JwtAuthenticationFilter 예외 처리 | 토큰 검증과 클레임 파싱 예외를 catch하여 401 반환 | 유지 | 완료 |
 | 27 | user | Role `"ADMIN"` 하드코딩 | `User.create()`에서 항상 "ADMIN" | enum 또는 상수로 관리 | 미착수 |
 
 ---
@@ -89,8 +90,8 @@
 ## 검증 결과
 
 ```
-빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈)
-테스트: mvn test → 61/61 통과 (user 20 + notification 12 + delivery 12 + analytics 17)
+빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
+테스트: mvn test → 91개 통과 (user 21 + notification 13 + delivery 39 + analytics 18, 2026-08-02)
 ```
 
 ---

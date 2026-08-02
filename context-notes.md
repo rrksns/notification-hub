@@ -121,3 +121,11 @@
 - OAuth access token issuance succeeded.
 - FCM HTTP v1 send returned `200 OK` and message name `projects/notification-hub-c680b/messages/0:1784885378031120%54b6692d54b6692d`.
 - User confirmed the Android device received the `안녕?울트라?` notification.
+
+## 2026-08-02
+
+- Reviewed documentation against the current code and test state before the next improvement phase.
+- Full multi-module `mvn test` passed with 91 tests: user 21, notification 13, delivery 39, analytics 18.
+- Several P2 items in `docs/improvement-todo.md` were already implemented after the original March review: Redis counter parse safety, UTC time usage, notification content length limit, delivery transaction boundary, and gateway JWT exception handling.
+- Android FCM server-routed delivery was verified on 2026-08-01 through `notification-service` -> Kafka -> `delivery-service`, with delivery status `SUCCESS` and one attempt.
+- Remaining high-priority improvements are gateway fallback handling, direct-service-call security policy, and pageable list APIs.

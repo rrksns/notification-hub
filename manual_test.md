@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검), 2026-08-01 (Android FCM 서버 경유 발송)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ---
@@ -237,6 +237,16 @@ notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATI
 - FCM HTTP v1 응답: `200 OK`
 - FCM message name 반환 확인
 - Android 기기에서 `안녕?울트라?` 알림 수신 확인
+
+2026-08-01에 `notification-service`에서 `channel=PUSH` 알림을 생성하고 Kafka를 거쳐 `delivery-service`가 FCM provider로 발송하는 서버 경유 플로우를 검증했습니다.
+
+- FCM 환경변수 사전 점검 성공
+- Docker 인프라(MySQL, Redis, Kafka)와 `discovery-service`, `notification-service`, `delivery-service` 기동 성공
+- `POST /api/notifications` 응답: `201 Created`
+- notificationId: `79c526b3-7845-4735-bf27-92e79db89abf`
+- deliveryLogId: `034c9289-18a6-4680-a4b2-5628cd2e8f83`
+- `GET /api/deliveries/{deliveryLogId}` 응답: `status=SUCCESS`, `attemptCount=1`
+- service account JSON과 Android registration token은 문서에 기록하지 않음
 
 ---
 

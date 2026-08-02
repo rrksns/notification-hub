@@ -8,7 +8,7 @@
 - `PUSH_PROVIDER=fcm` sends to FCM HTTP v1 with `message.token`.
 - `FcmPushSender` uses a platform-neutral FCM registration token.
 - The current payload uses `notification.title` and `notification.body`.
-- Android manual delivery is still pending real Firebase credentials and an Android registration token.
+- Android direct FCM delivery and server-routed delivery through `notification-service` -> Kafka -> `delivery-service` have both been verified.
 
 ## Phase 7.1: Firebase and APNs Prerequisites
 
