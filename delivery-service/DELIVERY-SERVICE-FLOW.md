@@ -222,6 +222,8 @@ Content-Type: application/json
 }
 ```
 
+이 요청은 delivery-service 경유 PUSH provider 연동을 검증하는 notification payload 경로입니다. Android 테스트 앱 `android_noti_app`의 앱 저장소와 최근 수신 로그 UI를 검증하려면 `manual_test.md`의 직접 FCM HTTP v1 data-only 호출 절차를 사용합니다.
+
 `2xx` 응답을 성공으로 처리합니다. FCM 4xx/5xx 응답, 네트워크 오류, 필수 설정 누락은 `PushDeliveryException`으로 감싸져 기존 delivery 실패 흐름으로 전달됩니다.
 
 `GoogleServiceAccountAccessTokenProvider`는 `FCM_CREDENTIALS_JSON`, `GOOGLE_APPLICATION_CREDENTIALS`, Application Default Credentials 순서로 service account 인증 정보를 찾고, `https://www.googleapis.com/auth/firebase.messaging` scope의 OAuth access token을 발급합니다.
@@ -332,4 +334,4 @@ mvn test -pl delivery-service -Dtest=FcmPushSenderTest
 실제 외부 발송 검증은 SendGrid API Key와 인증된 Sender Identity가 필요합니다. `.env.local`에 `EMAIL_PROVIDER=sendgrid`, `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`을 설정한 뒤 실행합니다.
 Twilio 실제 외부 발송 검증은 Twilio Account SID, Auth Token, 발신 번호 또는 Messaging Service SID, 수신 가능한 테스트 전화번호가 필요합니다. `.env.local`에 `SMS_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`를 설정한 뒤 실행합니다.
 FCM 실제 외부 발송 검증은 Firebase project id, service account 인증 정보, Android 또는 iOS FCM registration token이 필요합니다. iOS는 Firebase 콘솔에서 iOS 앱과 APNs authentication key를 먼저 연결해야 합니다. `.env.local`에 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `FCM_TITLE`을 설정한 뒤 실행합니다.
-Android 실제 발송 전에는 `scripts/verify-android-fcm-env.sh .env.local`로 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, service account 인증 정보, `ANDROID_FCM_REGISTRATION_TOKEN` 준비 여부를 확인합니다.
+Android 실제 발송 전에는 `scripts/verify-android-fcm-env.sh .env.local`로 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, service account 인증 정보, `ANDROID_FCM_REGISTRATION_TOKEN` 준비 여부를 확인합니다. Android 앱 내부 로그 UI 검증은 data-only payload가 필요하므로 `manual_test.md`의 직접 호출 절차를 따릅니다.

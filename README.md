@@ -328,7 +328,7 @@ CLOSED (정상) ──실패율 50% 초과──→ OPEN (차단: fallback에서
 | `FCM_API_URL` | `https://fcm.googleapis.com/v1` | FCM HTTP v1 API 엔드포인트 |
 | `FCM_TITLE` | `Notification Hub` | 기본 PUSH 알림 제목 |
 
-PUSH 구현에서는 `recipient`를 Android 또는 iOS FCM registration token으로 해석합니다. iOS 발송은 Firebase iOS 앱 등록과 APNs 인증 설정이 완료된 뒤 같은 FCM provider로 검증합니다. `PUSH_PROVIDER=fcm` 상태에서 FCM이 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `PushDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
+PUSH 구현에서는 `recipient`를 Android 또는 iOS FCM registration token으로 해석합니다. 현재 delivery-service 경유 FCM 발송은 `notification` payload를 사용합니다. iOS 발송은 Firebase iOS 앱 등록과 APNs 인증 설정이 완료된 뒤 같은 FCM provider로 검증합니다. `PUSH_PROVIDER=fcm` 상태에서 FCM이 4xx/5xx를 반환하거나 네트워크 오류가 발생하면 `PushDeliveryException`이 발생하고, 기존 delivery 흐름에 따라 `DeliveryLog`는 `FAILED`로 기록되며 실패 이벤트가 `delivery-results` 토픽에 발행됩니다.
 
 ---
 
@@ -551,6 +551,8 @@ scripts/verify-android-fcm-env.sh .env.local
 ```
 
 검증에 필요한 값은 `PUSH_PROVIDER=fcm`, `FCM_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS` 또는 `FCM_CREDENTIALS_JSON`, `ANDROID_FCM_REGISTRATION_TOKEN`입니다. service account JSON과 registration token은 커밋하지 않습니다.
+
+`android_noti_app`의 앱 내부 최근 수신 로그 UI까지 검증하려면 `manual_test.md`의 Android 직접 FCM HTTP v1 data-only 호출 절차를 사용합니다. delivery-service 경유 PUSH는 현재 `notification` payload를 보내므로 backend provider 연동과 delivery log 성공 여부를 검증하는 경로로 봅니다.
 
 ### 실행 순서 요약
 

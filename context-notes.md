@@ -129,3 +129,12 @@
 - Several P2 items in `docs/improvement-todo.md` were already implemented after the original March review: Redis counter parse safety, UTC time usage, notification content length limit, delivery transaction boundary, and gateway JWT exception handling.
 - Android FCM server-routed delivery was verified on 2026-08-01 through `notification-service` -> Kafka -> `delivery-service`, with delivery status `SUCCESS` and one attempt.
 - Remaining high-priority improvements are gateway fallback handling, direct-service-call security policy, and pageable list APIs.
+
+## 2026-08-10
+
+- The Android test app now treats data-only FCM payloads as the standard path for in-app log verification.
+- This server repo still documents an Android direct FCM HTTP v1 example with `notification` payload, which can bypass the Android app's storage path when the app is backgrounded.
+- The backend `FcmPushSender` currently sends `message.notification.title` and `message.notification.body`. That remains the delivery-service provider contract for this documentation pass.
+- The documentation update separates two paths: direct data-only FCM HTTP v1 calls for `android_noti_app` log/UI verification, and delivery-service routed notification PUSH for backend provider integration verification.
+- `manual_test.md` Android direct FCM HTTP v1 example now sends `message.data.title`, `message.data.body`, and `message.data.source`.
+- README and `delivery-service/DELIVERY-SERVICE-FLOW.md` now state that delivery-service routed PUSH still uses notification payload, while Android app log UI verification should use the direct data-only call.

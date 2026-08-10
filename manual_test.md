@@ -175,16 +175,18 @@ Android FCM verification environment is ready.
 
 `ACCESS_TOKEN`은 Firebase service account로 발급한 `https://www.googleapis.com/auth/firebase.messaging` scope의 OAuth access token입니다.
 
+이 직접 호출은 `android_noti_app`의 앱 저장소, 최근 수신 로그 UI, foreground 즉시 갱신을 확인하기 위한 `message.data` 기반 data-only 검증 경로입니다. notification payload를 넣으면 Android background 상태에서 시스템 트레이가 직접 처리할 수 있으므로 앱 로그 저장을 보장하지 않습니다.
+
 ```bash
 set -a
 . ./.env.local
 set +a
 
 jq -n \
-  --arg token "ANDROID_FCM_REGISTRATION_TOKEN" \
+  --arg token "$ANDROID_FCM_REGISTRATION_TOKEN" \
   --arg title "${FCM_TITLE:-Notification Hub}" \
   --arg body "Notification Hub Android FCM actual delivery test." \
-  '{message:{token:$token, notification:{title:$title, body:$body}}}' \
+  '{message:{token:$token, data:{title:$title, body:$body, source:"notification_hub_manual_test"}}}' \
 | curl -sS -o /tmp/fcm-response.json -w "%{http_code}\n" \
   -X POST "${FCM_API_URL:-https://fcm.googleapis.com/v1}/projects/${FCM_PROJECT_ID}/messages:send" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}" \
@@ -204,11 +206,14 @@ mvn spring-boot:run -pl delivery-service
 
 notification-service를 통해 `channel=PUSH`, `recipient=ANDROID_FCM_REGISTRATION_TOKEN`으로 알림을 발행하면 delivery-service가 Android FCM token 대상으로 발송합니다.
 
+현재 delivery-service 경유 PUSH는 `FcmPushSender` 구현에 따라 FCM `notification` payload를 보냅니다. 이 경로는 backend provider 연동과 delivery log 성공 여부를 검증하는 용도입니다. Android 앱 내부 최근 로그 UI까지 검증하려면 위의 직접 data-only 호출을 사용합니다.
+
 ### 예상 결과
 
 - FCM API 성공 응답은 `200 OK`
 - 실패 시 `/tmp/fcm-response.json`에서 FCM 오류 메시지 확인
-- 실제 Android 기기에서 PUSH 알림 수신 확인
+- 직접 data-only 호출 시 Android 앱의 `FCM_MESSAGE` Logcat과 최근 수신 로그 UI 확인
+- delivery-service 경유 호출 시 delivery log 성공과 실제 Android 기기 PUSH 알림 수신 확인
 
 ### 현재 상태
 

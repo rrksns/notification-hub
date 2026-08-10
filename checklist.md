@@ -187,3 +187,12 @@
 - [x] Confirm Android device receives PUSH notification.
 - [x] Update manual test result after actual send.
 - [x] Commit Android FCM verification documentation.
+
+## Android FCM Data-Only Docs
+
+- [x] Create Android FCM data-only docs design.
+- [x] Create Android FCM data-only docs implementation plan.
+- [x] Update Android direct FCM HTTP v1 example to data-only payload.
+- [x] Document the difference between direct data-only app-log verification and delivery-service notification PUSH.
+- [x] Verify documentation search and diff check.
+- [x] Commit and push Android FCM data-only documentation.
