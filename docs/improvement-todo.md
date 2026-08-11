@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-02 (P2 일부 반영 상태 재점검, 전체 테스트 91개 통과)
+**최종 수정**: 2026-08-11 (API Gateway fallback 구현)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -76,7 +76,7 @@
 | 17 | analytics | `ZoneId.systemDefault()` 사용 | 주요 시간 변환과 도메인 생성이 `ZoneOffset.UTC` 기준으로 정리됨 | 유지 | 완료 |
 | 18 | analytics | DailyStats 내부 `long[]` 배열 | index 0/1이 성공/실패인지 코드로만 파악 가능 | `ChannelCounter(long success, long failure)` 객체로 교체 | 미착수 |
 | 19 | api-gateway | IP 기반 Rate Limiting만 존재 | NAT/프록시 뒤에서 동일 IP로 집계, X-Forwarded-For 미처리 | 테넌트별 Rate Limiting 추가, X-Forwarded-For 파싱 | 미착수 |
-| 20 | api-gateway | Circuit Breaker fallback 미구현 | `forward:/fallback` 설정만 있고 실제 컨트롤러 없음 | FallbackController 구현 (503 Service Unavailable 반환) | 미착수 |
+| 20 | api-gateway | Circuit Breaker fallback 미구현 | `/fallback`에서 503 Service Unavailable 공통 오류 응답 반환 | 유지 | 완료 |
 | 21 | notification | content 길이 제한 없음 | `CreateNotificationRequest.content`에 `@Size(max = 2000)` 반영 | 유지 | 완료 |
 | 22 | user | 비밀번호 복잡도 검증 없음 | `@Size(min=8)` 만 적용 | 정규식 또는 passay 라이브러리로 복잡도 규칙 추가 | 미착수 |
 | 23 | analytics | `findByTenantId()` 페이징 없음 | 수백만 건 조회 시 OOM 위험 | `Pageable` 파라미터 추가 | 미착수 |

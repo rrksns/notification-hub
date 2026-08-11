@@ -196,3 +196,15 @@
 - [x] Document the difference between direct data-only app-log verification and delivery-service notification PUSH.
 - [x] Verify documentation search and diff check.
 - [x] Commit and push Android FCM data-only documentation.
+
+## API Gateway Fallback
+
+- [x] Create API Gateway fallback design.
+- [x] Create API Gateway fallback implementation plan.
+- [x] Write RED fallback controller test.
+- [x] Run focused test and confirm expected failure.
+- [x] Add fallback controller returning 503 JSON response.
+- [x] Verify focused api-gateway fallback test.
+- [x] Update improvement todo, gateway flow, and context notes.
+- [x] Verify api-gateway tests and diff check.
+- [x] Commit and push API Gateway fallback implementation.

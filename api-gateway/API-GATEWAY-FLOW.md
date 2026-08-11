@@ -14,8 +14,11 @@ api-gateway/
 └── src/main/
     ├── java/com/notificationhub/gateway/
     │   ├── ApiGatewayApplication.java
-    │   └── filter/
-    │       └── JwtAuthenticationFilter.java
+    │   ├── filter/
+    │   │   ├── FallbackResponseFilter.java
+    │   │   └── JwtAuthenticationFilter.java
+    │   └── presentation/controller/
+    │       └── FallbackController.java
     └── resources/
         └── application.yml
 ```
@@ -60,6 +63,7 @@ api-gateway/
             Circuit Breaker (Resilience4j)
             ├─ 정상 → 대상 서비스로 전달
             └─ 장애 → /fallback 으로 포워드
+                └─ 503 Service Unavailable + 공통 오류 JSON 반환
 ```
 
 ---
@@ -95,7 +99,10 @@ api-gateway/
 | 슬라이딩 윈도우 크기 | 최근 요청 10개 |
 | 실패율 임계값 | 50% (5회 이상 실패 시 OPEN) |
 | OPEN 상태 대기 시간 | 10초 후 재시도 |
-| Fallback | `/fallback` 엔드포인트로 포워드 |
+| Fallback | `/fallback` 엔드포인트로 포워드 후 503 Service Unavailable 반환 |
+
+`/fallback`은 `FallbackResponseFilter`가 최상위 순서에서 해당 경로만 처리합니다.
+이 필터는 Spring Security 기본 인증 설정을 재정의하지 않고 fallback 응답만 503 JSON으로 확정합니다.
 
 ---
 

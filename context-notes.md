@@ -138,3 +138,14 @@
 - The documentation update separates two paths: direct data-only FCM HTTP v1 calls for `android_noti_app` log/UI verification, and delivery-service routed notification PUSH for backend provider integration verification.
 - `manual_test.md` Android direct FCM HTTP v1 example now sends `message.data.title`, `message.data.body`, and `message.data.source`.
 - README and `delivery-service/DELIVERY-SERVICE-FLOW.md` now state that delivery-service routed PUSH still uses notification payload, while Android app log UI verification should use the direct data-only call.
+
+## 2026-08-11
+
+- The next local high-priority improvement is API Gateway fallback handling from P2 #20 in `docs/improvement-todo.md`.
+- `api-gateway/src/main/resources/application.yml` already forwards Circuit Breaker fallback requests to `/fallback`.
+- There is currently no `/fallback` controller in api-gateway.
+- The implementation will add a small reactive controller that returns HTTP 503 with `ApiResponse.error("Service temporarily unavailable")`.
+- The first focused fallback test failed as expected because `FallbackController` did not exist.
+- After adding `FallbackController`, the same test returned 401 because `common` brings Spring Security onto the gateway classpath and default WebFlux security intercepted `/fallback`.
+- Added `FallbackResponseFilter` for the `/fallback` path only, so fallback responses are written before default security interception without changing the gateway's broader security chain.
+- Focused verification passed with `mvn test -pl api-gateway -am -Dtest=FallbackControllerTest -Dsurefire.failIfNoSpecifiedTests=false`.
