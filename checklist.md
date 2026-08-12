@@ -208,3 +208,15 @@
 - [x] Update improvement todo, gateway flow, and context notes.
 - [x] Verify api-gateway tests and diff check.
 - [x] Commit and push API Gateway fallback implementation.
+
+## Analytics Delivery Event Pageable
+
+- [x] Create analytics delivery event pageable design.
+- [x] Create analytics delivery event pageable implementation plan.
+- [x] Write RED adapter test for pageable tenant lookup.
+- [x] Run focused test and confirm expected failure.
+- [x] Change delivery event repository port and Mongo repository to pageable.
+- [x] Verify focused adapter test.
+- [x] Update improvement todo and context notes.
+- [x] Verify analytics-service tests and diff check.
+- [x] Commit and push analytics delivery event pageable change.

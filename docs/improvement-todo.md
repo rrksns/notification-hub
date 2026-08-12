@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-11 (API Gateway fallback 구현)
+**최종 수정**: 2026-08-12 (analytics delivery event 조회 페이징 적용)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -79,7 +79,7 @@
 | 20 | api-gateway | Circuit Breaker fallback 미구현 | `/fallback`에서 503 Service Unavailable 공통 오류 응답 반환 | 유지 | 완료 |
 | 21 | notification | content 길이 제한 없음 | `CreateNotificationRequest.content`에 `@Size(max = 2000)` 반영 | 유지 | 완료 |
 | 22 | user | 비밀번호 복잡도 검증 없음 | `@Size(min=8)` 만 적용 | 정규식 또는 passay 라이브러리로 복잡도 규칙 추가 | 미착수 |
-| 23 | analytics | `findByTenantId()` 페이징 없음 | 수백만 건 조회 시 OOM 위험 | `Pageable` 파라미터 추가 | 미착수 |
+| 23 | analytics | `findByTenantId()` 페이징 없음 | `DeliveryEventRepository.findByTenantId()`가 `Pageable` 기반 `Page` 조회로 변경됨 | 유지 | 완료 |
 | 24 | delivery | `@Transactional` 누락 | `ProcessDeliveryService.process()`에 `@Transactional` 반영 | 유지 | 완료 |
 | 25 | 전체 | SecurityConfig `permitAll()` | 서비스 직접 호출 시 인증 없이 접근 가능 | 각 서비스에도 JWT 필터 적용 또는 K8s NetworkPolicy로 격리 | 미착수 |
 | 26 | api-gateway | JwtAuthenticationFilter 예외 처리 | 토큰 검증과 클레임 파싱 예외를 catch하여 401 반환 | 유지 | 완료 |

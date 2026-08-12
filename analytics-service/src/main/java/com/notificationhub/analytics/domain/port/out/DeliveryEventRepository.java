@@ -1,9 +1,10 @@
 package com.notificationhub.analytics.domain.port.out;
 
 import com.notificationhub.analytics.domain.model.DeliveryEvent;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface DeliveryEventRepository {
     DeliveryEvent save(DeliveryEvent event);
-    List<DeliveryEvent> findByTenantId(String tenantId);
+    Page<DeliveryEvent> findByTenantId(String tenantId, Pageable pageable);
 }

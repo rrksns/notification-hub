@@ -149,3 +149,13 @@
 - After adding `FallbackController`, the same test returned 401 because `common` brings Spring Security onto the gateway classpath and default WebFlux security intercepted `/fallback`.
 - Added `FallbackResponseFilter` for the `/fallback` path only, so fallback responses are written before default security interception without changing the gateway's broader security chain.
 - Focused verification passed with `mvn test -pl api-gateway -am -Dtest=FallbackControllerTest -Dsurefire.failIfNoSpecifiedTests=false`.
+
+## 2026-08-12
+
+- The next selected P2 item is analytics #23, `findByTenantId()` pagination.
+- The current `DeliveryEventRepository.findByTenantId(String)` returns `List<DeliveryEvent>`, and `DeliveryEventMongoRepository.findByTenantId(String)` returns all matching documents.
+- The minimal approved scope is repository-level pagination only: no new REST API, no DTO response shape, and no controller change.
+- The implementation will require callers to pass `Pageable` and will preserve Spring Data `Page` metadata through the adapter.
+- RED verification failed as expected because neither the domain port nor Mongo repository accepted `Pageable`.
+- `DeliveryEventRepository`, `DeliveryEventMongoRepository`, and `DeliveryEventRepositoryAdapter` now use `Page<...> findByTenantId(String, Pageable)`.
+- Focused verification passed with `mvn test -pl analytics-service -am -Dtest=DeliveryEventRepositoryAdapterTest -Dsurefire.failIfNoSpecifiedTests=false`.
