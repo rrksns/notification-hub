@@ -2,6 +2,7 @@ package com.notificationhub.user.domain;
 
 import com.notificationhub.user.domain.exception.InvalidUserException;
 import com.notificationhub.user.domain.model.User;
+import com.notificationhub.user.domain.model.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +17,13 @@ class UserTest {
         assertThat(user.getTenantId()).isEqualTo("tenant-1");
         assertThat(user.getEmail()).isEqualTo("user@test.com");
         assertThat(user.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("신규 User 기본 역할은 ADMIN")
+    void createUser_defaultRoleIsAdmin() {
+        User user = User.create("tenant-1", "user@test.com", "encodedPassword123");
+        assertThat(user.getRole()).isEqualTo(UserRole.ADMIN.name());
     }
 
     @Test

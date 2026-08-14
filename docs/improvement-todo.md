@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-12 (analytics delivery event 조회 페이징 적용)
+**최종 수정**: 2026-08-14 (user 기본 역할 enum 추가)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -83,7 +83,7 @@
 | 24 | delivery | `@Transactional` 누락 | `ProcessDeliveryService.process()`에 `@Transactional` 반영 | 유지 | 완료 |
 | 25 | 전체 | SecurityConfig `permitAll()` | 서비스 직접 호출 시 인증 없이 접근 가능 | 각 서비스에도 JWT 필터 적용 또는 K8s NetworkPolicy로 격리 | 미착수 |
 | 26 | api-gateway | JwtAuthenticationFilter 예외 처리 | 토큰 검증과 클레임 파싱 예외를 catch하여 401 반환 | 유지 | 완료 |
-| 27 | user | Role `"ADMIN"` 하드코딩 | `User.create()`에서 항상 "ADMIN" | enum 또는 상수로 관리 | 미착수 |
+| 27 | user | Role `"ADMIN"` 하드코딩 | `User.create()` 기본 역할이 `UserRole.ADMIN.name()` 참조로 변경됨 | 유지 | 완료 |
 
 ---
 

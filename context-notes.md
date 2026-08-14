@@ -159,3 +159,12 @@
 - RED verification failed as expected because neither the domain port nor Mongo repository accepted `Pageable`.
 - `DeliveryEventRepository`, `DeliveryEventMongoRepository`, and `DeliveryEventRepositoryAdapter` now use `Page<...> findByTenantId(String, Pageable)`.
 - Focused verification passed with `mvn test -pl analytics-service -am -Dtest=DeliveryEventRepositoryAdapterTest -Dsurefire.failIfNoSpecifiedTests=false`.
+
+## 2026-08-14
+
+- The next selected P2 item is user #27, `Role "ADMIN"` hardcoding.
+- The minimal approved scope keeps `User.role` as `String` so JPA mapping, JWT claims, mappers, and public contracts do not change.
+- The implementation will add a domain `UserRole` enum and have `User.create()` use `UserRole.ADMIN.name()` for the existing default role value.
+- RED verification failed as expected because `UserRole` did not exist.
+- Added `UserRole.ADMIN` and replaced the default role literal in `User.create()` with `UserRole.ADMIN.name()`.
+- Focused verification passed with `mvn test -pl user-service -am -Dtest=UserTest -Dsurefire.failIfNoSpecifiedTests=false`.

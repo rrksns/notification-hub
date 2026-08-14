@@ -220,3 +220,15 @@
 - [x] Update improvement todo and context notes.
 - [x] Verify analytics-service tests and diff check.
 - [x] Commit and push analytics delivery event pageable change.
+
+## User Role Enum
+
+- [x] Create user role enum design.
+- [x] Create user role enum implementation plan.
+- [x] Write RED user role domain test.
+- [x] Run focused test and confirm expected failure.
+- [x] Add UserRole enum and replace role literal in User.create.
+- [x] Verify focused user domain test.
+- [x] Update improvement todo and context notes.
+- [x] Verify user-service tests and diff check.
+- [x] Commit and push user role enum change.
