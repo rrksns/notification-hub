@@ -30,11 +30,11 @@ api-gateway/
 | 경로 | 대상 서비스 | 인증 | Rate Limit | 비고 |
 |------|------------|------|------------|------|
 | `/api/auth/**` | user-service | 없음 | 없음 | 공개 인증 엔드포인트 |
-| `/api/users/**` | user-service | JWT | IP 기반 (100/s) | — |
-| `/api/keys/**` | user-service | JWT | IP 기반 (100/s) | API 키 관리 |
-| `/api/notifications/**` | notification-service | JWT | 없음 | X-Tenant-Id 헤더 주입 |
-| `/api/deliveries/**` | delivery-service | JWT | 없음 | X-Tenant-Id 헤더 주입 |
-| `/api/analytics/**` | analytics-service | JWT | 없음 | X-Tenant-Id 헤더 주입 |
+| `/api/users/**` | user-service | JWT | 테넌트 우선, 없으면 IP 기반 (100/s) | — |
+| `/api/keys/**` | user-service | JWT | 테넌트 우선, 없으면 IP 기반 (100/s) | API 키 관리 |
+| `/api/notifications/**` | notification-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
+| `/api/deliveries/**` | delivery-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
+| `/api/analytics/**` | analytics-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
 
 ---
 
@@ -58,7 +58,7 @@ api-gateway/
             ├─ tenantId, userId 추출
             └─ 요청 헤더에 X-Tenant-Id, X-User-Id 주입
                 ↓
-            Rate Limiter (Redis, IP 기반 - /api/users/**, /api/keys/**)
+            Rate Limiter (Redis, X-Tenant-Id 우선, 없으면 X-Forwarded-For/remote address)
                 ↓
             Circuit Breaker (Resilience4j)
             ├─ 정상 → 대상 서비스로 전달
@@ -115,7 +115,10 @@ api-gateway/
 | 알고리즘 | Token Bucket |
 | replenishRate | 초당 100 토큰 보충 |
 | burstCapacity | 최대 200 토큰 (순간 급증 허용) |
-| Key | 클라이언트 IP 주소 |
+| Key | `X-Tenant-Id` 우선, 없으면 `X-Forwarded-For` 첫 IP, 없으면 remote address |
+
+`tenantRateLimitKeyResolver`는 JWT 인증 필터가 주입한 `X-Tenant-Id`를 우선 사용합니다.
+테넌트 헤더가 없는 요청은 프록시 환경을 고려해 `X-Forwarded-For` 첫 IP를 사용하고, 이 값도 없으면 remote address를 사용합니다.
 
 ---
 

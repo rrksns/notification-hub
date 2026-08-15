@@ -398,11 +398,11 @@ docker exec notification-hub-redis redis-cli KEYS "realtime:tenant-001:*"
 
 ### 2.4 용도 3 — Rate Limiting (api-gateway)
 
-**목적**: IP별 과도한 요청을 차단하여 서비스를 보호
+**목적**: 테넌트 또는 클라이언트 IP별 과도한 요청을 차단하여 서비스를 보호
 
 **구현 방식**: Spring Cloud Gateway의 `RequestRateLimiter` 필터 + Redis 백엔드 (토큰 버킷 알고리즘)
 
-**키 기준**: 클라이언트 IP 주소 (`GatewayConfig.ipKeyResolver()` — `exchange.getRequest().getRemoteAddress()`)
+**키 기준**: `X-Tenant-Id` 우선, 없으면 `X-Forwarded-For` 첫 IP, 없으면 remote address (`GatewayConfig.tenantRateLimitKeyResolver()`)
 
 **설정** (`api-gateway/application.yml`):
 
@@ -412,7 +412,7 @@ filters:
     args:
       redis-rate-limiter.replenishRate: 100   # 초당 100개 토큰 충전
       redis-rate-limiter.burstCapacity: 200   # 토큰 버킷 최대 용량 200개
-      key-resolver: "#{@ipKeyResolver}"       # IP 기준
+      key-resolver: "#{@tenantRateLimitKeyResolver}" # 테넌트 우선, 없으면 IP 기준
 ```
 
 **토큰 버킷 동작 원리**:
@@ -429,9 +429,9 @@ filters:
 
 - 평상시: 초당 100개 요청까지 안정적으로 처리
 - 순간 트래픽 폭증: 최대 200개까지 허용 (버킷에 쌓인 토큰 소진)
-- Redis에 토큰 상태를 저장 → api-gateway가 여러 인스턴스로 스케일링되어도 IP당 제한이 정확하게 적용
+- Redis에 토큰 상태를 저장 → api-gateway가 여러 인스턴스로 스케일링되어도 테넌트 또는 IP별 제한이 정확하게 적용
 
-**적용 범위**: `user-service` 라우트(`/api/users/**`, `/api/keys/**`)에만 Rate Limiter 필터 적용. 다른 서비스 라우트에는 JWT 인증 필터만 적용.
+**적용 범위**: `user-service`, `notification-service`, `delivery-service`, `analytics-service` 라우트에 Rate Limiter 필터 적용. JWT 보호 라우트는 인증 필터 뒤에서 테넌트 기준 key를 사용합니다.
 
 ---
 
@@ -443,7 +443,7 @@ filters:
     ▼
 ┌──────────────────────────────────────────────────────┐
 │ api-gateway (8080)                                   │
-│   Redis ① Rate Limiting (IP별 토큰 버킷)              │
+│   Redis ① Rate Limiting (테넌트/IP별 토큰 버킷)       │
 │   JWT 토큰 검증                                       │
 │   Circuit Breaker (Resilience4j)                     │
 └──────────────────────────────────────────────────────┘
@@ -486,7 +486,7 @@ filters:
 
 | 서비스 | 키 패턴 | 용도 | TTL |
 |--------|---------|------|-----|
-| api-gateway | Spring 내부 관리 (토큰 버킷) | IP별 요청 제한 | 자동 |
+| api-gateway | Spring 내부 관리 (토큰 버킷) | 테넌트 또는 IP별 요청 제한 | 자동 |
 | notification-service | `idempotency:notification:{tenantId}:{key}` | 중복 발송 방지 | 24시간 |
 | analytics-service | `realtime:{tenantId}:success:{channel}` | 채널별 성공 카운터 | 없음 (영구) |
 | analytics-service | `realtime:{tenantId}:failure:{channel}` | 채널별 실패 카운터 | 없음 (영구) |

@@ -22,7 +22,7 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 100
                 redis-rate-limiter.burstCapacity: 200
-                key-resolver: "#{@ipKeyResolver}"
+                key-resolver: "#{@tenantRateLimitKeyResolver}"
         - id: user-service-public
           uri: lb://user-service
           predicates:
@@ -33,18 +33,33 @@ spring:
             - Path=/api/notifications/**
           filters:
             - JwtAuthentication
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@tenantRateLimitKeyResolver}"
         - id: delivery-service
           uri: lb://delivery-service
           predicates:
             - Path=/api/deliveries/**
           filters:
             - JwtAuthentication
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@tenantRateLimitKeyResolver}"
         - id: analytics-service
           uri: lb://analytics-service
           predicates:
             - Path=/api/analytics/**
           filters:
             - JwtAuthentication
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@tenantRateLimitKeyResolver}"
       default-filters:
         - name: CircuitBreaker
           args:

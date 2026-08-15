@@ -176,3 +176,16 @@
 - The approved scope is to add DTO Bean Validation tests and update status docs only, with no production code change.
 - Added `RegisterTenantRequestTest` to verify valid complex passwords pass and passwords missing uppercase, lowercase, number, or special character fail validation.
 - Focused verification passed with `mvn test -pl user-service -am -Dtest=RegisterTenantRequestTest -Dsurefire.failIfNoSpecifiedTests=false`.
+
+## 2026-08-16
+
+- The next selected P2 item is api-gateway #19, IP-only Rate Limiting.
+- The minimal scope keeps the existing Redis token bucket values and only changes the key selection strategy.
+- Protected requests should be rate limited by JWT-derived `X-Tenant-Id`, because `JwtAuthenticationFilter` removes client-supplied tenant headers before reinjecting trusted claims.
+- Requests without a tenant header should fall back to the first `X-Forwarded-For` IP, then remote address, then `unknown`.
+- Added `tenantRateLimitKeyResolver` and wired `RequestRateLimiter` to user, notification, delivery, and analytics routes.
+- Focused verification passed with `mvn test -pl api-gateway -am -Dtest=GatewayConfigTest -Dsurefire.failIfNoSpecifiedTests=false`.
+- Full api-gateway verification initially failed in the existing `FallbackControllerTest` because api-gateway lacked the Mockito subclass mock maker test setting already used by user, notification, delivery, and analytics modules.
+- Added the same Mockito subclass mock maker setting to api-gateway test resources.
+- Full multi-module `mvn test` passed with 103 tests: api-gateway 5, user 27, notification 13, delivery 39, analytics 19.
+- Manual configuration surface check confirmed `application.yml` parses and every `RequestRateLimiter` route references `tenantRateLimitKeyResolver`.

@@ -242,3 +242,16 @@
 - [x] Update improvement todo and context notes.
 - [x] Verify user-service tests and diff check.
 - [x] Commit and push user password complexity test.
+
+## API Gateway Tenant Rate Limiting
+
+- [x] Create API Gateway tenant rate limiting design.
+- [x] Create API Gateway tenant rate limiting implementation plan.
+- [x] Write RED tenant rate limit key resolver test.
+- [x] Run focused key resolver test and confirm expected failure.
+- [x] Add tenant-first rate limit key resolver.
+- [x] Point gateway RequestRateLimiter to tenant-first resolver.
+- [x] Verify focused api-gateway key resolver test.
+- [x] Update improvement todo, gateway flow, Redis docs, and context notes.
+- [x] Verify api-gateway tests and manual configuration surface.
+- [x] Commit API Gateway tenant rate limiting change.
