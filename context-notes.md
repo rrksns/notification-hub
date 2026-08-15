@@ -168,3 +168,11 @@
 - RED verification failed as expected because `UserRole` did not exist.
 - Added `UserRole.ADMIN` and replaced the default role literal in `User.create()` with `UserRole.ADMIN.name()`.
 - Focused verification passed with `mvn test -pl user-service -am -Dtest=UserTest -Dsurefire.failIfNoSpecifiedTests=false`.
+
+## 2026-08-15
+
+- The next selected P2 item is user #22, password complexity validation.
+- `RegisterTenantRequest.password` already has `@Size(min = 8, max = 100)` and a `@Pattern` requiring uppercase, lowercase, number, and one `@$!%*?&` special character.
+- The approved scope is to add DTO Bean Validation tests and update status docs only, with no production code change.
+- Added `RegisterTenantRequestTest` to verify valid complex passwords pass and passwords missing uppercase, lowercase, number, or special character fail validation.
+- Focused verification passed with `mvn test -pl user-service -am -Dtest=RegisterTenantRequestTest -Dsurefire.failIfNoSpecifiedTests=false`.

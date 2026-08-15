@@ -232,3 +232,13 @@
 - [x] Update improvement todo and context notes.
 - [x] Verify user-service tests and diff check.
 - [x] Commit and push user role enum change.
+
+## User Password Complexity
+
+- [x] Create user password complexity design.
+- [x] Create user password complexity implementation plan.
+- [x] Add RegisterTenantRequest validation test.
+- [x] Verify focused DTO validation test.
+- [x] Update improvement todo and context notes.
+- [x] Verify user-service tests and diff check.
+- [x] Commit and push user password complexity test.
