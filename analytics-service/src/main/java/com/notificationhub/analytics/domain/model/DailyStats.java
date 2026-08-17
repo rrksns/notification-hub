@@ -11,11 +11,11 @@ public class DailyStats {
     private long totalSent;
     private long totalSuccess;
     private long totalFailed;
-    private final Map<String, long[]> channelCounts; // channel -> [success, failure]
+    private final Map<String, ChannelStats> channelCounts;
 
     private DailyStats(String id, String tenantId, LocalDate date,
                        long totalSent, long totalSuccess, long totalFailed,
-                       Map<String, long[]> channelCounts) {
+                       Map<String, ChannelStats> channelCounts) {
         this.id = id;
         this.tenantId = tenantId;
         this.date = date;
@@ -31,26 +31,26 @@ public class DailyStats {
 
     public static DailyStats reconstruct(String id, String tenantId, LocalDate date,
                                           long totalSent, long totalSuccess, long totalFailed,
-                                          Map<String, long[]> channelCounts) {
+                                          Map<String, ChannelStats> channelCounts) {
         return new DailyStats(id, tenantId, date, totalSent, totalSuccess, totalFailed, channelCounts);
     }
 
     public void recordSuccess(String channel) {
         totalSent++;
         totalSuccess++;
-        channelCounts.computeIfAbsent(channel, k -> new long[]{0, 0})[0]++;
+        ChannelStats current = channelCounts.getOrDefault(channel, new ChannelStats(0, 0));
+        channelCounts.put(channel, new ChannelStats(current.successCount() + 1, current.failureCount()));
     }
 
     public void recordFailure(String channel) {
         totalSent++;
         totalFailed++;
-        channelCounts.computeIfAbsent(channel, k -> new long[]{0, 0})[1]++;
+        ChannelStats current = channelCounts.getOrDefault(channel, new ChannelStats(0, 0));
+        channelCounts.put(channel, new ChannelStats(current.successCount(), current.failureCount() + 1));
     }
 
     public Map<String, ChannelStats> getChannelStats() {
-        Map<String, ChannelStats> result = new HashMap<>();
-        channelCounts.forEach((ch, counts) -> result.put(ch, new ChannelStats(counts[0], counts[1])));
-        return result;
+        return new HashMap<>(channelCounts);
     }
 
     public String getId() { return id; }
@@ -59,5 +59,4 @@ public class DailyStats {
     public long getTotalSent() { return totalSent; }
     public long getTotalSuccess() { return totalSuccess; }
     public long getTotalFailed() { return totalFailed; }
-    public Map<String, long[]> getRawChannelCounts() { return channelCounts; }
 }

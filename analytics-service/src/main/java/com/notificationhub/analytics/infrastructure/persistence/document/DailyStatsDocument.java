@@ -1,5 +1,6 @@
 package com.notificationhub.analytics.infrastructure.persistence.document;
 
+import com.notificationhub.analytics.domain.model.ChannelStats;
 import com.notificationhub.analytics.domain.model.DailyStats;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -28,13 +29,17 @@ public class DailyStatsDocument {
         doc.totalSent = stats.getTotalSent();
         doc.totalSuccess = stats.getTotalSuccess();
         doc.totalFailed = stats.getTotalFailed();
-        doc.channelCounts = new HashMap<>(stats.getRawChannelCounts());
+        stats.getChannelStats().forEach((channel, channelStats) ->
+                doc.channelCounts.put(channel, new long[]{channelStats.successCount(), channelStats.failureCount()}));
         return doc;
     }
 
     public DailyStats toDomain() {
+        Map<String, ChannelStats> domainChannelCounts = new HashMap<>();
+        channelCounts.forEach((channel, counts) ->
+                domainChannelCounts.put(channel, new ChannelStats(counts[0], counts[1])));
         return DailyStats.reconstruct(id, tenantId, date, totalSent, totalSuccess, totalFailed,
-                new HashMap<>(channelCounts));
+                domainChannelCounts);
     }
 
     public String getTenantId() { return tenantId; }

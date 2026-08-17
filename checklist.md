@@ -255,3 +255,16 @@
 - [x] Update improvement todo, gateway flow, Redis docs, and context notes.
 - [x] Verify api-gateway tests and manual configuration surface.
 - [x] Commit API Gateway tenant rate limiting change.
+
+## Analytics DailyStats Channel Counter
+
+- [x] Create analytics DailyStats channel counter design.
+- [x] Create analytics DailyStats channel counter implementation plan.
+- [x] Write RED DailyStats reconstruct test for ChannelStats counters.
+- [x] Run focused DailyStats test and confirm expected failure.
+- [x] Replace DailyStats internal long array counters with ChannelStats.
+- [x] Preserve DailyStatsDocument Mongo array storage conversion.
+- [x] Verify focused DailyStats domain test.
+- [x] Update improvement todo, PROCESS, and context notes.
+- [x] Verify analytics-service tests, full tests, and diff check.
+- [x] Commit analytics DailyStats channel counter change.

@@ -246,8 +246,8 @@ presentation/   → domain/port/in/ 호출
 | user-service | 27 | domain + application + presentation dto + architecture |
 | notification-service | 13 | domain + application + architecture |
 | delivery-service | 39 | domain(8) + application(4) + infrastructure sender(26) + architecture(1) |
-| analytics-service | 19 | domain + application + infrastructure persistence + architecture |
-| **합계** | **103** | gateway + domain + application + infrastructure + architecture |
+| analytics-service | 20 | domain + application + infrastructure persistence + architecture |
+| **합계** | **104** | gateway + domain + application + infrastructure + architecture |
 
 ---
 

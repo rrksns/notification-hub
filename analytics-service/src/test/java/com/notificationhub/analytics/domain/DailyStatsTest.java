@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -64,5 +65,24 @@ class DailyStatsTest {
         assertThat(stats.successCount()).isEqualTo(10L);
         assertThat(stats.failureCount()).isEqualTo(2L);
         assertThat(stats.total()).isEqualTo(12L);
+    }
+
+    @Test
+    @DisplayName("복원 시 채널 카운터는 ChannelStats로 표현한다")
+    void reconstruct_usesNamedChannelStatsCounters() {
+        DailyStats stats = DailyStats.reconstruct(
+                "tenant-1:2026-03-17",
+                "tenant-1",
+                LocalDate.of(2026, 3, 17),
+                4,
+                3,
+                1,
+                Map.of("EMAIL", new ChannelStats(3, 1))
+        );
+
+        ChannelStats emailStats = stats.getChannelStats().get("EMAIL");
+
+        assertThat(emailStats.successCount()).isEqualTo(3);
+        assertThat(emailStats.failureCount()).isEqualTo(1);
     }
 }

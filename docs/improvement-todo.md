@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-16 (api-gateway 테넌트별 Rate Limiting 적용)
+**최종 수정**: 2026-08-17 (analytics DailyStats 채널 카운터 명시화)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -74,7 +74,7 @@
 | 15 | user | Tenant ↔ User ↔ ApiKey FK 없음 | tenantId가 String — 참조 무결성 없음 | FK 제약 또는 최소한 애플리케이션 레벨 검증 | 미착수 |
 | 16 | analytics | `Long.parseLong()` 예외 미처리 | `RedisRealtimeCounterAdapter.parseLongSafe()`에서 경고 로그 후 0L 반환 | 유지 | 완료 |
 | 17 | analytics | `ZoneId.systemDefault()` 사용 | 주요 시간 변환과 도메인 생성이 `ZoneOffset.UTC` 기준으로 정리됨 | 유지 | 완료 |
-| 18 | analytics | DailyStats 내부 `long[]` 배열 | index 0/1이 성공/실패인지 코드로만 파악 가능 | `ChannelCounter(long success, long failure)` 객체로 교체 | 미착수 |
+| 18 | analytics | DailyStats 내부 `long[]` 배열 | `DailyStats` 도메인 내부 채널 카운터를 `ChannelStats(successCount, failureCount)` 값으로 교체. Mongo document 저장 구조는 기존 배열 형태 유지 | 유지 | 완료 |
 | 19 | api-gateway | IP 기반 Rate Limiting만 존재 | JWT 인증 요청은 `X-Tenant-Id` 기준, 테넌트 없는 요청은 `X-Forwarded-For` 첫 IP 또는 remote address 기준으로 제한 | 유지 | 완료 |
 | 20 | api-gateway | Circuit Breaker fallback 미구현 | `/fallback`에서 503 Service Unavailable 공통 오류 응답 반환 | 유지 | 완료 |
 | 21 | notification | content 길이 제한 없음 | `CreateNotificationRequest.content`에 `@Size(max = 2000)` 반영 | 유지 | 완료 |
@@ -91,7 +91,7 @@
 
 ```
 빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
-테스트: mvn test → 103개 통과 (api-gateway 5 + user 27 + notification 13 + delivery 39 + analytics 19, 2026-08-16)
+테스트: mvn test → 104개 통과 (api-gateway 5 + user 27 + notification 13 + delivery 39 + analytics 20, 2026-08-17)
 ```
 
 ---

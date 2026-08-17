@@ -189,3 +189,14 @@
 - Added the same Mockito subclass mock maker setting to api-gateway test resources.
 - Full multi-module `mvn test` passed with 103 tests: api-gateway 5, user 27, notification 13, delivery 39, analytics 19.
 - Manual configuration surface check confirmed `application.yml` parses and every `RequestRateLimiter` route references `tenantRateLimitKeyResolver`.
+
+## 2026-08-17
+
+- The next selected local P2 item is analytics #18, `DailyStats` internal `long[]` channel counters.
+- `ChannelStats` already exists and is returned by `DailyStats.getChannelStats()`, so adding a separate `ChannelCounter` type would duplicate the same domain concept.
+- The minimal scope is to store `Map<String, ChannelStats>` inside `DailyStats` while keeping `DailyStatsDocument` as `Map<String, long[]>` for the existing MongoDB shape and atomic `$inc` paths.
+- RED verification failed as expected because `DailyStats.reconstruct()` still required `Map<String, long[]>`.
+- `DailyStats` now stores `Map<String, ChannelStats>` internally, and `DailyStatsDocument` converts between the domain value and the existing Mongo `long[]` shape.
+- Focused verification passed with `mvn test -pl analytics-service -am -Dtest=DailyStatsTest -Dsurefire.failIfNoSpecifiedTests=false`.
+- Analytics module verification passed with `mvn test -pl analytics-service -am` and 20 tests.
+- Full multi-module `mvn test` passed with 104 tests: api-gateway 5, user 27, notification 13, delivery 39, analytics 20.
