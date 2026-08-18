@@ -243,11 +243,11 @@ presentation/   → domain/port/in/ 호출
 | 서비스 | 테스트 수 | 커버 대상 |
 |--------|-----------|-----------|
 | api-gateway | 5 | config + fallback presentation |
-| user-service | 27 | domain + application + presentation dto + architecture |
-| notification-service | 13 | domain + application + architecture |
-| delivery-service | 39 | domain(8) + application(4) + infrastructure sender(26) + architecture(1) |
+| user-service | 28 | domain + application + presentation dto + persistence entity + architecture |
+| notification-service | 14 | domain + application + persistence entity + architecture |
+| delivery-service | 40 | domain(8) + application(4) + infrastructure sender(26) + persistence entity(1) + architecture(1) |
 | analytics-service | 20 | domain + application + infrastructure persistence + architecture |
-| **합계** | **104** | gateway + domain + application + infrastructure + architecture |
+| **합계** | **107** | gateway + domain + application + infrastructure + architecture |
 
 ---
 

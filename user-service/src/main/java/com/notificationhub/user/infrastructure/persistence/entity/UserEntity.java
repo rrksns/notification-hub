@@ -11,6 +11,8 @@ public class UserEntity {
 
     @Id
     private String id;
+    @Version
+    private Long version;
     @Column(nullable = false)
     private String tenantId;
     @Column(nullable = false)

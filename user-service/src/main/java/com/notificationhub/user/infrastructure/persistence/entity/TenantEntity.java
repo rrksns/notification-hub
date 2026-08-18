@@ -10,6 +10,8 @@ public class TenantEntity {
 
     @Id
     private String id;
+    @Version
+    private Long version;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false, unique = true)

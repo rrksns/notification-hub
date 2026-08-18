@@ -13,6 +13,8 @@ public class NotificationEntity {
 
     @Id
     private String id;
+    @Version
+    private Long version;
     @Column(nullable = false)
     private String tenantId;
     @Enumerated(EnumType.STRING)

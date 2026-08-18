@@ -200,3 +200,15 @@
 - Focused verification passed with `mvn test -pl analytics-service -am -Dtest=DailyStatsTest -Dsurefire.failIfNoSpecifiedTests=false`.
 - Analytics module verification passed with `mvn test -pl analytics-service -am` and 20 tests.
 - Full multi-module `mvn test` passed with 104 tests: api-gateway 5, user 27, notification 13, delivery 39, analytics 20.
+
+## 2026-08-18
+
+- The next selected P2 item is #14, JPA `@Version` optimistic locking.
+- The minimal scope is persistence entities only: add `@Version Long version` without changing domain models, mappers, DTOs, or API responses.
+- Target JPA entities are `TenantEntity`, `UserEntity`, `ApiKeyEntity`, `NotificationEntity`, and `DeliveryLogEntity`.
+- Reflection-based structure tests will verify the field exists without requiring a database.
+- RED verification failed as expected because the user entity structure test could not find a `version` field.
+- Added `@Version Long version` to the five JPA entities while leaving constructors and mapper contracts unchanged.
+- Focused verification passed with `mvn test -pl user-service,notification-service,delivery-service -am -Dtest=JpaOptimisticLockingTest -Dsurefire.failIfNoSpecifiedTests=false`.
+- Target JPA module verification passed with `mvn test -pl user-service,notification-service,delivery-service -am`: user 28, notification 14, delivery 40.
+- Full multi-module `mvn test` passed with 107 tests: api-gateway 5, user 28, notification 14, delivery 40, analytics 20.

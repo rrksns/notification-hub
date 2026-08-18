@@ -268,3 +268,15 @@
 - [x] Update improvement todo, PROCESS, and context notes.
 - [x] Verify analytics-service tests, full tests, and diff check.
 - [x] Commit analytics DailyStats channel counter change.
+
+## JPA Optimistic Locking
+
+- [x] Create JPA optimistic locking design.
+- [x] Create JPA optimistic locking implementation plan.
+- [x] Write RED entity version structure tests.
+- [x] Run focused structure tests and confirm expected failure.
+- [x] Add `@Version Long version` to JPA entities.
+- [x] Verify focused structure tests.
+- [x] Update improvement todo and context notes.
+- [x] Verify target JPA module tests and diff check.
+- [x] Commit and push JPA optimistic locking change.

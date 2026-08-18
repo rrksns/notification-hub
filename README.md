@@ -688,10 +688,11 @@ kubectl delete namespace notification-hub
 
 | 서비스 | 테스트 수 | 검증 범위 |
 |--------|-----------|-----------|
-| user-service | 21/21 | domain + application + architecture |
-| notification-service | 13/13 | domain + application + architecture |
-| delivery-service | 39/39 | domain + application + provider sender + architecture |
-| analytics-service | 18/18 | domain + application + architecture |
+| api-gateway | 5/5 | config + fallback presentation |
+| user-service | 28/28 | domain + application + presentation dto + persistence entity + architecture |
+| notification-service | 14/14 | domain + application + persistence entity + architecture |
+| delivery-service | 40/40 | domain + application + provider sender + persistence entity + architecture |
+| analytics-service | 20/20 | domain + application + infrastructure persistence + architecture |
 
 ```bash
 # 전체 테스트 실행
