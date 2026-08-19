@@ -207,6 +207,11 @@
 - The highest-priority commercialization item is blocking direct calls to internal services, because user, notification, delivery, and analytics `SecurityConfig` still use `permitAll()`.
 - The planned approach is defense in depth: service-level JWT validation for protected APIs plus K8s NetworkPolicy so only api-gateway and approved monitoring Pods can reach internal service Pods.
 - The user asked not to proceed with iOS work, so iOS Firebase/APNs console tasks remain intentionally untouched.
+- Internal service access control Task 1 is limited to API Gateway route policy cleanup.
+- The current gateway config exposed `/api/users/**, /api/keys/**` through one user-service route without `JwtAuthentication`.
+- Added a route config test that requires separate `user-service-register`, `user-service-auth`, and `user-service-api-keys` routes.
+- `/api/users/register` remains public but keeps `RequestRateLimiter`, so unauthenticated registration traffic is limited by the resolver's IP fallback.
+- `/api/keys/**` now runs `JwtAuthentication` before `RequestRateLimiter`, so the rate limit key can use trusted JWT-derived `X-Tenant-Id`.
 
 ## 2026-08-18
 

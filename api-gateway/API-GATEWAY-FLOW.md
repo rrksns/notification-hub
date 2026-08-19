@@ -30,7 +30,7 @@ api-gateway/
 | 경로 | 대상 서비스 | 인증 | Rate Limit | 비고 |
 |------|------------|------|------------|------|
 | `/api/auth/**` | user-service | 없음 | 없음 | 공개 인증 엔드포인트 |
-| `/api/users/**` | user-service | JWT | 테넌트 우선, 없으면 IP 기반 (100/s) | — |
+| `/api/users/register` | user-service | 없음 | IP 기반 (100/s) | 공개 테넌트 등록 엔드포인트 |
 | `/api/keys/**` | user-service | JWT | 테넌트 우선, 없으면 IP 기반 (100/s) | API 키 관리 |
 | `/api/notifications/**` | notification-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
 | `/api/deliveries/**` | delivery-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
@@ -47,8 +47,12 @@ api-gateway/
     ↓
 경로(Predicate) 매칭
     │
-    ├─→ 공개 경로 (/api/auth/**)
+    ├─→ 공개 인증 경로 (/api/auth/**)
     │   └─→ 필터 없이 user-service로 라우팅
+    │
+    ├─→ 공개 등록 경로 (/api/users/register)
+    │   └─→ Rate Limiter (Redis, X-Forwarded-For/remote address)
+    │       └─→ user-service로 라우팅
     │
     └─→ 보호된 경로
         └─→ JwtAuthenticationFilter
@@ -119,6 +123,7 @@ api-gateway/
 
 `tenantRateLimitKeyResolver`는 JWT 인증 필터가 주입한 `X-Tenant-Id`를 우선 사용합니다.
 테넌트 헤더가 없는 요청은 프록시 환경을 고려해 `X-Forwarded-For` 첫 IP를 사용하고, 이 값도 없으면 remote address를 사용합니다.
+공개 등록 라우트인 `/api/users/register`는 JWT 인증 없이 같은 resolver를 사용하므로 IP 기준으로 제한됩니다.
 
 ---
 

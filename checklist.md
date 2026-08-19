@@ -277,6 +277,20 @@
 - [x] Verify documentation diff.
 - [x] Commit commercialization planning documents.
 
+## Internal Service Access Control
+
+- [x] Create isolated worktree for implementation.
+- [x] Verify baseline api-gateway tests.
+- [x] Write RED gateway route policy test.
+- [x] Run focused route policy test and confirm expected failure.
+- [x] Split user-service gateway routes into register, auth, and API key routes.
+- [x] Apply `JwtAuthentication` and `RequestRateLimiter` to `/api/keys/**`.
+- [x] Keep `/api/users/register` public while preserving rate limiting.
+- [x] Verify focused gateway route policy test.
+- [x] Update gateway flow documentation and context notes.
+- [x] Verify api-gateway tests and diff check.
+- [x] Commit gateway route policy change.
+
 ## JPA Optimistic Locking
 
 - [x] Create JPA optimistic locking design.

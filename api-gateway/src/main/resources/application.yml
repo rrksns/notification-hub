@@ -13,20 +13,31 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user-service
+        - id: user-service-register
           uri: lb://user-service
           predicates:
-            - Path=/api/users/**, /api/keys/**
+            - Path=/api/users/register
           filters:
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 100
                 redis-rate-limiter.burstCapacity: 200
                 key-resolver: "#{@tenantRateLimitKeyResolver}"
-        - id: user-service-public
+        - id: user-service-auth
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**
+        - id: user-service-api-keys
+          uri: lb://user-service
+          predicates:
+            - Path=/api/keys/**
+          filters:
+            - JwtAuthentication
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@tenantRateLimitKeyResolver}"
         - id: notification-service
           uri: lb://notification-service
           predicates:
