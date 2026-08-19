@@ -201,6 +201,13 @@
 - Analytics module verification passed with `mvn test -pl analytics-service -am` and 20 tests.
 - Full multi-module `mvn test` passed with 104 tests: api-gateway 5, user 27, notification 13, delivery 39, analytics 20.
 
+## 2026-08-19
+
+- Reviewed commercialization readiness separately from the earlier portfolio-oriented improvement list.
+- The highest-priority commercialization item is blocking direct calls to internal services, because user, notification, delivery, and analytics `SecurityConfig` still use `permitAll()`.
+- The planned approach is defense in depth: service-level JWT validation for protected APIs plus K8s NetworkPolicy so only api-gateway and approved monitoring Pods can reach internal service Pods.
+- The user asked not to proceed with iOS work, so iOS Firebase/APNs console tasks remain intentionally untouched.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.
