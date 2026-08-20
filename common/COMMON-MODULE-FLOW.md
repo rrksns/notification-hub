@@ -21,6 +21,9 @@ common/
     ├── jwt/
     │   ├── JwtProperties.java        ← JWT 설정 바인딩
     │   └── JwtTokenProvider.java     ← JWT 생성/검증
+    ├── security/
+    │   ├── JwtSecurityProperties.java        ← 내부 서비스 JWT 제외 경로 설정
+    │   └── JwtHeaderAuthenticationFilter.java ← 내부 서비스 Servlet JWT 인증 필터
     └── response/
         ├── ApiResponse.java          ← 표준 API 응답 래퍼
         └── PageResponse.java         ← 페이지네이션 응답
@@ -47,6 +50,20 @@ common/
 | `getSubject(token)` | userId 추출 |
 | `getTenantId(token)` | tenantId 추출 |
 | `parseToken(token)` | Claims 파싱 (실패 시 예외) |
+
+#### JwtSecurityProperties
+내부 서비스가 JWT 검증에서 제외할 공개 경로를 보관합니다.
+서비스별 SecurityConfig가 이 값을 사용해 회원 등록, 로그인, actuator health 같은 공개 경로를 필터에서 제외할 수 있습니다.
+
+#### JwtHeaderAuthenticationFilter
+Servlet 기반 내부 서비스에서 사용하는 JWT 인증 필터입니다.
+
+| 동작 | 설명 |
+|------|------|
+| 공개 경로 제외 | `jwt.security.excluded-paths`에 매칭되는 요청은 JWT 검증 없이 통과 |
+| Bearer 토큰 검증 | `Authorization: Bearer {token}`이 없거나 유효하지 않으면 401 반환 |
+| 신뢰 헤더 재주입 | 기존 `X-Tenant-Id`, `X-User-Id`를 무시하고 JWT claim 기준으로 재주입 |
+| SecurityContext 설정 | 인증된 요청은 subject를 principal로 설정해 Spring Security `authenticated()`에서 사용할 수 있게 처리 |
 
 ---
 
@@ -156,3 +173,6 @@ common
   ├─ delivery-service   (NotificationEvent, DeliveryResultEvent, ApiResponse)
   └─ analytics-service  (NotificationEvent, DeliveryResultEvent)
 ```
+
+`JwtHeaderAuthenticationFilter`는 내부 서비스 직접 호출 차단을 위해 common이 제공하는 Servlet 보안 필터입니다.
+각 서비스 SecurityConfig 등록은 별도 단계에서 진행합니다.

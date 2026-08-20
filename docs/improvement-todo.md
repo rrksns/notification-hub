@@ -81,7 +81,7 @@
 | 22 | user | 비밀번호 복잡도 검증 없음 | `RegisterTenantRequest.password`에서 크기와 대문자/소문자/숫자/특수문자 포함을 Bean Validation으로 검증 | 유지 | 완료 |
 | 23 | analytics | `findByTenantId()` 페이징 없음 | `DeliveryEventRepository.findByTenantId()`가 `Pageable` 기반 `Page` 조회로 변경됨 | 유지 | 완료 |
 | 24 | delivery | `@Transactional` 누락 | `ProcessDeliveryService.process()`에 `@Transactional` 반영 | 유지 | 완료 |
-| 25 | 전체 | SecurityConfig `permitAll()` | 서비스 직접 호출 시 인증 없이 접근 가능 | 각 서비스에도 JWT 필터 적용 또는 K8s NetworkPolicy로 격리 | 미착수 |
+| 25 | 전체 | SecurityConfig `permitAll()` | 서비스 직접 호출 시 인증 없이 접근 가능 | 공통 Servlet JWT 필터 추가 완료. 각 서비스 SecurityConfig 적용과 K8s NetworkPolicy 추가 필요 | 진행 중 |
 | 26 | api-gateway | JwtAuthenticationFilter 예외 처리 | 토큰 검증과 클레임 파싱 예외를 catch하여 401 반환 | 유지 | 완료 |
 | 27 | user | Role `"ADMIN"` 하드코딩 | `User.create()` 기본 역할이 `UserRole.ADMIN.name()` 참조로 변경됨 | 유지 | 완료 |
 
@@ -91,7 +91,7 @@
 
 ```
 빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
-테스트: mvn test → 107개 통과 (api-gateway 5 + user 28 + notification 14 + delivery 40 + analytics 20, 2026-08-18)
+테스트: mvn test -pl api-gateway,user-service,notification-service,delivery-service,analytics-service -am → 115개 통과 (common 4 + api-gateway 9 + user 28 + notification 14 + delivery 40 + analytics 20, 2026-08-20)
 ```
 
 ---

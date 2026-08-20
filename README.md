@@ -688,7 +688,8 @@ kubectl delete namespace notification-hub
 
 | 서비스 | 테스트 수 | 검증 범위 |
 |--------|-----------|-----------|
-| api-gateway | 5/5 | config + fallback presentation |
+| common | 4/4 | servlet JWT security filter |
+| api-gateway | 9/9 | route config + rate limit config + fallback presentation |
 | user-service | 28/28 | domain + application + presentation dto + persistence entity + architecture |
 | notification-service | 14/14 | domain + application + persistence entity + architecture |
 | delivery-service | 40/40 | domain + application + provider sender + persistence entity + architecture |

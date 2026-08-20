@@ -212,6 +212,16 @@
 - Added a route config test that requires separate `user-service-register`, `user-service-auth`, and `user-service-api-keys` routes.
 - `/api/users/register` remains public but keeps `RequestRateLimiter`, so unauthenticated registration traffic is limited by the resolver's IP fallback.
 - `/api/keys/**` now runs `JwtAuthentication` before `RequestRateLimiter`, so the rate limit key can use trusted JWT-derived `X-Tenant-Id`.
+- Task 2 adds the reusable Servlet-side JWT filter in `common`.
+- The filter must reject missing or invalid bearer tokens, bypass configured public paths, overwrite forged tenant/user headers with JWT claims, and populate `SecurityContext` so service `SecurityConfig` can use `authenticated()`.
+
+## 2026-08-20
+
+- Implemented `JwtHeaderAuthenticationFilter` in `common` as the reusable Servlet-side direct-call guard for internal services.
+- The filter uses `JwtTokenProvider`, rejects missing or invalid bearer tokens with 401, and bypasses `JwtSecurityProperties.excludedPaths()`.
+- Valid requests are forwarded through a request wrapper that returns JWT-derived `X-Tenant-Id` and `X-User-Id`, so forged inbound headers are overwritten before controller code sees them.
+- The filter also populates `SecurityContext` with the JWT subject as principal, which prepares Task 3 service `SecurityConfig` changes to use `authenticated()`.
+- Task 3 still needs to register this filter in user, notification, delivery, and analytics service SecurityConfig classes.
 
 ## 2026-08-18
 

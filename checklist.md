@@ -290,6 +290,15 @@
 - [x] Update gateway flow documentation and context notes.
 - [x] Verify api-gateway tests and diff check.
 - [x] Commit gateway route policy change.
+- [x] Create isolated worktree for Task 2.
+- [x] Verify baseline common module tests.
+- [x] Write RED common JWT header filter tests.
+- [x] Run focused common filter test and confirm expected failure.
+- [x] Add Servlet JWT filter and security properties in common.
+- [x] Verify focused common filter tests.
+- [x] Update common flow documentation and context notes.
+- [x] Verify common module tests and diff check.
+- [x] Commit common JWT header filter change.
 
 ## JPA Optimistic Locking
 

@@ -69,7 +69,7 @@ presentation/   → domain/port/in/ 호출
 
 **작업 내용**:
 - Root `pom.xml` — Spring Boot 3.2.5 BOM, Spring Cloud 2023.0.1 BOM, JaCoCo 설정
-- `common` 모듈 — `ApiResponse<T>`, `PageResponse<T>`, `BusinessException`, `ErrorCode`, `GlobalExceptionHandler`, `NotificationEvent`, `DeliveryResultEvent`, `JwtProperties`, `JwtTokenProvider`
+- `common` 모듈 — `ApiResponse<T>`, `PageResponse<T>`, `BusinessException`, `ErrorCode`, `GlobalExceptionHandler`, `NotificationEvent`, `DeliveryResultEvent`, `JwtProperties`, `JwtTokenProvider`, `JwtSecurityProperties`, `JwtHeaderAuthenticationFilter`
 - `discovery-service` — Eureka Server (`@EnableEurekaServer`)
 - `api-gateway` — Spring Cloud Gateway + JWT 필터 + Redis Rate Limiter + Resilience4j Circuit Breaker
 - `docker-compose.yml` — MySQL(3307), MongoDB, Redis, Kafka(KRaft), Prometheus, Grafana, Zipkin
@@ -242,12 +242,13 @@ presentation/   → domain/port/in/ 호출
 
 | 서비스 | 테스트 수 | 커버 대상 |
 |--------|-----------|-----------|
-| api-gateway | 5 | config + fallback presentation |
+| common | 4 | servlet JWT security filter |
+| api-gateway | 9 | route config + rate limit config + fallback presentation |
 | user-service | 28 | domain + application + presentation dto + persistence entity + architecture |
 | notification-service | 14 | domain + application + persistence entity + architecture |
 | delivery-service | 40 | domain(8) + application(4) + infrastructure sender(26) + persistence entity(1) + architecture(1) |
 | analytics-service | 20 | domain + application + infrastructure persistence + architecture |
-| **합계** | **107** | gateway + domain + application + infrastructure + architecture |
+| **합계** | **115** | common security + gateway + domain + application + infrastructure + architecture |
 
 ---
 
