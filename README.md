@@ -628,14 +628,25 @@ kubectl apply -f k8s/discovery-service/ -f k8s/api-gateway/ \
   -f k8s/delivery-service/ -f k8s/analytics-service/
 ```
 
-### 5단계 — 파드 상태 확인
+### 5단계 — 내부 서비스 NetworkPolicy 적용
+
+```bash
+kubectl apply -f k8s/networkpolicy/
+```
+
+`user-service`, `notification-service`, `delivery-service`, `analytics-service` Pod의 ingress는 기본 차단됩니다.
+서비스 API 포트는 `app=api-gateway` Pod에서만 접근할 수 있습니다.
+클러스터 내부 Prometheus를 사용할 경우 `monitoring` namespace 또는 `monitoring=true` label이 있는 namespace의 `app.kubernetes.io/name=prometheus` Pod만 actuator 포트에 접근할 수 있습니다.
+현재 로컬 Docker Prometheus 방식은 `kubectl port-forward`를 사용하므로 NetworkPolicy 적용 대상이 아닙니다.
+
+### 6단계 — 파드 상태 확인
 
 ```bash
 # 전체 Running 확인 (약 2~3분 소요)
 kubectl get pods -n notification-hub
 ```
 
-### 6단계 — HPA 및 메트릭 서버 (선택)
+### 7단계 — HPA 및 메트릭 서버 (선택)
 
 ```bash
 # metrics-server 설치
@@ -808,6 +819,7 @@ notification-hub/
 │   └── grafana/             ← 대시보드 JSON + 데이터소스 설정
 ├── k8s/                     ← Kubernetes 매니페스트
 │   ├── namespace.yaml, configmap.yaml, secret.yaml
+│   ├── networkpolicy/       ← 내부 서비스 ingress 제한 정책
 │   └── {service}/deployment.yaml, service.yaml, [hpa.yaml, ingress.yaml]
 ├── terraform/
 │   ├── local/               ← Docker provider (로컬 인프라)

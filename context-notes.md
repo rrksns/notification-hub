@@ -238,6 +238,16 @@
 - Focused verification passed with `mvn test -pl user-service,notification-service,delivery-service,analytics-service -am -Dtest=SecurityConfigTest -Dsurefire.failIfNoSpecifiedTests=false`.
 - K8s NetworkPolicy remains the next defense-in-depth step for the internal service access control plan.
 
+## 2026-08-22
+
+- Task 4 adds Kubernetes NetworkPolicy as the network-level guard for internal services.
+- The policy selects `user-service`, `notification-service`, `delivery-service`, and `analytics-service` Pods by their existing `app` labels and applies ingress default deny.
+- Service API ingress is allowed only from Pods with `app=api-gateway` in the same `notification-hub` namespace.
+- Actuator ingress is allowed only from Prometheus Pods labeled `app.kubernetes.io/name=prometheus` in a namespace named `monitoring` or labeled `monitoring=true`.
+- The existing local Docker Prometheus workflow uses `kubectl port-forward`; that path is not represented as in-cluster Pod-to-Pod traffic and is documented separately from the NetworkPolicy allow list.
+- `kubectl apply --dry-run=client -f k8s/networkpolicy/` could not complete because the current `orbstack` Kubernetes API at `127.0.0.1:26443` refused connections.
+- Local structural validation passed with Ruby YAML parsing and NetworkPolicy field checks for all 9 documents.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.

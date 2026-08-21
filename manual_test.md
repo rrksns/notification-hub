@@ -814,6 +814,16 @@ docker compose up -d grafana prometheus
 
 **비고**: Prometheus가 `host.docker.internal:{port}` 방식으로 스크랩하므로 kubectl port-forward 필수. k8s 환경에서 영구 운영 시 Prometheus를 k8s 내부에 배포하는 것이 정석.
 
+### 내부 서비스 NetworkPolicy 검증 (2026-08-22)
+
+| 항목 | 결과 |
+|------|------|
+| kubectl dry-run | `orbstack` Kubernetes API가 `127.0.0.1:26443`에서 connection refused를 반환해 미실행 |
+| manifest 구조 검증 | Ruby YAML parser와 필수 NetworkPolicy 필드 검사로 9개 문서 통과 |
+| 적용 범위 | user, notification, delivery, analytics service Pod ingress |
+| 허용 소스 | api-gateway Pod, monitoring namespace의 Prometheus Pod |
+| 남은 확인 | 실제 운영 CNI에서 NetworkPolicy enforcement 확인 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

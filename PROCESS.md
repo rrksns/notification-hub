@@ -214,6 +214,7 @@ presentation/   → domain/port/in/ 호출
 - `namespace.yaml`, `configmap.yaml`, `secret.yaml`
 - 전 서비스 `Deployment` + `Service`
 - `api-gateway` Ingress (nginx, `notification-hub.local`)
+- NetworkPolicy: 내부 서비스 ingress 기본 차단, api-gateway와 승인된 Prometheus Pod만 허용
 - HPA: user/notification-service — CPU 70%, min 2, max 10
 - Liveness: `/actuator/health/liveness`, Readiness: `/actuator/health/readiness`
 - resources requests/limits 설정

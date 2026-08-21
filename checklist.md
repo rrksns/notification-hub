@@ -309,6 +309,15 @@
 - [x] Verify service module tests and diff check.
 - [x] Update security documentation and context notes.
 - [x] Commit service SecurityConfig change.
+- [x] Create isolated worktree for Task 4.
+- [x] Create K8s NetworkPolicy implementation plan.
+- [x] Add internal service default-deny ingress NetworkPolicy.
+- [x] Allow api-gateway Pod ingress to user, notification, delivery, and analytics service ports.
+- [x] Allow approved Prometheus Pod ingress to internal service actuator ports.
+- [x] Attempt NetworkPolicy kubectl dry-run and record local OrbStack API unavailable.
+- [x] Validate NetworkPolicy manifest structure with local YAML checker.
+- [x] Update security documentation and context notes for NetworkPolicy.
+- [x] Commit NetworkPolicy change.
 
 ## JPA Optimistic Locking
 
