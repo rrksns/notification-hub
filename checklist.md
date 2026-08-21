@@ -299,6 +299,16 @@
 - [x] Update common flow documentation and context notes.
 - [x] Verify common module tests and diff check.
 - [x] Commit common JWT header filter change.
+- [x] Create isolated worktree for Task 3.
+- [x] Verify service security config paths and test pattern.
+- [x] Write RED service SecurityConfig tests.
+- [x] Run focused service security tests and confirm expected failure.
+- [x] Register common JWT filter in user, notification, delivery, and analytics SecurityConfig.
+- [x] Configure public actuator health and user public endpoint exclusions.
+- [x] Verify focused service security tests.
+- [x] Verify service module tests and diff check.
+- [x] Update security documentation and context notes.
+- [x] Commit service SecurityConfig change.
 
 ## JPA Optimistic Locking
 

@@ -10,7 +10,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 ### 주요 설계 포인트
 
 - **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수(`${DB_PASSWORD}`, `${JWT_SECRET}`)로 분리. `.env` 파일로 관리하며 `.gitignore`에 포함
-- **테넌트 격리**: api-gateway에서 JWT 클레임 기반으로 `X-Tenant-Id` 헤더를 주입. 클라이언트가 보낸 헤더는 제거 후 재주입하여 위조 방지
+- **테넌트 격리**: api-gateway와 내부 서비스 Servlet JWT 필터가 JWT 클레임 기반으로 `X-Tenant-Id` 헤더를 재주입. 클라이언트가 보낸 헤더는 제거 또는 덮어써서 위조 방지
 - **Kafka 발행 신뢰성**: fire-and-forget 대신 동기 확인(`.get(5초)`) + 실패 시 예외 전파/로깅
 - **멱등성 보장**: notification-service(Redis 키)와 delivery-service(notificationId 중복 체크) 양쪽에서 중복 방지
 - **원자적 통계 집계**: MongoDB `$inc` + `upsert`로 DailyStats Race Condition 방지
@@ -690,10 +690,10 @@ kubectl delete namespace notification-hub
 |--------|-----------|-----------|
 | common | 4/4 | servlet JWT security filter |
 | api-gateway | 9/9 | route config + rate limit config + fallback presentation |
-| user-service | 28/28 | domain + application + presentation dto + persistence entity + architecture |
-| notification-service | 14/14 | domain + application + persistence entity + architecture |
-| delivery-service | 40/40 | domain + application + provider sender + persistence entity + architecture |
-| analytics-service | 20/20 | domain + application + infrastructure persistence + architecture |
+| user-service | 33/33 | security config + domain + application + presentation dto + persistence entity + architecture |
+| notification-service | 17/17 | security config + domain + application + persistence entity + architecture |
+| delivery-service | 43/43 | security config + domain + application + provider sender + persistence entity + architecture |
+| analytics-service | 23/23 | security config + domain + application + infrastructure persistence + architecture |
 
 ```bash
 # 전체 테스트 실행

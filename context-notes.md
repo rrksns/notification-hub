@@ -222,6 +222,21 @@
 - Valid requests are forwarded through a request wrapper that returns JWT-derived `X-Tenant-Id` and `X-User-Id`, so forged inbound headers are overwritten before controller code sees them.
 - The filter also populates `SecurityContext` with the JWT subject as principal, which prepares Task 3 service `SecurityConfig` changes to use `authenticated()`.
 - Task 3 still needs to register this filter in user, notification, delivery, and analytics service SecurityConfig classes.
+- Task 3 will register the common Servlet JWT filter in user, notification, delivery, and analytics services.
+- User-service public paths remain `/api/users/register`, `/api/auth/**`, and actuator health endpoints.
+- Notification, delivery, and analytics services expose only actuator health endpoints publicly; service API paths require JWT.
+- Security tests use each real service `SecurityConfig` with test-only probe controllers to verify direct protected calls return 401 and JWT calls receive trusted tenant headers.
+
+## 2026-08-21
+
+- Task 3 applies the common Servlet JWT filter to user, notification, delivery, and analytics service `SecurityConfig` classes.
+- RED service security tests failed as expected because protected probe APIs still returned 200 without a token and preserved forged `X-Tenant-Id` headers.
+- Each service now registers `JwtHeaderAuthenticationFilter` before `UsernamePasswordAuthenticationFilter`, disables session state, and requires authentication for service APIs.
+- User-service keeps `/api/users/register`, `/api/auth/**`, and actuator health endpoints public.
+- Notification, delivery, and analytics services keep only actuator health endpoints public.
+- Each service `application.yml` now sets `jwt.security.excluded-paths` so the filter and `SecurityFilterChain` public path policy stay aligned outside tests.
+- Focused verification passed with `mvn test -pl user-service,notification-service,delivery-service,analytics-service -am -Dtest=SecurityConfigTest -Dsurefire.failIfNoSpecifiedTests=false`.
+- K8s NetworkPolicy remains the next defense-in-depth step for the internal service access control plan.
 
 ## 2026-08-18
 

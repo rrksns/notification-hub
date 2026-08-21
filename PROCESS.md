@@ -72,6 +72,7 @@ presentation/   → domain/port/in/ 호출
 - `common` 모듈 — `ApiResponse<T>`, `PageResponse<T>`, `BusinessException`, `ErrorCode`, `GlobalExceptionHandler`, `NotificationEvent`, `DeliveryResultEvent`, `JwtProperties`, `JwtTokenProvider`, `JwtSecurityProperties`, `JwtHeaderAuthenticationFilter`
 - `discovery-service` — Eureka Server (`@EnableEurekaServer`)
 - `api-gateway` — Spring Cloud Gateway + JWT 필터 + Redis Rate Limiter + Resilience4j Circuit Breaker
+- 내부 서비스 — 공통 Servlet JWT 필터로 user 등록/인증과 actuator health 외 서비스 API 직접 호출 차단
 - `docker-compose.yml` — MySQL(3307), MongoDB, Redis, Kafka(KRaft), Prometheus, Grafana, Zipkin
 - 스켈레톤 모듈 — user/notification/delivery/analytics-service `pom.xml`
 
@@ -244,11 +245,11 @@ presentation/   → domain/port/in/ 호출
 |--------|-----------|-----------|
 | common | 4 | servlet JWT security filter |
 | api-gateway | 9 | route config + rate limit config + fallback presentation |
-| user-service | 28 | domain + application + presentation dto + persistence entity + architecture |
-| notification-service | 14 | domain + application + persistence entity + architecture |
-| delivery-service | 40 | domain(8) + application(4) + infrastructure sender(26) + persistence entity(1) + architecture(1) |
-| analytics-service | 20 | domain + application + infrastructure persistence + architecture |
-| **합계** | **115** | common security + gateway + domain + application + infrastructure + architecture |
+| user-service | 33 | security config + domain + application + presentation dto + persistence entity + architecture |
+| notification-service | 17 | security config + domain + application + persistence entity + architecture |
+| delivery-service | 43 | security config + domain(8) + application(4) + infrastructure sender(26) + persistence entity(1) + architecture(1) |
+| analytics-service | 23 | security config + domain + application + infrastructure persistence + architecture |
+| **합계** | **129** | internal service security + common security + gateway + domain + application + infrastructure + architecture |
 
 ---
 
