@@ -10,7 +10,7 @@
 | 순위 | 작업 | 이유 | 현재 근거 |
 |---|---|---|---|
 | 1 | 내부 서비스 직접 호출 차단 | api-gateway 우회 시 tenant header 위조와 무인증 직접 호출 가능성이 남는다 | user, notification, delivery, analytics `SecurityConfig`가 `permitAll()`이다 |
-| 2 | K8s Secret 평문 제거 | 운영 secret이 Git에 평문으로 남으면 배포 전제 자체가 깨진다 | `k8s/secret.yaml`에 DB 비밀번호와 JWT secret이 `stringData`로 있다 |
+| 2 | K8s Secret 평문 제거 | 운영 secret이 Git에 평문으로 남으면 배포 전제 자체가 깨진다 | `k8s/secret.yaml` 추적 제거와 배포 시 Secret 생성 절차 필요 |
 | 3 | DB 마이그레이션 체계 도입 | `DDL_AUTO=validate`만으로는 운영 스키마 변경, 롤백, 배포 순서를 관리할 수 없다 | Flyway/Liquibase migration 디렉터리가 없다 |
 | 4 | 핵심 E2E 통합 테스트 추가 | 단위 테스트만으로 Kafka, Redis, MySQL, Mongo 연동 장애를 잡기 어렵다 | Testcontainers 또는 Embedded Kafka 기반 테스트가 없다 |
 
@@ -34,5 +34,5 @@
 
 ## 다음 실행 항목
 
-1번 `내부 서비스 직접 호출 차단`부터 진행한다.
-상용화 기준으로는 K8s NetworkPolicy만으로는 로컬/비K8s 실행과 애플리케이션 단 우회 방어가 부족하므로, NetworkPolicy와 서비스 레벨 JWT 검증을 함께 계획한다.
+2번 `K8s Secret 평문 제거`를 진행했다.
+다음 P0 작업은 3번 `DB 마이그레이션 체계 도입`이다.

@@ -18,9 +18,15 @@ spec:
           image: mongo:7.0
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
-              value: "nhub"
+              valueFrom:
+                secretKeyRef:
+                  name: notification-hub-secret
+                  key: MONGODB_USERNAME
             - name: MONGO_INITDB_ROOT_PASSWORD
-              value: "nhub1234"
+              valueFrom:
+                secretKeyRef:
+                  name: notification-hub-secret
+                  key: MONGODB_PASSWORD
             - name: MONGO_INITDB_DATABASE
               value: "analytics"
           ports:

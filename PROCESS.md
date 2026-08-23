@@ -211,7 +211,8 @@ presentation/   → domain/port/in/ 호출
 - Kafka Consumer Lag (timeseries)
 
 **Task 6.3 — Kubernetes** (`k8s/`):
-- `namespace.yaml`, `configmap.yaml`, `secret.yaml`
+- `namespace.yaml`, `configmap.yaml`, `secret.example.yaml`
+- 실제 `notification-hub-secret`은 배포 시 `kubectl create secret generic`으로 생성하고 Git에 커밋하지 않음
 - 전 서비스 `Deployment` + `Service`
 - `api-gateway` Ingress (nginx, `notification-hub.local`)
 - NetworkPolicy: 내부 서비스 ingress 기본 차단, api-gateway와 승인된 Prometheus Pod만 허용

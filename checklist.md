@@ -330,3 +330,18 @@
 - [x] Update improvement todo and context notes.
 - [x] Verify target JPA module tests and diff check.
 - [x] Commit and push JPA optimistic locking change.
+
+## K8s Secret Hardening
+
+- [x] Create isolated worktree for K8s Secret hardening.
+- [x] Create K8s Secret hardening design.
+- [x] Create K8s Secret hardening implementation plan.
+- [x] Remove tracked `k8s/secret.yaml`.
+- [x] Add ignored local `k8s/secret.yaml` rule.
+- [x] Add tracked `k8s/secret.example.yaml` placeholder template.
+- [x] Move MySQL and MongoDB password env values to `secretKeyRef`.
+- [x] Update README deployment flow to create Secret with `kubectl create secret generic`.
+- [x] Verify active files no longer contain removed K8s secret values.
+- [x] Verify K8s YAML parsing and kubectl Secret generation.
+- [x] Update context notes and manual test record.
+- [x] Commit K8s Secret hardening change.

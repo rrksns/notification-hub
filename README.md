@@ -9,7 +9,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 
 ### 주요 설계 포인트
 
-- **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수(`${DB_PASSWORD}`, `${JWT_SECRET}`)로 분리. `.env` 파일로 관리하며 `.gitignore`에 포함
+- **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수와 Kubernetes Secret으로 분리. `.env`와 실제 `k8s/secret.yaml`은 `.gitignore`에 포함
 - **테넌트 격리**: api-gateway와 내부 서비스 Servlet JWT 필터가 JWT 클레임 기반으로 `X-Tenant-Id` 헤더를 재주입. 클라이언트가 보낸 헤더는 제거 또는 덮어써서 위조 방지
 - **Kafka 발행 신뢰성**: fire-and-forget 대신 동기 확인(`.get(5초)`) + 실패 시 예외 전파/로깅
 - **멱등성 보장**: notification-service(Redis 키)와 delivery-service(notificationId 중복 체크) 양쪽에서 중복 방지
@@ -593,7 +593,32 @@ for svc in discovery-service api-gateway user-service notification-service deliv
 done
 ```
 
-### 2단계 — 인프라 배포
+### 2단계 — Namespace, ConfigMap, Secret 준비
+
+```bash
+export MYSQL_ROOT_PASSWORD="<root-password>"
+export MYSQL_USERNAME="nhub"
+export MYSQL_PASSWORD="<mysql-password>"
+export MONGODB_USERNAME="nhub"
+export MONGODB_PASSWORD="<mongodb-password>"
+export JWT_SECRET="<base64-encoded-jwt-secret>"
+
+kubectl apply -f k8s/namespace.yaml -f k8s/configmap.yaml
+kubectl create secret generic notification-hub-secret \
+  -n notification-hub \
+  --from-literal=MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD}" \
+  --from-literal=MYSQL_USERNAME="${MYSQL_USERNAME}" \
+  --from-literal=MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
+  --from-literal=MONGODB_USERNAME="${MONGODB_USERNAME}" \
+  --from-literal=MONGODB_PASSWORD="${MONGODB_PASSWORD}" \
+  --from-literal=JWT_SECRET="${JWT_SECRET}" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+`k8s/secret.yaml`은 Git에 커밋하지 않습니다.
+키 이름만 확인할 때는 `k8s/secret.example.yaml`을 참고합니다.
+
+### 3단계 — 인프라 배포
 
 ```bash
 kubectl apply -f k8s/infra/
@@ -605,30 +630,29 @@ kubectl wait --for=condition=ready pod -l app=mongodb -n notification-hub --time
 kubectl wait --for=condition=ready pod -l app=kafka -n notification-hub --timeout=120s
 ```
 
-### 3단계 — DB 초기화
+### 4단계 — DB 초기화
 
 ```bash
-kubectl exec -n notification-hub deployment/mysql -- mysql -u root -proot1234 -e "
+kubectl exec -n notification-hub deployment/mysql -- mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "
   CREATE DATABASE IF NOT EXISTS notification_service;
   CREATE DATABASE IF NOT EXISTS user_service;
   CREATE DATABASE IF NOT EXISTS delivery_service;
-  GRANT ALL PRIVILEGES ON notification_service.* TO 'nhub'@'%';
-  GRANT ALL PRIVILEGES ON user_service.* TO 'nhub'@'%';
-  GRANT ALL PRIVILEGES ON delivery_service.* TO 'nhub'@'%';
+  GRANT ALL PRIVILEGES ON notification_service.* TO '${MYSQL_USERNAME}'@'%';
+  GRANT ALL PRIVILEGES ON user_service.* TO '${MYSQL_USERNAME}'@'%';
+  GRANT ALL PRIVILEGES ON delivery_service.* TO '${MYSQL_USERNAME}'@'%';
   FLUSH PRIVILEGES;
 "
 ```
 
-### 4단계 — 앱 서비스 배포
+### 5단계 — 앱 서비스 배포
 
 ```bash
-kubectl apply -f k8s/configmap.yaml -f k8s/secret.yaml
 kubectl apply -f k8s/discovery-service/ -f k8s/api-gateway/ \
   -f k8s/user-service/ -f k8s/notification-service/ \
   -f k8s/delivery-service/ -f k8s/analytics-service/
 ```
 
-### 5단계 — 내부 서비스 NetworkPolicy 적용
+### 6단계 — 내부 서비스 NetworkPolicy 적용
 
 ```bash
 kubectl apply -f k8s/networkpolicy/
@@ -639,14 +663,14 @@ kubectl apply -f k8s/networkpolicy/
 클러스터 내부 Prometheus를 사용할 경우 `monitoring` namespace 또는 `monitoring=true` label이 있는 namespace의 `app.kubernetes.io/name=prometheus` Pod만 actuator 포트에 접근할 수 있습니다.
 현재 로컬 Docker Prometheus 방식은 `kubectl port-forward`를 사용하므로 NetworkPolicy 적용 대상이 아닙니다.
 
-### 6단계 — 파드 상태 확인
+### 7단계 — 파드 상태 확인
 
 ```bash
 # 전체 Running 확인 (약 2~3분 소요)
 kubectl get pods -n notification-hub
 ```
 
-### 7단계 — HPA 및 메트릭 서버 (선택)
+### 8단계 — HPA 및 메트릭 서버 (선택)
 
 ```bash
 # metrics-server 설치
@@ -790,9 +814,9 @@ curl -s "http://localhost:8080/api/analytics/daily?date=$(date +%Y-%m-%d)" \
 docker exec notification-hub-redis redis-cli KEYS "realtime:*"
 
 # MongoDB 발송 이벤트
-docker exec notification-hub-mongodb mongosh \
-  -u nhub -p nhub1234 --authenticationDatabase admin \
-  --eval "db.getSiblingDB('analytics').delivery_events.find().sort({occurredAt:-1}).limit(5).pretty()"
+docker exec notification-hub-mongodb sh -c 'mongosh \
+  -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin \
+  --eval "db.getSiblingDB(\"analytics\").delivery_events.find().sort({occurredAt:-1}).limit(5).pretty()"'
 
 # Kafka 토픽 메시지 확인
 docker exec notification-hub-kafka /opt/kafka/bin/kafka-console-consumer.sh \
@@ -818,7 +842,7 @@ notification-hub/
 │   ├── prometheus/          ← prometheus.yml
 │   └── grafana/             ← 대시보드 JSON + 데이터소스 설정
 ├── k8s/                     ← Kubernetes 매니페스트
-│   ├── namespace.yaml, configmap.yaml, secret.yaml
+│   ├── namespace.yaml, configmap.yaml, secret.example.yaml
 │   ├── networkpolicy/       ← 내부 서비스 ingress 제한 정책
 │   └── {service}/deployment.yaml, service.yaml, [hpa.yaml, ingress.yaml]
 ├── terraform/

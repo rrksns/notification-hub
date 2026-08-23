@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-22 (내부 서비스 NetworkPolicy 추가)
+**최종 수정**: 2026-08-23 (K8s Secret 평문 제거)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -14,7 +14,7 @@
 
 | # | 서비스 | 이슈 | 수정 내용 | 상태 |
 |---|--------|------|----------|------|
-| 1 | 전체 | 시크릿 하드코딩 | 전 서비스 application.yml을 `${DB_PASSWORD:nhub1234}`, `${JWT_SECRET:...}` 환경변수 참조로 변경. `.env` 파일 생성 (`.gitignore` 포함 확인 완료) | ✅ |
+| 1 | 전체 | 시크릿 하드코딩 | 전 서비스 application.yml을 환경변수 참조로 변경. `.env`와 실제 `k8s/secret.yaml`은 `.gitignore`에 포함하고, K8s 배포는 `kubectl create secret generic`으로 Secret 생성 | ✅ |
 | 2 | 전체 | `X-Tenant-Id` 헤더 신뢰 | `JwtAuthenticationFilter`에서 클라이언트가 보낸 `X-Tenant-Id`, `X-User-Id` 헤더를 먼저 제거(`headers.remove()`) 후 JWT 클레임 기반으로 재주입 | ✅ |
 | 3 | delivery | CircuitBreaker fallback이 성공으로 처리됨 | `deliverFallback()`에서 `RuntimeException`을 던지도록 수정 → 발송 실패가 정상적으로 FAILED 처리됨 | ✅ |
 | 4 | delivery / analytics | Kafka `addTrustedPackages("*")` | 양쪽 `KafkaConsumerConfig`에서 `"com.notificationhub.common.event"` 로 제한 | ✅ |

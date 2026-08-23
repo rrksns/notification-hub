@@ -33,11 +33,20 @@ spec:
           image: mysql:8.0
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: "root1234"
+              valueFrom:
+                secretKeyRef:
+                  name: notification-hub-secret
+                  key: MYSQL_ROOT_PASSWORD
             - name: MYSQL_USER
-              value: "nhub"
+              valueFrom:
+                secretKeyRef:
+                  name: notification-hub-secret
+                  key: MYSQL_USERNAME
             - name: MYSQL_PASSWORD
-              value: "nhub1234"
+              valueFrom:
+                secretKeyRef:
+                  name: notification-hub-secret
+                  key: MYSQL_PASSWORD
             - name: MYSQL_DATABASE
               value: "notification_hub"
           ports:

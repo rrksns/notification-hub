@@ -248,6 +248,15 @@
 - `kubectl apply --dry-run=client -f k8s/networkpolicy/` could not complete because the current `orbstack` Kubernetes API at `127.0.0.1:26443` refused connections.
 - Local structural validation passed with Ruby YAML parsing and NetworkPolicy field checks for all 9 documents.
 
+## 2026-08-23
+
+- The next commercialization P0 item is K8s Secret plaintext removal.
+- `k8s/secret.yaml` contained tracked DB password and JWT secret values, so it is removed from Git and added to `.gitignore`.
+- `k8s/secret.example.yaml` now documents the required Secret keys with placeholder values only.
+- Runtime `notification-hub-secret` creation is moved to the deployment procedure using `kubectl create secret generic ... --dry-run=client -o yaml | kubectl apply -f -`.
+- MySQL and MongoDB infra deployments now read password values from `notification-hub-secret` instead of YAML literals.
+- README deployment order now creates namespace, ConfigMap, and Secret before deploying infra Pods, because MySQL and MongoDB depend on the Secret at startup.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.

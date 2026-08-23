@@ -581,9 +581,9 @@ Received delivery result: {deliveryLogId} status=SUCCESS
 
 **MongoDB 저장 확인**
 ```bash
-docker exec notification-hub-mongodb mongosh \
-  -u nhub -p nhub1234 --authenticationDatabase admin \
-  --eval "db.getSiblingDB('analytics').delivery_events.find().sort({occurredAt:-1}).limit(3).pretty()"
+docker exec notification-hub-mongodb sh -c 'mongosh \
+  -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin \
+  --eval "db.getSiblingDB(\"analytics\").delivery_events.find().sort({occurredAt:-1}).limit(3).pretty()"'
 ```
 
 **결과** ✅
@@ -823,6 +823,15 @@ docker compose up -d grafana prometheus
 | 적용 범위 | user, notification, delivery, analytics service Pod ingress |
 | 허용 소스 | api-gateway Pod, monitoring namespace의 Prometheus Pod |
 | 남은 확인 | 실제 운영 CNI에서 NetworkPolicy enforcement 확인 |
+
+### K8s Secret 평문 제거 검증 (2026-08-23)
+
+| 항목 | 결과 |
+|------|------|
+| Secret manifest | `k8s/secret.yaml` 추적 제거, `.gitignore` 등록 |
+| Secret template | `k8s/secret.example.yaml`에 placeholder 키만 유지 |
+| Secret 생성 | `kubectl create secret generic ... --dry-run=client -o yaml`로 로컬 YAML 생성 확인 |
+| 남은 확인 | 실제 클러스터에서 Secret 생성 후 infra와 app Pod 기동 확인 |
 
 ---
 
