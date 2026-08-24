@@ -345,3 +345,16 @@
 - [x] Verify K8s YAML parsing and kubectl Secret generation.
 - [x] Update context notes and manual test record.
 - [x] Commit K8s Secret hardening change.
+
+## DB Migration
+
+- [x] Create isolated worktree for DB migration work.
+- [x] Verify baseline full Maven tests.
+- [x] Create DB migration design.
+- [x] Create DB migration implementation plan.
+- [x] Add Flyway MySQL dependency to JPA services.
+- [x] Change JPA service default `DDL_AUTO` to `validate`.
+- [x] Add initial Flyway SQL migrations for user, notification, and delivery schemas.
+- [x] Update deployment and commercialization documentation.
+- [x] Verify Maven tests and migration checks.
+- [x] Commit DB migration change.

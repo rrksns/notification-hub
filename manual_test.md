@@ -833,6 +833,19 @@ docker compose up -d grafana prometheus
 | Secret 생성 | `kubectl create secret generic ... --dry-run=client -o yaml`로 로컬 YAML 생성 확인 |
 | 남은 확인 | 실제 클러스터에서 Secret 생성 후 infra와 app Pod 기동 확인 |
 
+### DB migration 체계 도입 검증 (2026-08-24)
+
+| 항목 | 결과 |
+|------|------|
+| Migration 위치 | user, notification, delivery 서비스별 `src/main/resources/db/migration` 추가 |
+| Hibernate 설정 | 세 JPA 서비스의 기본 `DDL_AUTO`를 `validate`로 변경 |
+| Flyway 설정 | `FLYWAY_ENABLED`, `FLYWAY_BASELINE_ON_MIGRATE` 환경변수로 제어 가능 |
+| 기본 검증 | `mvn test` 전체 reactor 성공 |
+| 실제 MySQL smoke | 임시 MySQL 8.0.44에서 세 서비스 V1 migration 적용 성공 |
+| Hibernate validate | user, notification, delivery 서비스가 Flyway 적용 schema에서 `ddl-auto=validate` 통과 |
+| 비고 | delivery-service는 DB 검증 후 Kafka broker 미기동으로 consumer 재시도 로그가 발생해 수동 중지 |
+| 남은 확인 | 기존 운영 DB baseline 전환 리허설 필요 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

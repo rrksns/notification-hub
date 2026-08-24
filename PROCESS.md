@@ -233,6 +233,11 @@ presentation/   → domain/port/in/ 호출
 - `Build Docker Images` job: 6개 서비스 matrix 병렬 Docker 빌드
 - 전 서비스 `Dockerfile` (eclipse-temurin:17-jre-alpine)
 
+**Task 6.7 — Flyway DB migration**:
+- user, notification, delivery 서비스에 Flyway MySQL migration 추가
+- `ddl-auto` 기본값을 `validate`로 변경해 Hibernate는 schema 검증만 수행
+- 기존 DB는 migration 도입 전 schema 점검과 baseline 전환 절차 필요
+
 **트러블슈팅**:
 - `Publish Test Results` 실패 → `permissions: checks: write` 추가로 해결
 - `common` 모듈 Dockerfile 없음 → Docker matrix에서 제거

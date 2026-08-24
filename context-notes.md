@@ -257,6 +257,16 @@
 - MySQL and MongoDB infra deployments now read password values from `notification-hub-secret` instead of YAML literals.
 - README deployment order now creates namespace, ConfigMap, and Secret before deploying infra Pods, because MySQL and MongoDB depend on the Secret at startup.
 
+## 2026-08-24
+
+- The next commercialization P0 item is DB migration system introduction.
+- Flyway is the smallest fit because Spring Boot auto-configures it from the classpath and each JPA service can own its `db/migration` scripts.
+- The scope is limited to MySQL-backed user, notification, and delivery services. Analytics remains MongoDB-based and is not changed here.
+- New empty DBs should be created at database and grant level by `docker/mysql/init.sql` or K8s MySQL init SQL, then service startup applies Flyway V1 and Hibernate validates the schema.
+- Existing DBs previously created by Hibernate `ddl-auto=update` must be inspected before rollout. A one-time `FLYWAY_BASELINE_ON_MIGRATE=true` baseline may be used only after confirming the schema matches the application.
+- MySQL smoke verification found Hibernate 6 expects native MySQL `ENUM` for fields annotated with `@Enumerated(EnumType.STRING)`, while plain `String` fields such as `UserEntity.role` must remain `VARCHAR(255)`.
+- After adjusting the V1 SQL, Flyway applied all three service migrations to a temporary MySQL 8.0.44 container and user, notification, and delivery services all reached Hibernate schema validation successfully.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.

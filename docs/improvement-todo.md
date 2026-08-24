@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-23 (K8s Secret 평문 제거)
+**최종 수정**: 2026-08-24 (DB migration 체계 도입)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -44,7 +44,7 @@
 | 7 | delivery | Consumer 멱등성 체크 없음 | `ProcessDeliveryService.process()`에서 `notificationId`로 기존 `DeliveryLog` 존재 여부 확인. 중복 시 기존 결과 반환하고 skip | ✅ |
 | 8 | notification | `@Transactional` 누락 | `CreateNotificationService.create()`에 `@Transactional` 적용 | ✅ |
 | 9 | user | 이메일 유니크 제약 범위 | `UserEntity`의 글로벌 유니크(`unique=true`) 제거 → `@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"tenantId", "email"}))` 복합 유니크로 변경 | ✅ |
-| 10 | user / notification / delivery | `ddl-auto: update` | `${DDL_AUTO:update}` 환경변수화. 로컬 기본값 `update`, 프로덕션 배포 시 `DDL_AUTO=validate` 설정 | ✅ |
+| 10 | user / notification / delivery | `ddl-auto: update` | Flyway MySQL migration 추가. `${DDL_AUTO:validate}` 기본값으로 전환해 Hibernate는 schema 검증만 수행 | ✅ |
 | 11 | delivery | DLQ 소비자 없음 | `DlqConsumer` 신규 생성. `notifications.dlq` 토픽 소비 → `log.error()`로 실패 알림 기록 (이후 알림 연동 확장 가능) | ✅ |
 | 12 | notification | GET API에서 도메인 모델 직접 반환 | `GetNotificationResponse` DTO(record) 생성. `NotificationController.getById()`에서 `Notification` → DTO 변환 후 반환 | ✅ |
 
@@ -91,7 +91,7 @@
 
 ```
 빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
-테스트: mvn test -pl user-service,notification-service,delivery-service,analytics-service -am → 120개 통과 (common 4 + user 33 + notification 17 + delivery 43 + analytics 23, 2026-08-21)
+테스트: mvn test → BUILD SUCCESS (8모듈, 2026-08-24)
 ```
 
 ---

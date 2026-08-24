@@ -10,6 +10,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 ### 주요 설계 포인트
 
 - **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수와 Kubernetes Secret으로 분리. `.env`와 실제 `k8s/secret.yaml`은 `.gitignore`에 포함
+- **DB 마이그레이션**: MySQL 스키마는 Flyway `db/migration` SQL로 관리하고, Hibernate는 기본 `DDL_AUTO=validate`로 스키마 일치 여부만 검증
 - **테넌트 격리**: api-gateway와 내부 서비스 Servlet JWT 필터가 JWT 클레임 기반으로 `X-Tenant-Id` 헤더를 재주입. 클라이언트가 보낸 헤더는 제거 또는 덮어써서 위조 방지
 - **Kafka 발행 신뢰성**: fire-and-forget 대신 동기 확인(`.get(5초)`) + 실패 시 예외 전파/로깅
 - **멱등성 보장**: notification-service(Redis 키)와 delivery-service(notificationId 중복 체크) 양쪽에서 중복 방지
@@ -630,7 +631,7 @@ kubectl wait --for=condition=ready pod -l app=mongodb -n notification-hub --time
 kubectl wait --for=condition=ready pod -l app=kafka -n notification-hub --timeout=120s
 ```
 
-### 4단계 — DB 초기화
+### 4단계 — DB와 권한 준비
 
 ```bash
 kubectl exec -n notification-hub deployment/mysql -- mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "
@@ -643,6 +644,9 @@ kubectl exec -n notification-hub deployment/mysql -- mysql -u root -p"${MYSQL_RO
   FLUSH PRIVILEGES;
 "
 ```
+
+테이블 생성과 인덱스 적용은 `user-service`, `notification-service`, `delivery-service` 시작 시 각 서비스의 Flyway migration이 수행합니다.
+기존에 Hibernate `ddl-auto=update`로 만든 DB를 그대로 전환하는 경우에는 schema를 먼저 점검하고, 최초 1회에 한해 `FLYWAY_BASELINE_ON_MIGRATE=true` 사용 여부를 결정합니다.
 
 ### 5단계 — 앱 서비스 배포
 
@@ -837,7 +841,9 @@ notification-hub/
 ├── delivery-service/        ← Kafka 소비 + 채널 발송 + 재시도/DLQ
 ├── analytics-service/       ← 통계 집계 (MongoDB + Redis)
 ├── docker-compose.yml       ← 인프라 컨테이너 (7개)
-├── docker/mysql/init.sql    ← MySQL 초기화 스크립트
+├── docker/mysql/init.sql    ← MySQL database와 권한 초기화 스크립트
+├── {user,notification,delivery}-service/src/main/resources/db/migration/
+│                           ← 서비스별 Flyway MySQL schema migration
 ├── monitoring/
 │   ├── prometheus/          ← prometheus.yml
 │   └── grafana/             ← 대시보드 JSON + 데이터소스 설정

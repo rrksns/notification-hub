@@ -48,6 +48,10 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.notificationhub</groupId>
             <artifactId>common</artifactId>
         </dependency>
