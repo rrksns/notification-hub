@@ -733,6 +733,7 @@ kubectl delete namespace notification-hub
 | notification-service | 17/17 | security config + domain + application + persistence entity + architecture |
 | delivery-service | 43/43 | security config + domain + application + provider sender + persistence entity + architecture |
 | analytics-service | 23/23 | security config + domain + application + infrastructure persistence + architecture |
+| e2e-tests | 2/2 | Testcontainers 기반 notification 접수와 delivery/analytics Kafka 파이프라인 |
 
 ```bash
 # 전체 테스트 실행
@@ -744,6 +745,14 @@ mvn test jacoco:report -pl user-service
 ```
 
 ### E2E 플로우 테스트
+
+자동화된 핵심 E2E 검증은 별도 `e2e-tests` Maven 모듈에서 실행합니다. Docker가 사용 가능하면 MySQL, Redis, Kafka, MongoDB Testcontainers를 띄워 실제 인프라 연동을 검증하고, Docker가 없으면 JUnit Testcontainers 설정에 따라 Docker 의존 테스트를 skip합니다.
+
+```bash
+mvn test -pl e2e-tests -am
+```
+
+로컬 Docker Engine 29 계열처럼 최소 Docker API가 높은 환경을 위해 `e2e-tests` Surefire 설정은 Testcontainers Docker client API version을 `1.44`로 고정합니다.
 
 **1. 테넌트 등록 → JWT 발급**
 

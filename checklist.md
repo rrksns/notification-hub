@@ -366,10 +366,10 @@
 - [x] Create E2E integration test design.
 - [x] Create E2E integration test implementation plan.
 - [x] Add dedicated `e2e-tests` Maven module.
-- [ ] Add notification-service Testcontainers acceptance test.
-- [ ] Verify notification-service E2E test.
-- [ ] Add delivery-service and analytics-service pipeline E2E test.
-- [ ] Verify delivery and analytics pipeline E2E test.
-- [ ] Update commercialization documentation and manual test record.
-- [ ] Verify full Maven tests and diff check.
-- [ ] Commit E2E integration test implementation.
+- [x] Add notification-service Testcontainers acceptance test.
+- [x] Verify notification-service E2E test.
+- [x] Add delivery-service and analytics-service pipeline E2E test.
+- [x] Verify delivery and analytics pipeline E2E test.
+- [x] Update commercialization documentation and manual test record.
+- [x] Verify full Maven tests and diff check.
+- [x] Commit E2E integration test implementation.

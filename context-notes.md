@@ -277,6 +277,14 @@
 - Spring Boot official docs support `@ServiceConnection` and `@DynamicPropertySource` for Testcontainers connection details. This project needs explicit dynamic properties because multiple service contexts share the same container set.
 - Testcontainers official docs support JUnit Jupiter integration and module dependencies for MySQL, Kafka, and MongoDB. Redis will use a `GenericContainer` with the core Testcontainers dependency.
 - Docker-dependent tests should use `@Testcontainers(disabledWithoutDocker = true)` so local or CI environments without Docker skip these tests instead of failing unrelated builds.
+- Added `NotificationAcceptanceIntegrationTest` to verify notification-service writes MySQL state, stores the Redis idempotency key, and publishes the `NotificationEvent` to Kafka with real containers.
+- Added `DeliveryAnalyticsPipelineIntegrationTest` to verify a Kafka `NotificationEvent` becomes a successful delivery log, a Mongo analytics delivery event, and a Redis realtime counter increment.
+- Local Docker Engine 29 through OrbStack requires Docker API 1.40 or newer, while the resolved Testcontainers client defaulted unknown Docker API versions to 1.32. The `e2e-tests` Surefire config now sets `api.version=1.44`.
+- E2E startup exposed Flyway V1 collisions because the dedicated test module depends on multiple service modules. E2E contexts now pin `spring.flyway.locations` to each service's migration directory.
+- E2E schema validation exposed lowercase MySQL ENUM definitions for Java `EnumType.STRING` fields. Notification and delivery V1 migrations now use the uppercase Java enum names.
+- Delivery pipeline E2E exposed a same-transaction JPA merge issue when a delivery log is saved as PENDING and then SUCCESS with the same ID. `DeliveryLogRepositoryAdapter.save()` now updates the managed entity when the log already exists.
+- Verification passed with `mvn test -pl e2e-tests -am`: E2E 2 tests, failures 0, errors 0, skipped 0.
+- Full reactor verification passed with `mvn test`: 9 Maven modules, including Docker-backed E2E tests.
 
 ## 2026-08-18
 

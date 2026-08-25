@@ -20,7 +20,12 @@ public class DeliveryLogRepositoryAdapter implements DeliveryLogRepository {
 
     @Override
     public DeliveryLog save(DeliveryLog deliveryLog) {
-        return jpaRepository.save(DeliveryLogEntity.from(deliveryLog)).toDomain();
+        return jpaRepository.findById(deliveryLog.getId())
+                .map(entity -> {
+                    entity.updateFrom(deliveryLog);
+                    return jpaRepository.save(entity).toDomain();
+                })
+                .orElseGet(() -> jpaRepository.save(DeliveryLogEntity.from(deliveryLog)).toDomain());
     }
 
     @Override

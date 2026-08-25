@@ -12,7 +12,7 @@
 | 1 | 내부 서비스 직접 호출 차단 | api-gateway 우회 시 tenant header 위조와 무인증 직접 호출 가능성이 남는다 | user, notification, delivery, analytics `SecurityConfig`가 `permitAll()`이다 |
 | 2 | K8s Secret 평문 제거 | 운영 secret이 Git에 평문으로 남으면 배포 전제 자체가 깨진다 | `k8s/secret.yaml` 추적 제거와 배포 시 Secret 생성 절차 필요 |
 | 3 | DB 마이그레이션 체계 도입 | `DDL_AUTO=validate`만으로는 운영 스키마 변경, 롤백, 배포 순서를 관리할 수 없다 | Flyway migration 추가와 기존 DB 전환 절차 필요 |
-| 4 | 핵심 E2E 통합 테스트 추가 | 단위 테스트만으로 Kafka, Redis, MySQL, Mongo 연동 장애를 잡기 어렵다 | Testcontainers 또는 Embedded Kafka 기반 테스트가 없다 |
+| 4 | 핵심 E2E 통합 테스트 추가 | 단위 테스트만으로 Kafka, Redis, MySQL, Mongo 연동 장애를 잡기 어렵다 | `e2e-tests` 모듈에서 Testcontainers 기반 접수와 파이프라인 검증을 수행한다 |
 
 ## P1. 운영 안정성 강화
 
@@ -34,5 +34,5 @@
 
 ## 다음 실행 항목
 
-3번 `DB 마이그레이션 체계 도입`을 진행했다.
-다음 P0 작업은 4번 `핵심 E2E 통합 테스트 추가`다.
+4번 `핵심 E2E 통합 테스트 추가`를 진행했다.
+다음 상용화 작업은 P1 5번 `DLQ 운영 도구 추가`다.

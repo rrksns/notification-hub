@@ -846,6 +846,18 @@ docker compose up -d grafana prometheus
 | 비고 | delivery-service는 DB 검증 후 Kafka broker 미기동으로 consumer 재시도 로그가 발생해 수동 중지 |
 | 남은 확인 | 기존 운영 DB baseline 전환 리허설 필요 |
 
+### 핵심 E2E 통합 테스트 검증 (2026-08-25)
+
+| 항목 | 결과 |
+|------|------|
+| 테스트 모듈 | `e2e-tests` Maven 모듈 추가 |
+| notification 접수 | MySQL, Redis, Kafka Testcontainers로 알림 저장, 멱등성 키, Kafka 이벤트 발행 검증 |
+| delivery/analytics 파이프라인 | Kafka, MySQL, MongoDB, Redis Testcontainers로 발송 성공 로그, analytics 이벤트 저장, realtime counter 증가 검증 |
+| Docker 동작 | `@Testcontainers(disabledWithoutDocker = true)`로 Docker 미사용 환경에서는 Docker 의존 테스트 skip |
+| 로컬 Docker API | Docker Engine 29 계열 호환을 위해 `e2e-tests` Surefire에서 `api.version=1.44` 설정 |
+| E2E 검증 | `mvn test -pl e2e-tests -am` 성공, E2E 2개 통과 |
+| 전체 검증 | `mvn test` 성공, 9개 Maven 모듈 통과 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항
