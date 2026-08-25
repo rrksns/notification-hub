@@ -267,6 +267,17 @@
 - MySQL smoke verification found Hibernate 6 expects native MySQL `ENUM` for fields annotated with `@Enumerated(EnumType.STRING)`, while plain `String` fields such as `UserEntity.role` must remain `VARCHAR(255)`.
 - After adjusting the V1 SQL, Flyway applied all three service migrations to a temporary MySQL 8.0.44 container and user, notification, and delivery services all reached Hibernate schema validation successfully.
 
+## 2026-08-25
+
+- The next commercialization P0 item is core E2E integration test coverage.
+- The approved scope is option 1: split the E2E surface into a notification acceptance test and a delivery plus analytics pipeline test.
+- A dedicated `e2e-tests` Maven module keeps Docker-backed integration tests visible and avoids coupling them to production service modules.
+- The notification acceptance test should use real MySQL, Redis, and Kafka containers and verify Flyway schema, notification persistence, Redis idempotency, and Kafka event publication.
+- The delivery plus analytics pipeline test should use real Kafka, MySQL, MongoDB, and Redis containers and verify a `NotificationEvent` becomes a successful delivery log, an analytics delivery event, and a Redis realtime counter increment.
+- Spring Boot official docs support `@ServiceConnection` and `@DynamicPropertySource` for Testcontainers connection details. This project needs explicit dynamic properties because multiple service contexts share the same container set.
+- Testcontainers official docs support JUnit Jupiter integration and module dependencies for MySQL, Kafka, and MongoDB. Redis will use a `GenericContainer` with the core Testcontainers dependency.
+- Docker-dependent tests should use `@Testcontainers(disabledWithoutDocker = true)` so local or CI environments without Docker skip these tests instead of failing unrelated builds.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.

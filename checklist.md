@@ -358,3 +358,18 @@
 - [x] Update deployment and commercialization documentation.
 - [x] Verify Maven tests and migration checks.
 - [x] Commit DB migration change.
+
+## Core E2E Integration Tests
+
+- [x] Create isolated worktree for E2E integration test work.
+- [x] Verify baseline full Maven tests.
+- [x] Create E2E integration test design.
+- [x] Create E2E integration test implementation plan.
+- [ ] Add dedicated `e2e-tests` Maven module.
+- [ ] Add notification-service Testcontainers acceptance test.
+- [ ] Verify notification-service E2E test.
+- [ ] Add delivery-service and analytics-service pipeline E2E test.
+- [ ] Verify delivery and analytics pipeline E2E test.
+- [ ] Update commercialization documentation and manual test record.
+- [ ] Verify full Maven tests and diff check.
+- [ ] Commit E2E integration test implementation.
