@@ -365,7 +365,7 @@
 - [x] Verify baseline full Maven tests.
 - [x] Create E2E integration test design.
 - [x] Create E2E integration test implementation plan.
-- [ ] Add dedicated `e2e-tests` Maven module.
+- [x] Add dedicated `e2e-tests` Maven module.
 - [ ] Add notification-service Testcontainers acceptance test.
 - [ ] Verify notification-service E2E test.
 - [ ] Add delivery-service and analytics-service pipeline E2E test.
