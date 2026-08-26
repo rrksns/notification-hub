@@ -297,3 +297,14 @@
 - Focused verification passed with `mvn test -pl user-service,notification-service,delivery-service -am -Dtest=JpaOptimisticLockingTest -Dsurefire.failIfNoSpecifiedTests=false`.
 - Target JPA module verification passed with `mvn test -pl user-service,notification-service,delivery-service -am`: user 28, notification 14, delivery 40.
 - Full multi-module `mvn test` passed with 107 tests: api-gateway 5, user 28, notification 14, delivery 40, analytics 20.
+
+## 2026-08-26
+
+- The next commercialization P1 item is DLQ operator tooling.
+- This branch is stacked on `origin/feat/e2e-integration-tests` because the E2E work is pushed but not merged into `main`.
+- Baseline verification passed in the stacked worktree with `mvn test`: 9 Maven modules, including Docker-backed E2E tests.
+- The selected approach is a dedicated `dlq-ops` Maven module instead of shell scripts or an API surface.
+- `dlq-ops` will reuse `common` `NotificationEvent` and Spring Kafka serializers so operator replay uses the same event contract as the services.
+- The CLI starts with `list`, `export`, and `replay`. Replay defaults to dry-run and requires `--execute` for actual Kafka publication.
+- DLQ reads should use `enable.auto.commit=false` and a generated group id by default, so inspecting DLQ messages does not advance an operator-managed offset.
+- Export format is JSON Lines containing Kafka metadata plus `NotificationEvent`, which makes replay auditable and reviewable before execution.

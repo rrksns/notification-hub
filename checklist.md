@@ -373,3 +373,21 @@
 - [x] Update commercialization documentation and manual test record.
 - [x] Verify full Maven tests and diff check.
 - [x] Commit E2E integration test implementation.
+
+## DLQ Ops Tool
+
+- [x] Create isolated worktree for DLQ ops tool work.
+- [x] Verify baseline full Maven tests.
+- [x] Create DLQ ops tool design.
+- [x] Create DLQ ops tool implementation plan.
+- [ ] Add dedicated `dlq-ops` Maven module.
+- [ ] Add minimal CLI skeleton and help surface.
+- [ ] Add CLI option parsing and event filters.
+- [ ] Add JSON Lines export/import codec.
+- [ ] Add DLQ list and export commands.
+- [ ] Add DLQ replay command with dry-run default.
+- [ ] Update operator documentation.
+- [ ] Verify focused `dlq-ops` tests.
+- [ ] Verify full Maven tests.
+- [ ] Manually exercise CLI help and invalid-command surfaces.
+- [ ] Commit DLQ ops tool implementation.
