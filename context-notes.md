@@ -320,3 +320,8 @@
 - Integrated parser validation into `DlqOpsApplication` so unknown options fail before command execution.
 - Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOptionsParserTest,DlqEventFilterTest,DlqOpsApplicationTest -Dsurefire.failIfNoSpecifiedTests=false`: 11 tests, failures 0, errors 0.
 - Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 11 tests.
+- Task 3 RED verification failed as expected because `DlqRecord` and `DlqRecordCodec` did not exist.
+- Added `DlqRecord` to preserve Kafka topic, partition, offset, timestamp, key, and `NotificationEvent` in export files.
+- Added `DlqRecordCodec` with Jackson Java Time support and JSON Lines file read/write methods.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqRecordCodecTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 14 tests.
