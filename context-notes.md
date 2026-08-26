@@ -345,3 +345,10 @@
 - Manual invalid-command verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar nope`, exit code 1.
 - Manual dry-run replay verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay --input /private/tmp/dlq-ops-smoke.jsonl`, exit code 0 and one replay candidate.
 - Final full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.
+
+## 2026-08-26 CI follow-up
+
+- PR #1 CI failed in `mvn clean verify` during E2E test compilation because the three service dependencies were declared with `test` scope and their classes were absent from the clean reactor test classpath.
+- The E2E module contains only integration tests, so notification, delivery, and analytics service dependencies use the default compile scope to make their application classes available when compiling those tests.
+- A clean `verify` still failed because Spring Boot repackage replaced each service's main artifact with a fat JAR whose classes are nested under `BOOT-INF/classes`. Service packaging now keeps the plain JAR as the main artifact and attaches the executable JAR with the `exec` classifier; Dockerfiles copy only the executable classifier.
+- Verification after the packaging change passed for `mvn clean package -DskipTests -pl notification-service,delivery-service,analytics-service -am`, including both plain and `-exec.jar` artifacts. E2E reports also passed with 2 tests, 0 failures, 0 errors, and 0 skipped after `mvn -pl e2e-tests -am test`.

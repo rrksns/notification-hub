@@ -391,3 +391,10 @@
 - [x] Verify full Maven tests.
 - [x] Manually exercise CLI help and invalid-command surfaces.
 - [x] Commit DLQ ops tool implementation.
+
+## CI Build Fix
+
+- [x] Reproduce the clean reactor CI failure in the E2E test module.
+- [x] Make service classes available to E2E test compilation.
+- [x] Verify clean Maven reactor build.
+- [x] Commit and push the CI build fix.
