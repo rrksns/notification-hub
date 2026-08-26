@@ -386,8 +386,8 @@
 - [x] Add JSON Lines export/import codec.
 - [x] Add DLQ list and export commands.
 - [x] Add DLQ replay command with dry-run default.
-- [ ] Update operator documentation.
+- [x] Update operator documentation.
 - [x] Verify focused `dlq-ops` tests.
 - [x] Verify full Maven tests.
 - [x] Manually exercise CLI help and invalid-command surfaces.
-- [ ] Commit DLQ ops tool implementation.
+- [x] Commit DLQ ops tool implementation.

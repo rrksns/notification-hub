@@ -274,7 +274,51 @@ Kafka: notifications 토픽 수신
 [@RetryableTopic — Kafka 토픽 기반 비차단 재시도]
   └─ 1회 실패 → notifications-retry-1000 토픽 (1초 후 재소비)
   └─ 2회 실패 → notifications-retry-2000 토픽 (2초 후 재소비)
-  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer가 로깅, 수동 확인 필요)
+  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer 로깅, dlq-ops 조회와 재처리)
+```
+
+**DLQ 운영 CLI**
+
+`dlq-ops` 모듈은 `notifications.dlq` 메시지를 조회, JSON Lines 파일로 export, 원본 `notifications` 토픽으로 replay한다. replay는 기본적으로 dry-run이며 실제 재발행은 `--execute`가 있을 때만 수행한다.
+
+빌드.
+
+```bash
+mvn -pl dlq-ops -am package
+```
+
+조회.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list \
+  --bootstrap-servers localhost:9092 \
+  --limit 20
+```
+
+테넌트 기준 export.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+```
+
+dry-run replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+```
+
+실제 replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
 ```
 
 **Circuit Breaker 상태 전이:**
@@ -435,7 +479,7 @@ Kafka: delivery-results 토픽 수신
 | `notifications` | 3 | notification-service | delivery-service | 알림 발송 요청 |
 | `notifications-retry-1000` | 자동 | delivery-service | delivery-service | 1차 재시도 (1초 지연) |
 | `notifications-retry-2000` | 자동 | delivery-service | delivery-service | 2차 재시도 (2초 지연) |
-| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer) | 최종 실패 메시지 로깅 |
+| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer), dlq-ops | 최종 실패 메시지 로깅, 조회, export, replay |
 | `delivery-results` | 3 | delivery-service | analytics-service | 발송 결과 집계 |
 
 ### Kubernetes

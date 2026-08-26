@@ -516,6 +516,42 @@ Received message in dlt listener: notifications.dlq-0@0
 
 **결과** ✅ 3회 재시도 후 notifications.dlq 이동, 터미널 A 수신 확인
 
+DLQ 운영 CLI 조회.
+
+```bash
+mvn -pl dlq-ops -am package
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list \
+  --bootstrap-servers localhost:9092 \
+  --limit 20
+```
+
+DLQ export.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+```
+
+DLQ replay dry-run.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+```
+
+DLQ replay 실제 실행.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
+```
+
 **테스트 후 임시 코드 원복 필요**
 
 ---

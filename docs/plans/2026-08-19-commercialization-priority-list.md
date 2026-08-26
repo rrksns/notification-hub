@@ -18,7 +18,7 @@
 
 | 순위 | 작업 | 이유 | 권장 방향 |
 |---|---|---|---|
-| 5 | DLQ 운영 도구 추가 | 최종 실패 메시지가 로그에만 남으면 운영자가 재처리하기 어렵다 | DLQ 조회, 검색, 재처리 API 또는 운영 CLI |
+| 5 | DLQ 운영 도구 추가 | 최종 실패 메시지가 로그에만 남으면 운영자가 재처리하기 어렵다 | `dlq-ops` CLI로 DLQ 조회, JSONL export, dry-run 기본 replay를 수행한다 |
 | 6 | 알림/경보 체계 추가 | Prometheus/Grafana는 있으나 장애를 사람에게 알리는 Alertmanager 규칙이 필요하다 | 5xx, Kafka lag, DLQ 증가, 외부 provider 실패율 알림 |
 | 7 | 이미지 배포 전략 정리 | CI는 이미지를 빌드만 하고 push/release promotion이 없다 | registry push, immutable tag, rollback 절차 |
 | 8 | 백업과 복구 리허설 | MySQL, MongoDB, Redis/Kafka 상태 복구 절차가 운영 문서로 필요하다 | RPO/RTO, 백업 주기, 복구 테스트 기록 |
@@ -35,4 +35,5 @@
 ## 다음 실행 항목
 
 4번 `핵심 E2E 통합 테스트 추가`를 진행했다.
-다음 상용화 작업은 P1 5번 `DLQ 운영 도구 추가`다.
+P1 5번 `DLQ 운영 도구 추가`를 진행했다.
+다음 상용화 작업은 P1 6번 `알림/경보 체계 추가`다.

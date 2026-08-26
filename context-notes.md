@@ -337,3 +337,11 @@
 - `KafkaDlqReplayClient` publishes all replay records through one producer instance and uses the original Kafka key when present, otherwise `event.notificationId()`.
 - Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsReplayTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
 - Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 20 tests.
+- The final operator surface is documented as an executable jar built by `mvn -pl dlq-ops -am package`.
+- README, `manual_test.md`, and `docs/kafka-redis.md` now show `list`, `export`, dry-run `replay`, and `replay --execute` examples.
+- The commercialization priority list now points to P1 6, alerting and alarm rules, as the next item.
+- Packaging verification passed with `mvn -pl dlq-ops -am package`; Spring Boot repackage produced `dlq-ops-1.0.0-SNAPSHOT.jar`.
+- Manual jar help verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar --help`, exit code 0.
+- Manual invalid-command verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar nope`, exit code 1.
+- Manual dry-run replay verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay --input /private/tmp/dlq-ops-smoke.jsonl`, exit code 0 and one replay candidate.
+- Final full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.
