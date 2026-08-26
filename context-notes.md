@@ -314,3 +314,9 @@
 - Manual CLI surface verification passed for `java -cp dlq-ops/target/classes com.notificationhub.dlqops.DlqOpsApplication --help` with exit code 0.
 - Manual invalid-command verification returned exit code 1 and printed `Unknown command 'nope'. Run with --help.`
 - Full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.
+- Task 2 RED verification failed as expected because `DlqOptions`, `DlqOptionsParser`, `DlqCommand`, and `DlqEventFilter` did not exist.
+- Added manual option parsing with defaults for local Kafka, DLQ source topic, replay target topic, generated group id, limit, timeout, filters, file paths, and `--execute`.
+- Added event filtering for tenant id, notification id, and channel.
+- Integrated parser validation into `DlqOpsApplication` so unknown options fail before command execution.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOptionsParserTest,DlqEventFilterTest,DlqOpsApplicationTest -Dsurefire.failIfNoSpecifiedTests=false`: 11 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 11 tests.

@@ -37,14 +37,14 @@ public class DlqOpsApplication {
             return 0;
         }
 
-        String command = args[0];
-        if (isKnownCommand(command)) {
-            err.printf("Command '%s' is not implemented yet.%n", command);
+        try {
+            DlqOptions options = DlqOptionsParser.parse(args);
+            err.printf("Command '%s' is not implemented yet.%n", options.command().name().toLowerCase());
             return 2;
+        } catch (IllegalArgumentException exception) {
+            err.println(exception.getMessage() + ". Run with --help.");
+            return 1;
         }
-
-        err.printf("Unknown command '%s'. Run with --help.%n", command);
-        return 1;
     }
 
     private static boolean hasHelp(String[] args) {
@@ -52,7 +52,4 @@ public class DlqOpsApplication {
                 .anyMatch(arg -> "--help".equals(arg) || "-h".equals(arg));
     }
 
-    private static boolean isKnownCommand(String command) {
-        return "list".equals(command) || "export".equals(command) || "replay".equals(command);
-    }
 }

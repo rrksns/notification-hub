@@ -382,7 +382,7 @@
 - [x] Create DLQ ops tool implementation plan.
 - [x] Add dedicated `dlq-ops` Maven module.
 - [x] Add minimal CLI skeleton and help surface.
-- [ ] Add CLI option parsing and event filters.
+- [x] Add CLI option parsing and event filters.
 - [ ] Add JSON Lines export/import codec.
 - [ ] Add DLQ list and export commands.
 - [ ] Add DLQ replay command with dry-run default.

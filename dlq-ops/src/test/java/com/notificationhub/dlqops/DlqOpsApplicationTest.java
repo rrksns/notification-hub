@@ -40,4 +40,19 @@ class DlqOpsApplicationTest {
         assertThat(exitCode).isEqualTo(1);
         assertThat(error.toString(StandardCharsets.UTF_8)).contains("Missing command");
     }
+
+    @Test
+    @DisplayName("지원하지 않는 옵션은 실패 종료한다")
+    void run_unknownOption_returnsFailure() {
+        ByteArrayOutputStream error = new ByteArrayOutputStream();
+
+        int exitCode = DlqOpsApplication.run(
+                new String[]{"list", "--unknown"},
+                System.out,
+                new PrintStream(error)
+        );
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(error.toString(StandardCharsets.UTF_8)).contains("Unknown option");
+    }
 }
