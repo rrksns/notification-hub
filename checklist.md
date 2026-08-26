@@ -380,14 +380,14 @@
 - [x] Verify baseline full Maven tests.
 - [x] Create DLQ ops tool design.
 - [x] Create DLQ ops tool implementation plan.
-- [ ] Add dedicated `dlq-ops` Maven module.
-- [ ] Add minimal CLI skeleton and help surface.
+- [x] Add dedicated `dlq-ops` Maven module.
+- [x] Add minimal CLI skeleton and help surface.
 - [ ] Add CLI option parsing and event filters.
 - [ ] Add JSON Lines export/import codec.
 - [ ] Add DLQ list and export commands.
 - [ ] Add DLQ replay command with dry-run default.
 - [ ] Update operator documentation.
-- [ ] Verify focused `dlq-ops` tests.
-- [ ] Verify full Maven tests.
-- [ ] Manually exercise CLI help and invalid-command surfaces.
+- [x] Verify focused `dlq-ops` tests.
+- [x] Verify full Maven tests.
+- [x] Manually exercise CLI help and invalid-command surfaces.
 - [ ] Commit DLQ ops tool implementation.

@@ -308,3 +308,9 @@
 - The CLI starts with `list`, `export`, and `replay`. Replay defaults to dry-run and requires `--execute` for actual Kafka publication.
 - DLQ reads should use `enable.auto.commit=false` and a generated group id by default, so inspecting DLQ messages does not advance an operator-managed offset.
 - Export format is JSON Lines containing Kafka metadata plus `NotificationEvent`, which makes replay auditable and reviewable before execution.
+- Task 1 RED verification failed as expected because Maven could not find `dlq-ops` in the reactor.
+- Added the `dlq-ops` Maven module with a minimal `DlqOpsApplication` that supports `--help`, missing command errors, and unknown command errors.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsApplicationTest -Dsurefire.failIfNoSpecifiedTests=false`: 2 tests, failures 0, errors 0.
+- Manual CLI surface verification passed for `java -cp dlq-ops/target/classes com.notificationhub.dlqops.DlqOpsApplication --help` with exit code 0.
+- Manual invalid-command verification returned exit code 1 and printed `Unknown command 'nope'. Run with --help.`
+- Full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.

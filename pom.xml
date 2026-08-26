@@ -18,6 +18,7 @@
         <module>notification-service</module>
         <module>delivery-service</module>
         <module>analytics-service</module>
+        <module>dlq-ops</module>
         <module>e2e-tests</module>
     </modules>
 
