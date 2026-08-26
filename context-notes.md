@@ -331,3 +331,9 @@
 - `DlqOpsApplication` now executes `list` and `export`, applies `DlqEventFilter`, respects `limit`, and requires `--output` for export.
 - Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsListExportTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
 - Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 17 tests.
+- Task 5 RED verification failed as expected because `DlqReplayClient` and the replay-aware `DlqOpsApplication.run(...)` overload did not exist.
+- Added `DlqReplayClient` as the replay publish boundary and `KafkaDlqReplayClient` as the Kafka producer implementation.
+- `replay` reads JSON Lines export files, applies the same filters and limit, defaults to dry-run, and only publishes when `--execute` is present.
+- `KafkaDlqReplayClient` publishes all replay records through one producer instance and uses the original Kafka key when present, otherwise `event.notificationId()`.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsReplayTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 20 tests.

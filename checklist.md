@@ -385,7 +385,7 @@
 - [x] Add CLI option parsing and event filters.
 - [x] Add JSON Lines export/import codec.
 - [x] Add DLQ list and export commands.
-- [ ] Add DLQ replay command with dry-run default.
+- [x] Add DLQ replay command with dry-run default.
 - [ ] Update operator documentation.
 - [x] Verify focused `dlq-ops` tests.
 - [x] Verify full Maven tests.

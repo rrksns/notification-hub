@@ -21,10 +21,12 @@ public class DlqOpsApplication {
             """;
 
     private final DlqConsumerClient consumerClient;
+    private final DlqReplayClient replayClient;
     private final DlqRecordCodec recordCodec;
 
-    DlqOpsApplication(DlqConsumerClient consumerClient, DlqRecordCodec recordCodec) {
+    DlqOpsApplication(DlqConsumerClient consumerClient, DlqReplayClient replayClient, DlqRecordCodec recordCodec) {
         this.consumerClient = consumerClient;
+        this.replayClient = replayClient;
         this.recordCodec = recordCodec;
     }
 
@@ -37,7 +39,7 @@ public class DlqOpsApplication {
     }
 
     static int run(String[] args, PrintStream out, PrintStream err) {
-        return run(args, out, err, new KafkaDlqConsumerClient(), new DlqRecordCodec());
+        return run(args, out, err, new KafkaDlqConsumerClient(), new DlqRecordCodec(), new KafkaDlqReplayClient());
     }
 
     static int run(
@@ -47,7 +49,18 @@ public class DlqOpsApplication {
             DlqConsumerClient consumerClient,
             DlqRecordCodec recordCodec
     ) {
-        return new DlqOpsApplication(consumerClient, recordCodec).execute(args, out, err);
+        return run(args, out, err, consumerClient, recordCodec, new KafkaDlqReplayClient());
+    }
+
+    static int run(
+            String[] args,
+            PrintStream out,
+            PrintStream err,
+            DlqConsumerClient consumerClient,
+            DlqRecordCodec recordCodec,
+            DlqReplayClient replayClient
+    ) {
+        return new DlqOpsApplication(consumerClient, replayClient, recordCodec).execute(args, out, err);
     }
 
     private int execute(String[] args, PrintStream out, PrintStream err) {
@@ -66,7 +79,7 @@ public class DlqOpsApplication {
             return switch (options.command()) {
                 case LIST -> list(options, out);
                 case EXPORT -> export(options, out, err);
-                case REPLAY -> replay(options, err);
+                case REPLAY -> replay(options, out, err);
             };
         } catch (IllegalArgumentException exception) {
             err.println(exception.getMessage() + ". Run with --help.");
@@ -103,14 +116,30 @@ public class DlqOpsApplication {
         return 0;
     }
 
-    private int replay(DlqOptions options, PrintStream err) {
-        err.printf("Command '%s' is not implemented yet.%n", options.command().name().toLowerCase());
-        return 2;
+    private int replay(DlqOptions options, PrintStream out, PrintStream err) {
+        if (options.input() == null) {
+            err.println("Missing --input for replay. Run with --help.");
+            return 1;
+        }
+
+        List<DlqRecord> records = filteredRecords(recordCodec.read(Path.of(options.input())), options);
+        if (!options.execute()) {
+            out.printf("Dry run: %d record(s) would be replayed to %s.%n", records.size(), options.targetTopic());
+            return 0;
+        }
+
+        replayClient.publish(options, records);
+        out.printf("Replayed %d record(s) to %s.%n", records.size(), options.targetTopic());
+        return 0;
     }
 
     private List<DlqRecord> filteredRecords(DlqOptions options) {
+        return filteredRecords(consumerClient.read(options), options);
+    }
+
+    private List<DlqRecord> filteredRecords(List<DlqRecord> records, DlqOptions options) {
         DlqEventFilter filter = DlqEventFilter.from(options);
-        return consumerClient.read(options).stream()
+        return records.stream()
                 .filter(record -> filter.matches(record.event()))
                 .limit(options.limit())
                 .toList();
