@@ -325,3 +325,9 @@
 - Added `DlqRecordCodec` with Jackson Java Time support and JSON Lines file read/write methods.
 - Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqRecordCodecTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
 - Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 14 tests.
+- Task 4 RED verification failed as expected because `DlqConsumerClient` did not exist.
+- Added `DlqConsumerClient` as the list/export read boundary and `KafkaDlqConsumerClient` as the Kafka implementation.
+- `KafkaDlqConsumerClient` uses `enable.auto.commit=false`, `auto.offset.reset=earliest`, String keys, and Spring Kafka JSON deserialization for `NotificationEvent`.
+- `DlqOpsApplication` now executes `list` and `export`, applies `DlqEventFilter`, respects `limit`, and requires `--output` for export.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsListExportTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 17 tests.

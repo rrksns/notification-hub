@@ -384,7 +384,7 @@
 - [x] Add minimal CLI skeleton and help surface.
 - [x] Add CLI option parsing and event filters.
 - [x] Add JSON Lines export/import codec.
-- [ ] Add DLQ list and export commands.
+- [x] Add DLQ list and export commands.
 - [ ] Add DLQ replay command with dry-run default.
 - [ ] Update operator documentation.
 - [x] Verify focused `dlq-ops` tests.
