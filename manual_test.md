@@ -516,6 +516,42 @@ Received message in dlt listener: notifications.dlq-0@0
 
 **결과** ✅ 3회 재시도 후 notifications.dlq 이동, 터미널 A 수신 확인
 
+DLQ 운영 CLI 조회.
+
+```bash
+mvn -pl dlq-ops -am package
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list \
+  --bootstrap-servers localhost:9092 \
+  --limit 20
+```
+
+DLQ export.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+```
+
+DLQ replay dry-run.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+```
+
+DLQ replay 실제 실행.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
+```
+
 **테스트 후 임시 코드 원복 필요**
 
 ---
@@ -845,6 +881,31 @@ docker compose up -d grafana prometheus
 | Hibernate validate | user, notification, delivery 서비스가 Flyway 적용 schema에서 `ddl-auto=validate` 통과 |
 | 비고 | delivery-service는 DB 검증 후 Kafka broker 미기동으로 consumer 재시도 로그가 발생해 수동 중지 |
 | 남은 확인 | 기존 운영 DB baseline 전환 리허설 필요 |
+
+### 핵심 E2E 통합 테스트 검증 (2026-08-25)
+
+| 항목 | 결과 |
+|------|------|
+| 테스트 모듈 | `e2e-tests` Maven 모듈 추가 |
+| notification 접수 | MySQL, Redis, Kafka Testcontainers로 알림 저장, 멱등성 키, Kafka 이벤트 발행 검증 |
+| delivery/analytics 파이프라인 | Kafka, MySQL, MongoDB, Redis Testcontainers로 발송 성공 로그, analytics 이벤트 저장, realtime counter 증가 검증 |
+| Docker 동작 | `@Testcontainers(disabledWithoutDocker = true)`로 Docker 미사용 환경에서는 Docker 의존 테스트 skip |
+| 로컬 Docker API | Docker Engine 29 계열 호환을 위해 `e2e-tests` Surefire에서 `api.version=1.44` 설정 |
+| E2E 검증 | `mvn test -pl e2e-tests -am` 성공, E2E 2개 통과 |
+| 전체 검증 | `mvn test` 성공, 9개 Maven 모듈 통과 |
+
+### Prometheus Alertmanager 알림 체계 검증 (2026-08-28)
+
+| 항목 | 결과 |
+|------|------|
+| Prometheus 규칙 | `ServiceDown` 2분 지속과 HTTP 5xx 비율 5% 초과 규칙 추가 |
+| discovery scrape | `/actuator/prometheus` 노출을 추가해 정상 discovery 서비스 오탐 방지 |
+| Alertmanager 라우팅 | Webhook과 SMTP 이메일 receiver로 독립 전달, `send_resolved` 활성화 |
+| SMTP Secret | `smtp_auth_password_file`과 호스트 Secret 파일 마운트 사용, 비밀번호 원문은 저장소에 미기록 |
+| Compose 검증 | placeholder 환경변수로 `docker compose config --quiet` 통과 |
+| YAML/스크립트 검증 | `sh -n monitoring/alertmanager/entrypoint.sh`, Prometheus rule/config 검증 통과 |
+| 컨테이너 readiness | Alertmanager 이미지 pull 타임아웃으로 미실행. 네트워크가 가능한 환경에서 `docker compose up -d prometheus alertmanager`와 양쪽 `/-/ready` 재확인 필요 |
+| 실제 전송 | 외부 Webhook 및 SMTP Secret이 없어 미실행 |
 
 ---
 

@@ -274,7 +274,51 @@ Kafka: notifications 토픽 수신
 [@RetryableTopic — Kafka 토픽 기반 비차단 재시도]
   └─ 1회 실패 → notifications-retry-1000 토픽 (1초 후 재소비)
   └─ 2회 실패 → notifications-retry-2000 토픽 (2초 후 재소비)
-  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer가 로깅, 수동 확인 필요)
+  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer 로깅, dlq-ops 조회와 재처리)
+```
+
+**DLQ 운영 CLI**
+
+`dlq-ops` 모듈은 `notifications.dlq` 메시지를 조회, JSON Lines 파일로 export, 원본 `notifications` 토픽으로 replay한다. replay는 기본적으로 dry-run이며 실제 재발행은 `--execute`가 있을 때만 수행한다.
+
+빌드.
+
+```bash
+mvn -pl dlq-ops -am package
+```
+
+조회.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list \
+  --bootstrap-servers localhost:9092 \
+  --limit 20
+```
+
+테넌트 기준 export.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+```
+
+dry-run replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+```
+
+실제 replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
 ```
 
 **Circuit Breaker 상태 전이:**
@@ -398,6 +442,21 @@ Kafka: delivery-results 토픽 수신
 
 **Grafana 대시보드:** `http://localhost:3000` (admin / admin1234)
 
+**Alertmanager 알림:**
+
+Alertmanager는 `ServiceDown`과 HTTP 5xx 경보를 Webhook과 SMTP 이메일로 동시에 전달합니다. 실행 전에 `.env.example`을 `.env`로 복사하고 Webhook, SMTP 값과 호스트 Secret 파일 경로를 설정합니다. SMTP 비밀번호는 `${SMTP_AUTH_PASSWORD_SOURCE}` 파일에 저장하고 저장소에 커밋하지 않습니다.
+
+```bash
+cp .env.example .env
+mkdir -p .secrets
+printf '%s' 'smtp-password' > .secrets/smtp-password
+docker compose up -d prometheus alertmanager
+curl -fsS http://localhost:9090/-/ready
+curl -fsS http://localhost:9093/-/ready
+```
+
+Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090/alerts`, `http://localhost:9090/rules`, `http://localhost:9093/#/alerts`에서 확인합니다. 외부 Webhook과 SMTP 전달은 실제 운영 Secret을 주입한 환경에서 별도로 확인합니다.
+
 | 패널 | 내용 |
 |------|------|
 | Notifications Sent | 발송 건수 추이 |
@@ -435,7 +494,7 @@ Kafka: delivery-results 토픽 수신
 | `notifications` | 3 | notification-service | delivery-service | 알림 발송 요청 |
 | `notifications-retry-1000` | 자동 | delivery-service | delivery-service | 1차 재시도 (1초 지연) |
 | `notifications-retry-2000` | 자동 | delivery-service | delivery-service | 2차 재시도 (2초 지연) |
-| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer) | 최종 실패 메시지 로깅 |
+| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer), dlq-ops | 최종 실패 메시지 로깅, 조회, export, replay |
 | `delivery-results` | 3 | delivery-service | analytics-service | 발송 결과 집계 |
 
 ### Kubernetes
@@ -733,6 +792,7 @@ kubectl delete namespace notification-hub
 | notification-service | 17/17 | security config + domain + application + persistence entity + architecture |
 | delivery-service | 43/43 | security config + domain + application + provider sender + persistence entity + architecture |
 | analytics-service | 23/23 | security config + domain + application + infrastructure persistence + architecture |
+| e2e-tests | 2/2 | Testcontainers 기반 notification 접수와 delivery/analytics Kafka 파이프라인 |
 
 ```bash
 # 전체 테스트 실행
@@ -744,6 +804,14 @@ mvn test jacoco:report -pl user-service
 ```
 
 ### E2E 플로우 테스트
+
+자동화된 핵심 E2E 검증은 별도 `e2e-tests` Maven 모듈에서 실행합니다. Docker가 사용 가능하면 MySQL, Redis, Kafka, MongoDB Testcontainers를 띄워 실제 인프라 연동을 검증하고, Docker가 없으면 JUnit Testcontainers 설정에 따라 Docker 의존 테스트를 skip합니다.
+
+```bash
+mvn test -pl e2e-tests -am
+```
+
+로컬 Docker Engine 29 계열처럼 최소 Docker API가 높은 환경을 위해 `e2e-tests` Surefire 설정은 Testcontainers Docker client API version을 `1.44`로 고정합니다.
 
 **1. 테넌트 등록 → JWT 발급**
 

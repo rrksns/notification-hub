@@ -358,3 +358,56 @@
 - [x] Update deployment and commercialization documentation.
 - [x] Verify Maven tests and migration checks.
 - [x] Commit DB migration change.
+
+## Core E2E Integration Tests
+
+- [x] Create isolated worktree for E2E integration test work.
+- [x] Verify baseline full Maven tests.
+- [x] Create E2E integration test design.
+- [x] Create E2E integration test implementation plan.
+- [x] Add dedicated `e2e-tests` Maven module.
+- [x] Add notification-service Testcontainers acceptance test.
+- [x] Verify notification-service E2E test.
+- [x] Add delivery-service and analytics-service pipeline E2E test.
+- [x] Verify delivery and analytics pipeline E2E test.
+- [x] Update commercialization documentation and manual test record.
+- [x] Verify full Maven tests and diff check.
+- [x] Commit E2E integration test implementation.
+
+## DLQ Ops Tool
+
+- [x] Create isolated worktree for DLQ ops tool work.
+- [x] Verify baseline full Maven tests.
+- [x] Create DLQ ops tool design.
+- [x] Create DLQ ops tool implementation plan.
+- [x] Add dedicated `dlq-ops` Maven module.
+- [x] Add minimal CLI skeleton and help surface.
+- [x] Add CLI option parsing and event filters.
+- [x] Add JSON Lines export/import codec.
+- [x] Add DLQ list and export commands.
+- [x] Add DLQ replay command with dry-run default.
+- [x] Update operator documentation.
+- [x] Verify focused `dlq-ops` tests.
+- [x] Verify full Maven tests.
+- [x] Manually exercise CLI help and invalid-command surfaces.
+- [x] Commit DLQ ops tool implementation.
+
+## CI Build Fix
+
+- [x] Reproduce the clean reactor CI failure in the E2E test module.
+- [x] Make service classes available to E2E test compilation.
+- [x] Verify clean Maven reactor build.
+- [x] Commit and push the CI build fix.
+
+## Alerting
+
+- [x] Explore existing Prometheus and application metrics.
+- [x] Approve Webhook and SMTP delivery design.
+- [x] Write alerting design document.
+- [x] Write alerting implementation plan.
+- [x] Add Prometheus alert rules.
+- [x] Add Alertmanager routing and receivers.
+- [x] Connect Alertmanager to Docker Compose.
+- [x] Document environment variables and operations.
+- [x] Verify monitoring configuration and container readiness.
+- [x] Commit and push alerting implementation.

@@ -69,6 +69,17 @@ public class DeliveryLogEntity {
         );
     }
 
+    public void updateFrom(DeliveryLog log) {
+        this.notificationId = log.getNotificationId();
+        this.tenantId = log.getTenantId();
+        this.channel = log.getChannel();
+        this.recipient = log.getRecipient();
+        this.status = log.getStatus();
+        this.failureReason = log.getFailureReason();
+        this.attemptCount = log.getAttemptCount();
+        this.createdAt = log.getCreatedAt();
+    }
+
     public String getId() { return id; }
     public String getNotificationId() { return notificationId; }
     public String getTenantId() { return tenantId; }

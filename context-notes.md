@@ -267,6 +267,25 @@
 - MySQL smoke verification found Hibernate 6 expects native MySQL `ENUM` for fields annotated with `@Enumerated(EnumType.STRING)`, while plain `String` fields such as `UserEntity.role` must remain `VARCHAR(255)`.
 - After adjusting the V1 SQL, Flyway applied all three service migrations to a temporary MySQL 8.0.44 container and user, notification, and delivery services all reached Hibernate schema validation successfully.
 
+## 2026-08-25
+
+- The next commercialization P0 item is core E2E integration test coverage.
+- The approved scope is option 1: split the E2E surface into a notification acceptance test and a delivery plus analytics pipeline test.
+- A dedicated `e2e-tests` Maven module keeps Docker-backed integration tests visible and avoids coupling them to production service modules.
+- The notification acceptance test should use real MySQL, Redis, and Kafka containers and verify Flyway schema, notification persistence, Redis idempotency, and Kafka event publication.
+- The delivery plus analytics pipeline test should use real Kafka, MySQL, MongoDB, and Redis containers and verify a `NotificationEvent` becomes a successful delivery log, an analytics delivery event, and a Redis realtime counter increment.
+- Spring Boot official docs support `@ServiceConnection` and `@DynamicPropertySource` for Testcontainers connection details. This project needs explicit dynamic properties because multiple service contexts share the same container set.
+- Testcontainers official docs support JUnit Jupiter integration and module dependencies for MySQL, Kafka, and MongoDB. Redis will use a `GenericContainer` with the core Testcontainers dependency.
+- Docker-dependent tests should use `@Testcontainers(disabledWithoutDocker = true)` so local or CI environments without Docker skip these tests instead of failing unrelated builds.
+- Added `NotificationAcceptanceIntegrationTest` to verify notification-service writes MySQL state, stores the Redis idempotency key, and publishes the `NotificationEvent` to Kafka with real containers.
+- Added `DeliveryAnalyticsPipelineIntegrationTest` to verify a Kafka `NotificationEvent` becomes a successful delivery log, a Mongo analytics delivery event, and a Redis realtime counter increment.
+- Local Docker Engine 29 through OrbStack requires Docker API 1.40 or newer, while the resolved Testcontainers client defaulted unknown Docker API versions to 1.32. The `e2e-tests` Surefire config now sets `api.version=1.44`.
+- E2E startup exposed Flyway V1 collisions because the dedicated test module depends on multiple service modules. E2E contexts now pin `spring.flyway.locations` to each service's migration directory.
+- E2E schema validation exposed lowercase MySQL ENUM definitions for Java `EnumType.STRING` fields. Notification and delivery V1 migrations now use the uppercase Java enum names.
+- Delivery pipeline E2E exposed a same-transaction JPA merge issue when a delivery log is saved as PENDING and then SUCCESS with the same ID. `DeliveryLogRepositoryAdapter.save()` now updates the managed entity when the log already exists.
+- Verification passed with `mvn test -pl e2e-tests -am`: E2E 2 tests, failures 0, errors 0, skipped 0.
+- Full reactor verification passed with `mvn test`: 9 Maven modules, including Docker-backed E2E tests.
+
 ## 2026-08-18
 
 - The next selected P2 item is #14, JPA `@Version` optimistic locking.
@@ -278,3 +297,72 @@
 - Focused verification passed with `mvn test -pl user-service,notification-service,delivery-service -am -Dtest=JpaOptimisticLockingTest -Dsurefire.failIfNoSpecifiedTests=false`.
 - Target JPA module verification passed with `mvn test -pl user-service,notification-service,delivery-service -am`: user 28, notification 14, delivery 40.
 - Full multi-module `mvn test` passed with 107 tests: api-gateway 5, user 28, notification 14, delivery 40, analytics 20.
+
+## 2026-08-26
+
+- The next commercialization P1 item is DLQ operator tooling.
+- This branch is stacked on `origin/feat/e2e-integration-tests` because the E2E work is pushed but not merged into `main`.
+- Baseline verification passed in the stacked worktree with `mvn test`: 9 Maven modules, including Docker-backed E2E tests.
+- The selected approach is a dedicated `dlq-ops` Maven module instead of shell scripts or an API surface.
+- `dlq-ops` will reuse `common` `NotificationEvent` and Spring Kafka serializers so operator replay uses the same event contract as the services.
+- The CLI starts with `list`, `export`, and `replay`. Replay defaults to dry-run and requires `--execute` for actual Kafka publication.
+- DLQ reads should use `enable.auto.commit=false` and a generated group id by default, so inspecting DLQ messages does not advance an operator-managed offset.
+- Export format is JSON Lines containing Kafka metadata plus `NotificationEvent`, which makes replay auditable and reviewable before execution.
+- Task 1 RED verification failed as expected because Maven could not find `dlq-ops` in the reactor.
+- Added the `dlq-ops` Maven module with a minimal `DlqOpsApplication` that supports `--help`, missing command errors, and unknown command errors.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsApplicationTest -Dsurefire.failIfNoSpecifiedTests=false`: 2 tests, failures 0, errors 0.
+- Manual CLI surface verification passed for `java -cp dlq-ops/target/classes com.notificationhub.dlqops.DlqOpsApplication --help` with exit code 0.
+- Manual invalid-command verification returned exit code 1 and printed `Unknown command 'nope'. Run with --help.`
+- Full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.
+- Task 2 RED verification failed as expected because `DlqOptions`, `DlqOptionsParser`, `DlqCommand`, and `DlqEventFilter` did not exist.
+- Added manual option parsing with defaults for local Kafka, DLQ source topic, replay target topic, generated group id, limit, timeout, filters, file paths, and `--execute`.
+- Added event filtering for tenant id, notification id, and channel.
+- Integrated parser validation into `DlqOpsApplication` so unknown options fail before command execution.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOptionsParserTest,DlqEventFilterTest,DlqOpsApplicationTest -Dsurefire.failIfNoSpecifiedTests=false`: 11 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 11 tests.
+- Task 3 RED verification failed as expected because `DlqRecord` and `DlqRecordCodec` did not exist.
+- Added `DlqRecord` to preserve Kafka topic, partition, offset, timestamp, key, and `NotificationEvent` in export files.
+- Added `DlqRecordCodec` with Jackson Java Time support and JSON Lines file read/write methods.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqRecordCodecTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 14 tests.
+- Task 4 RED verification failed as expected because `DlqConsumerClient` did not exist.
+- Added `DlqConsumerClient` as the list/export read boundary and `KafkaDlqConsumerClient` as the Kafka implementation.
+- `KafkaDlqConsumerClient` uses `enable.auto.commit=false`, `auto.offset.reset=earliest`, String keys, and Spring Kafka JSON deserialization for `NotificationEvent`.
+- `DlqOpsApplication` now executes `list` and `export`, applies `DlqEventFilter`, respects `limit`, and requires `--output` for export.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsListExportTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 17 tests.
+- Task 5 RED verification failed as expected because `DlqReplayClient` and the replay-aware `DlqOpsApplication.run(...)` overload did not exist.
+- Added `DlqReplayClient` as the replay publish boundary and `KafkaDlqReplayClient` as the Kafka producer implementation.
+- `replay` reads JSON Lines export files, applies the same filters and limit, defaults to dry-run, and only publishes when `--execute` is present.
+- `KafkaDlqReplayClient` publishes all replay records through one producer instance and uses the original Kafka key when present, otherwise `event.notificationId()`.
+- Focused verification passed with `mvn test -pl dlq-ops -am -Dtest=DlqOpsReplayTest -Dsurefire.failIfNoSpecifiedTests=false`: 3 tests, failures 0, errors 0.
+- Module verification passed with `mvn test -pl dlq-ops -am`: common 4 tests and dlq-ops 20 tests.
+- The final operator surface is documented as an executable jar built by `mvn -pl dlq-ops -am package`.
+- README, `manual_test.md`, and `docs/kafka-redis.md` now show `list`, `export`, dry-run `replay`, and `replay --execute` examples.
+- The commercialization priority list now points to P1 6, alerting and alarm rules, as the next item.
+- Packaging verification passed with `mvn -pl dlq-ops -am package`; Spring Boot repackage produced `dlq-ops-1.0.0-SNAPSHOT.jar`.
+- Manual jar help verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar --help`, exit code 0.
+- Manual invalid-command verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar nope`, exit code 1.
+- Manual dry-run replay verification passed with `java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay --input /private/tmp/dlq-ops-smoke.jsonl`, exit code 0 and one replay candidate.
+- Final full reactor verification passed with `mvn test`: 10 Maven modules, including `dlq-ops` and Docker-backed E2E tests.
+
+## 2026-08-26 CI follow-up
+
+- PR #1 CI failed in `mvn clean verify` during E2E test compilation because the three service dependencies were declared with `test` scope and their classes were absent from the clean reactor test classpath.
+- The E2E module contains only integration tests, so notification, delivery, and analytics service dependencies use the default compile scope to make their application classes available when compiling those tests.
+- A clean `verify` still failed because Spring Boot repackage replaced each service's main artifact with a fat JAR whose classes are nested under `BOOT-INF/classes`. Service packaging now keeps the plain JAR as the main artifact and attaches the executable JAR with the `exec` classifier; Dockerfiles copy only the executable classifier.
+- Verification after the packaging change passed for `mvn clean package -DskipTests -pl notification-service,delivery-service,analytics-service -am`, including both plain and `-exec.jar` artifacts. E2E reports also passed with 2 tests, 0 failures, 0 errors, and 0 skipped after `mvn -pl e2e-tests -am test`.
+
+## 2026-08-27 Alerting design
+
+- The next commercialization item is P1 6, alerting and alarm rules.
+- The approved delivery scope is Webhook and SMTP email at the same time.
+- Alertmanager will use independent Webhook and email receivers under one default route, with grouped alerts, repeat suppression, and resolved notifications.
+- Prometheus rules will cover service down and HTTP 5xx first. DLQ lag and Provider failure rules must use verified time series; missing application metrics will be split into a separate instrumentation task instead of being guessed.
+- Credentials and endpoint values are environment-variable inputs only. No SMTP password, Webhook URL, or recipient address will be committed.
+- The implementation plan is recorded in `docs/plans/2026-08-27-alerting.md`. It deliberately starts with ServiceDown and HTTP 5xx rules because those metrics are verified in the current codebase; DLQ lag and Provider failure rules require confirmed time series or a separate instrumentation change.
+- Task 1 review found that discovery-service was scraped but did not expose `/actuator/prometheus`; its actuator exposure now includes `prometheus` so `ServiceDown` does not create a false critical alert for a healthy discovery service.
+- Task 2 added Alertmanager Webhook and SMTP routing with grouped alerts, repeat suppression, and resolved notifications. SMTP passwords use `smtp_auth_password_file`; the entrypoint rejects YAML-breaking scalar values before starting Alertmanager.
+- Task 3 connected Prometheus to Alertmanager at `alertmanager:9093`, mounts the Prometheus rule file and Alertmanager entrypoint, and separates host password source path from the container password file path.
+- Alerting configuration verification passed with `docker compose config --quiet`, `sh -n monitoring/alertmanager/entrypoint.sh`, and containerized Prometheus rule/config checks. Alertmanager readiness and real Webhook/SMTP delivery remain environment-dependent because the image pull timed out and no external credentials are available.
+- Alertmanager image pull later succeeded. With a temporary SMTP password file, `docker compose up -d prometheus alertmanager` reached both readiness endpoints, and Prometheus API confirmed `ServiceDown` and `Http5xxRateHigh` were loaded. An invalid quoted `SMTP_FROM` was rejected before Alertmanager startup. Real external Webhook and SMTP delivery remains unverified because no external credentials are available.

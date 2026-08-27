@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-24 (DB migration 체계 도입)
+**최종 수정**: 2026-08-25 (핵심 E2E 통합 테스트 추가)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -91,7 +91,8 @@
 
 ```
 빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
-테스트: mvn test → BUILD SUCCESS (8모듈, 2026-08-24)
+테스트: mvn test → BUILD SUCCESS (9모듈, 2026-08-25)
+E2E:   mvn test -pl e2e-tests -am → BUILD SUCCESS, MySQL, Redis, Kafka, MongoDB Testcontainers 기반 핵심 플로우 검증
 ```
 
 ---

@@ -500,6 +500,32 @@ filters:
 | `notifications` | 3 | tenantId | notification-service | delivery-service | JSON |
 | `notifications-retry-1000` | 자동 | — | @RetryableTopic | delivery-service | JSON |
 | `notifications-retry-2000` | 자동 | — | @RetryableTopic | delivery-service | JSON |
-| `notifications.dlq` | 1 | — | @RetryableTopic | 수동 확인 | JSON |
+| `notifications.dlq` | 1 | — | @RetryableTopic | `DlqConsumer`, `dlq-ops` | JSON |
 | `delivery-results` | 3 | tenantId | delivery-service | analytics-service | JSON |
 | `delivery-results.dlq` | 1 | — | kafka-init 생성 | — | — |
+
+### DLQ 운영 CLI
+
+`dlq-ops`는 `notifications.dlq` 토픽의 운영 도구다. `list`는 메시지를 표 형태로 조회하고, `export`는 JSON Lines 파일로 저장하며, `replay`는 export 파일을 읽어 `notifications` 토픽으로 재발행한다.
+
+기본 replay는 dry-run이다. 실제 재발행은 `--execute`가 있을 때만 수행한다.
+
+```bash
+mvn -pl dlq-ops -am package
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list --bootstrap-servers localhost:9092
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
+```
