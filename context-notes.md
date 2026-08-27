@@ -361,3 +361,4 @@
 - Prometheus rules will cover service down and HTTP 5xx first. DLQ lag and Provider failure rules must use verified time series; missing application metrics will be split into a separate instrumentation task instead of being guessed.
 - Credentials and endpoint values are environment-variable inputs only. No SMTP password, Webhook URL, or recipient address will be committed.
 - The implementation plan is recorded in `docs/plans/2026-08-27-alerting.md`. It deliberately starts with ServiceDown and HTTP 5xx rules because those metrics are verified in the current codebase; DLQ lag and Provider failure rules require confirmed time series or a separate instrumentation change.
+- Task 1 review found that discovery-service was scraped but did not expose `/actuator/prometheus`; its actuator exposure now includes `prometheus` so `ServiceDown` does not create a false critical alert for a healthy discovery service.

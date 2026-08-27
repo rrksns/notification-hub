@@ -405,7 +405,7 @@
 - [x] Approve Webhook and SMTP delivery design.
 - [x] Write alerting design document.
 - [x] Write alerting implementation plan.
-- [ ] Add Prometheus alert rules.
+- [x] Add Prometheus alert rules.
 - [ ] Add Alertmanager routing and receivers.
 - [ ] Connect Alertmanager to Docker Compose.
 - [ ] Document environment variables and operations.
