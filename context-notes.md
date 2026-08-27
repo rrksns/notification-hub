@@ -360,3 +360,4 @@
 - Alertmanager will use independent Webhook and email receivers under one default route, with grouped alerts, repeat suppression, and resolved notifications.
 - Prometheus rules will cover service down and HTTP 5xx first. DLQ lag and Provider failure rules must use verified time series; missing application metrics will be split into a separate instrumentation task instead of being guessed.
 - Credentials and endpoint values are environment-variable inputs only. No SMTP password, Webhook URL, or recipient address will be committed.
+- The implementation plan is recorded in `docs/plans/2026-08-27-alerting.md`. It deliberately starts with ServiceDown and HTTP 5xx rules because those metrics are verified in the current codebase; DLQ lag and Provider failure rules require confirmed time series or a separate instrumentation change.
