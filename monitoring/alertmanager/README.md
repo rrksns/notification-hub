@@ -11,8 +11,8 @@
 | `ALERTMANAGER_WEBHOOK_URL` | 경보를 받을 Webhook endpoint |
 | `SMTP_SMARTHOST` | SMTP 서버와 포트, 예: `smtp.example.invalid:587` |
 | `SMTP_FROM` | SMTP 발신 주소 |
-| `SMTP_AUTH_USERNAME` | SMTP 인증 사용자 |
-| `SMTP_AUTH_PASSWORD` | SMTP 인증 비밀번호 |
+| `SMTP_AUTH_USERNAME` | SMTP 인증 사용자. 일반적으로 비밀이 아닌 관례적인 SMTP 값 |
+| `SMTP_AUTH_PASSWORD_FILE` | Alertmanager가 읽을 SMTP 인증 비밀번호 파일 경로 |
 | `ALERT_EMAIL_TO` | 경보 수신 주소 |
 
 실제 endpoint, 계정, 비밀번호, 수신 주소는 저장소에 커밋하지 않습니다. 로컬 Secret store 또는 배포 환경의 Secret에서 주입합니다.
@@ -33,11 +33,14 @@ docker run --rm \
   -e SMTP_SMARTHOST=smtp.example.invalid:587 \
   -e SMTP_FROM=alertmanager@example.invalid \
   -e SMTP_AUTH_USERNAME=placeholder \
-  -e SMTP_AUTH_PASSWORD="unsafe'password" \
+  -e SMTP_AUTH_PASSWORD_FILE=/run/secrets/smtp-password \
   -e ALERT_EMAIL_TO=alerts@example.invalid \
   -v "$PWD/monitoring/alertmanager:/etc/alertmanager:ro" \
+  -v "$PWD/.secrets/smtp-password:/run/secrets/smtp-password:ro" \
   prom/alertmanager:latest \
   amtool check-config --config.expand-env /etc/alertmanager/alertmanager.yml
 ```
+
+위 검증 전에 로컬 테스트 디렉터리를 만들고 따옴표가 포함된 테스트 비밀번호 파일을 기록합니다. 예를 들어 `mkdir -p .secrets && printf '%s' 'unsafe'"'"'password" > .secrets/smtp-password`를 사용할 수 있습니다. 실제 비밀번호는 로컬 Secret store 또는 배포 환경의 Secret에서 주입하고 저장소에 기록하지 않습니다.
 
 실제 전송을 확인하려면 유효한 Webhook endpoint와 SMTP Secret을 주입한 뒤 Alertmanager API 또는 Prometheus 경보를 사용합니다. 이 저장소의 Task 3에서 Docker Compose 서비스 연결을 별도로 추가합니다.
