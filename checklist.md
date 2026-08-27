@@ -407,7 +407,7 @@
 - [x] Write alerting implementation plan.
 - [x] Add Prometheus alert rules.
 - [ ] Add Alertmanager routing and receivers.
-- [ ] Connect Alertmanager to Docker Compose.
+- [x] Connect Alertmanager to Docker Compose.
 - [ ] Document environment variables and operations.
 - [ ] Verify monitoring configuration and container readiness.
 - [ ] Commit and push alerting implementation.

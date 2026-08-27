@@ -37,7 +37,7 @@ Prometheus는 15초 주기로 각 서비스의 `/actuator/prometheus`를 수집�
 ## 설정과 보안
 
 - `monitoring/alertmanager/alertmanager.yml`은 receiver 구조와 라우팅만 추적한다.
-- 실제 SMTP 비밀번호는 파일 기반 Secret으로 주입하고, Webhook URL과 수신 이메일 등 설정값은 `${...}` 환경변수로 주입한다.
+- 실제 SMTP 비밀번호는 호스트 Secret 파일을 컨테이너 내부 `/run/secrets/smtp-password`에 마운트하고, Webhook URL과 수신 이메일 등 설정값은 `${...}` 환경변수로 주입한다.
 - `smtp_auth_password_file`을 사용해 비밀번호가 YAML 문법에 삽입되지 않도록 한다.
 - Docker Compose는 Alertmanager를 `9093` 포트로 노출하고 Prometheus의 `alerting` 및 `rule_files` 설정을 사용한다.
 - 예시 환경변수는 `.env.example` 또는 README에 문서화하며 실제 Secret은 커밋하지 않는다.
