@@ -894,6 +894,19 @@ docker compose up -d grafana prometheus
 | E2E 검증 | `mvn test -pl e2e-tests -am` 성공, E2E 2개 통과 |
 | 전체 검증 | `mvn test` 성공, 9개 Maven 모듈 통과 |
 
+### Prometheus Alertmanager 알림 체계 검증 (2026-08-28)
+
+| 항목 | 결과 |
+|------|------|
+| Prometheus 규칙 | `ServiceDown` 2분 지속과 HTTP 5xx 비율 5% 초과 규칙 추가 |
+| discovery scrape | `/actuator/prometheus` 노출을 추가해 정상 discovery 서비스 오탐 방지 |
+| Alertmanager 라우팅 | Webhook과 SMTP 이메일 receiver로 독립 전달, `send_resolved` 활성화 |
+| SMTP Secret | `smtp_auth_password_file`과 호스트 Secret 파일 마운트 사용, 비밀번호 원문은 저장소에 미기록 |
+| Compose 검증 | placeholder 환경변수로 `docker compose config --quiet` 통과 |
+| YAML/스크립트 검증 | `sh -n monitoring/alertmanager/entrypoint.sh`, Prometheus rule/config 검증 통과 |
+| 컨테이너 readiness | Alertmanager 이미지 pull 타임아웃으로 미실행. 네트워크가 가능한 환경에서 `docker compose up -d prometheus alertmanager`와 양쪽 `/-/ready` 재확인 필요 |
+| 실제 전송 | 외부 Webhook 및 SMTP Secret이 없어 미실행 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

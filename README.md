@@ -442,6 +442,21 @@ Kafka: delivery-results 토픽 수신
 
 **Grafana 대시보드:** `http://localhost:3000` (admin / admin1234)
 
+**Alertmanager 알림:**
+
+Alertmanager는 `ServiceDown`과 HTTP 5xx 경보를 Webhook과 SMTP 이메일로 동시에 전달합니다. 실행 전에 `.env.example`을 `.env`로 복사하고 Webhook, SMTP 값과 호스트 Secret 파일 경로를 설정합니다. SMTP 비밀번호는 `${SMTP_AUTH_PASSWORD_SOURCE}` 파일에 저장하고 저장소에 커밋하지 않습니다.
+
+```bash
+cp .env.example .env
+mkdir -p .secrets
+printf '%s' 'smtp-password' > .secrets/smtp-password
+docker compose up -d prometheus alertmanager
+curl -fsS http://localhost:9090/-/ready
+curl -fsS http://localhost:9093/-/ready
+```
+
+Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090/alerts`, `http://localhost:9090/rules`, `http://localhost:9093/#/alerts`에서 확인합니다. 외부 Webhook과 SMTP 전달은 실제 운영 Secret을 주입한 환경에서 별도로 확인합니다.
+
 | 패널 | 내용 |
 |------|------|
 | Notifications Sent | 발송 건수 추이 |
