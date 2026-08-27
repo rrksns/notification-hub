@@ -33,7 +33,7 @@ docker run --rm \
   -e SMTP_SMARTHOST=smtp.example.invalid:587 \
   -e SMTP_FROM=alertmanager@example.invalid \
   -e SMTP_AUTH_USERNAME=placeholder \
-  -e SMTP_AUTH_PASSWORD=placeholder \
+  -e SMTP_AUTH_PASSWORD="unsafe'password" \
   -e ALERT_EMAIL_TO=alerts@example.invalid \
   -v "$PWD/monitoring/alertmanager:/etc/alertmanager:ro" \
   prom/alertmanager:latest \
