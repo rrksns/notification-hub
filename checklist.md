@@ -398,3 +398,16 @@
 - [x] Make service classes available to E2E test compilation.
 - [x] Verify clean Maven reactor build.
 - [x] Commit and push the CI build fix.
+
+## Alerting
+
+- [x] Explore existing Prometheus and application metrics.
+- [x] Approve Webhook and SMTP delivery design.
+- [x] Write alerting design document.
+- [ ] Write alerting implementation plan.
+- [ ] Add Prometheus alert rules.
+- [ ] Add Alertmanager routing and receivers.
+- [ ] Connect Alertmanager to Docker Compose.
+- [ ] Document environment variables and operations.
+- [ ] Verify monitoring configuration and container readiness.
+- [ ] Commit and push alerting implementation.
