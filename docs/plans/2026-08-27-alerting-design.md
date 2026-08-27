@@ -10,7 +10,7 @@ Prometheus가 수집한 장애 신호를 Alertmanager를 통해 범용 Webhook�
 - Alertmanager 설정 파일 추가.
 - Docker Compose에 Alertmanager 서비스와 Prometheus rule 연결 추가.
 - Webhook과 이메일 receiver 동시 라우팅.
-- SMTP 계정과 Webhook URL의 환경변수 주입.
+- SMTP 접속 정보와 Webhook URL의 환경변수 주입.
 - 알림 발생, 반복 억제, 복구 알림에 대한 운영 문서와 설정 예시 추가.
 
 Kubernetes용 Alertmanager 배포 리소스와 실제 Webhook 서버 구현은 이번 범위에 포함하지 않는다. Kubernetes 환경에서는 동일한 규칙과 Alertmanager 설정을 ConfigMap 또는 Secret으로 주입할 수 있도록 파일 구조만 재사용 가능하게 유지한다.
@@ -37,7 +37,8 @@ Prometheus는 15초 주기로 각 서비스의 `/actuator/prometheus`를 수집�
 ## 설정과 보안
 
 - `monitoring/alertmanager/alertmanager.yml`은 receiver 구조와 라우팅만 추적한다.
-- 실제 SMTP 비밀번호, Webhook URL, 수신 이메일은 `${...}` 환경변수로 주입한다.
+- 실제 SMTP 비밀번호는 파일 기반 Secret으로 주입하고, Webhook URL과 수신 이메일 등 설정값은 `${...}` 환경변수로 주입한다.
+- `smtp_auth_password_file`을 사용해 비밀번호가 YAML 문법에 삽입되지 않도록 한다.
 - Docker Compose는 Alertmanager를 `9093` 포트로 노출하고 Prometheus의 `alerting` 및 `rule_files` 설정을 사용한다.
 - 예시 환경변수는 `.env.example` 또는 README에 문서화하며 실제 Secret은 커밋하지 않는다.
 
