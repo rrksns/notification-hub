@@ -19,7 +19,7 @@
 
 ## 지원하는 값 형식
 
-`entrypoint.sh`는 Alertmanager가 환경변수를 YAML에 확장하기 전에 필수 비밀번호 파일 경로와 일반 scalar 값을 검사합니다. `SMTP_AUTH_USERNAME`은 일반적으로 비밀이 아닌 관례적인 SMTP 값이므로 별도 파일이 필요하지 않습니다.
+`entrypoint.sh`는 Alertmanager를 시작하기 전에 필수 일반 scalar 값과 비밀번호 파일을 검사하고, 검증된 값으로 임시 설정 파일을 렌더링합니다. `SMTP_AUTH_USERNAME`은 일반적으로 비밀이 아닌 관례적인 SMTP 값이므로 별도 파일이 필요하지 않습니다.
 
 Webhook URL, SMTP smarthost, 발신 주소, SMTP 사용자, 수신 주소와 비밀번호 파일 경로는 공백 없이 작성하는 일반적인 YAML plain scalar 형식을 사용합니다. 작은따옴표, 큰따옴표, `#`, `$`, 공백과 줄바꿈은 허용하지 않으며, YAML 문법을 깨는 콜론 형식도 거부합니다. 따라서 `smtp.example.invalid:587`, `https://webhook.example.invalid/alerts`, `alertmanager@example.invalid` 같은 값은 지원하지만 표시 이름이 포함된 주소는 지원하지 않습니다.
 
@@ -27,7 +27,7 @@ Webhook URL, SMTP smarthost, 발신 주소, SMTP 사용자, 수신 주소와 비
 
 ## 시작 전 검증
 
-컨테이너의 entrypoint로 `entrypoint.sh`를 지정하면 Alertmanager 실행 전에 필수 일반 scalar 값과 비밀번호 파일의 읽기 권한을 검사합니다. 검사를 통과한 경우에만 `/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --config.expand-env`를 실행합니다.
+컨테이너의 entrypoint로 `entrypoint.sh`를 지정하면 Alertmanager 실행 전에 필수 일반 scalar 값과 비밀번호 파일의 읽기 권한을 검사합니다. 검사를 통과한 경우에만 임시 설정 파일을 사용해 `/bin/alertmanager --config.file=<rendered-file>`를 실행합니다.
 
 ```sh
 docker run --rm \
@@ -52,7 +52,7 @@ docker run --rm \
 
 ## 설정 검증
 
-Alertmanager 이미지에 포함된 도구를 사용해 환경변수를 주입한 상태로 검증합니다.
+Alertmanager entrypoint가 환경변수를 검증하고 임시 설정을 렌더링한 뒤 Alertmanager를 실행합니다. Compose에서는 `docker compose config --quiet`로 경로를 먼저 확인하고, 기동 후 `/-/ready` 응답을 확인합니다.
 
 ```sh
 docker run --rm \
@@ -63,11 +63,12 @@ docker run --rm \
   -e SMTP_AUTH_PASSWORD_FILE=/run/secrets/smtp-password \
   -e ALERT_EMAIL_TO=alerts@example.invalid \
   -v "$PWD/monitoring/alertmanager:/etc/alertmanager:ro" \
+  -v "$PWD/monitoring/alertmanager/entrypoint.sh:/entrypoint.sh:ro" \
   -v "$PWD/.secrets/smtp-password:/run/secrets/smtp-password:ro" \
-  prom/alertmanager:latest \
-  amtool check-config --config.expand-env /etc/alertmanager/alertmanager.yml
+  --entrypoint /entrypoint.sh \
+  prom/alertmanager:latest
 ```
 
 위 검증 전에 로컬 테스트 디렉터리를 만들고 따옴표가 포함된 테스트 비밀번호 파일을 기록합니다. 예를 들어 `mkdir -p .secrets && printf '%s' 'unsafe'"'"'password" > .secrets/smtp-password`를 사용할 수 있습니다. 실제 비밀번호는 로컬 Secret store 또는 배포 환경의 Secret에서 주입하고 저장소에 기록하지 않습니다.
 
-실제 전송을 확인하려면 유효한 Webhook endpoint와 SMTP Secret을 주입한 뒤 Alertmanager API 또는 Prometheus 경보를 사용합니다. 이 저장소의 Task 3에서 Docker Compose 서비스 연결을 별도로 추가합니다.
+실제 전송을 확인하려면 유효한 Webhook endpoint와 SMTP Secret을 주입한 뒤 Alertmanager API 또는 Prometheus 경보를 사용합니다. 외부 endpoint와 자격 증명이 없는 개발 환경에서는 readiness와 설정 로드까지만 확인합니다.
