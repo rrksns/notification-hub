@@ -411,3 +411,12 @@
 - [x] Document environment variables and operations.
 - [x] Verify monitoring configuration and container readiness.
 - [x] Commit and push alerting implementation.
+
+## Image Deployment Strategy
+
+- [x] Create image deployment strategy plan.
+- [x] Add GHCR login and immutable SHA image publishing to CI.
+- [x] Document GHCR pull Secret and SHA-based Kubernetes deployment.
+- [x] Document rollout verification and rollback procedure.
+- [ ] Verify the workflow on the next `main` push.
+- [ ] Commit and push image deployment strategy change.

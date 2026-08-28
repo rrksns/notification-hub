@@ -366,3 +366,13 @@
 - Task 3 connected Prometheus to Alertmanager at `alertmanager:9093`, mounts the Prometheus rule file and Alertmanager entrypoint, and separates host password source path from the container password file path.
 - Alerting configuration verification passed with `docker compose config --quiet`, `sh -n monitoring/alertmanager/entrypoint.sh`, and containerized Prometheus rule/config checks. Alertmanager readiness and real Webhook/SMTP delivery remain environment-dependent because the image pull timed out and no external credentials are available.
 - Alertmanager image pull later succeeded. With a temporary SMTP password file, `docker compose up -d prometheus alertmanager` reached both readiness endpoints, and Prometheus API confirmed `ServiceDown` and `Http5xxRateHigh` were loaded. An invalid quoted `SMTP_FROM` was rejected before Alertmanager startup. Real external Webhook and SMTP delivery remains unverified because no external credentials are available.
+
+## 2026-08-28 Image deployment strategy
+
+- The next commercialization item is P1 7, image deployment strategy.
+- The current CI matrix built six application images with `push: false`, while Kubernetes manifests used local `notification-hub/*:latest` images with `imagePullPolicy: Never`.
+- Selected GHCR because the repository already runs on GitHub Actions and `GITHUB_TOKEN` can publish packages with job-scoped `packages: write` permission.
+- CI now publishes each service as `ghcr.io/rrksns/notification-hub/<service>:${GITHUB_SHA}` and `:latest`. Production deployment documentation uses only the SHA tag; `latest` is informational.
+- Local Kubernetes manifests remain unchanged for OrbStack image loading. Production operators create a GHCR pull Secret, patch the service account, switch pull policy to `IfNotPresent`, set all six images to one SHA, and wait for rollout.
+- Rollback uses `kubectl rollout undo` for each Deployment and waits for rollout completion.
+- Workflow execution and real GHCR publication remain pending until the next `main` push. No registry credentials were created or committed locally.
