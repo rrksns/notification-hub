@@ -419,4 +419,4 @@
 - [x] Document GHCR pull Secret and SHA-based Kubernetes deployment.
 - [x] Document rollout verification and rollback procedure.
 - [ ] Verify the workflow on the next `main` push.
-- [ ] Commit and push image deployment strategy change.
+- [x] Commit and push image deployment strategy change.
