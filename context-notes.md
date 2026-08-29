@@ -376,3 +376,14 @@
 - Local Kubernetes manifests remain unchanged for OrbStack image loading. Production operators create a GHCR pull Secret, patch the service account, switch pull policy to `IfNotPresent`, set all six images to one SHA, and wait for rollout.
 - Rollback uses `kubectl rollout undo` for each Deployment and waits for rollout completion.
 - Workflow execution and real GHCR publication remain pending until the next `main` push. No registry credentials were created or committed locally.
+
+## 2026-08-29 Backup and restore rehearsal
+
+- The next commercialization item is P1 8, backup and restore rehearsal.
+- The approved approach is operator-run Compose scripts for MySQL, MongoDB, Redis, and Kafka metadata.
+- `scripts/backup/backup.sh` writes timestamped artifacts: MySQL all-database SQL, MongoDB analytics gzip archive, Redis `dump.rdb`, and Kafka topic/spec/config metadata plus a manifest.
+- `scripts/backup/restore.sh` validates all required artifacts and is dry-run by default. `--confirm` is required before database writes, Redis replacement/restart, or Kafka topic creation.
+- Kafka message bodies are intentionally outside this backup scope. The backup preserves topic names, partition counts, and config output; operators must review and reapply topic-specific settings during restore.
+- Target RPO is 24 hours and target RTO is 60 minutes. Backup directories must be replicated to storage separate from the application host.
+- Bash syntax checks, backup dry-run, missing-input guard, and fixture restore dry-run passed locally.
+- A real restore rehearsal remains pending because it requires disposable infrastructure and production-equivalent credentials. No live data was modified.

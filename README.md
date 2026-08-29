@@ -531,6 +531,30 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 
 운영 배포는 `latest`가 아니라 반드시 커밋 SHA 태그를 사용합니다. GitHub Actions의 `GITHUB_TOKEN`에 `packages: write` 권한을 사용하므로 별도 registry secret은 필요하지 않습니다.
 
+### 백업과 복구
+
+백업 대상은 MySQL 전체 데이터베이스, MongoDB `analytics`, Redis RDB snapshot, Kafka 토픽 목록·파티션·설정 메타데이터입니다. Kafka 메시지 본문은 백업하지 않으므로 장기 보관이 필요하면 별도 Kafka retention 또는 외부 아카이브 정책을 추가해야 합니다.
+
+목표 운영 기준은 RPO 24시간, RTO 60분입니다. 백업은 최소 하루 한 번 실행하고, 생성된 디렉터리는 애플리케이션 호스트와 분리된 저장소로 복제합니다.
+
+```bash
+# Compose가 실행 중인 호스트에서 백업
+scripts/backup/backup.sh --output /secure-backups/notification-hub
+
+# 실제 변경 없이 백업 산출물과 복구 대상을 확인
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp>
+
+# 복구 리허설 또는 승인된 장애 대응에서만 실행
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp> \
+  --confirm
+```
+
+복구는 MySQL과 MongoDB 데이터를 덮어쓰고 Redis 컨테이너를 재기동하므로 반드시 별도 복구 환경에서 먼저 리허설합니다. Kafka 토픽은 파티션 수 기준으로 재생성되며, `kafka/topic-configs.txt`를 검토해 필요한 토픽 설정을 재적용한 후 애플리케이션 health endpoint와 DLQ 소비 상태를 확인합니다.
+
+월 1회 복구 리허설에서 백업 생성 시각, 복구 시작·종료 시각, 데이터 검증 결과, RPO/RTO 달성 여부를 `manual_test.md`에 기록합니다.
+
 ---
 
 ## 서비스 실행 방법

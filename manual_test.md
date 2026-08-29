@@ -907,6 +907,16 @@ docker compose up -d grafana prometheus
 | 컨테이너 readiness | Alertmanager 이미지 pull 타임아웃으로 미실행. 네트워크가 가능한 환경에서 `docker compose up -d prometheus alertmanager`와 양쪽 `/-/ready` 재확인 필요 |
 | 실제 전송 | 외부 Webhook 및 SMTP Secret이 없어 미실행 |
 
+### 백업과 복구 스크립트 검증 (2026-08-29)
+
+| 항목 | 결과 |
+|------|------|
+| 백업 스크립트 | `scripts/backup/backup.sh --dry-run`으로 MySQL, MongoDB, Redis, Kafka 백업 명령 출력 확인 |
+| 복구 안전장치 | `restore.sh`가 `--input` 누락을 exit 2로 차단 |
+| 복구 dry-run | fixture 백업 디렉터리로 대상과 조치 출력 확인, 서비스 변경 없음 |
+| 목표 기준 | RPO 24시간, RTO 60분으로 정의 |
+| 실제 복구 리허설 | 별도 임시 인프라와 운영 자격 증명이 필요해 미실행 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항
