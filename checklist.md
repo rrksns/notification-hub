@@ -430,4 +430,4 @@
 - [x] Verify Bash syntax and backup dry-run.
 - [x] Verify restore missing-input guard and fixture dry-run.
 - [ ] Execute a real restore rehearsal in a separate environment.
-- [ ] Commit and push backup and restore implementation.
+- [x] Commit and push backup and restore implementation.
