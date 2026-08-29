@@ -34,7 +34,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 | 모니터링 | Prometheus + Grafana + Micrometer + Zipkin | — |
 | 컨테이너 | Docker Compose / Kubernetes | — |
 | IaC | Terraform (local Docker + AWS 설계) | — |
-| CI/CD | GitHub Actions (test + Docker 이미지 빌드) | — |
+| CI/CD | GitHub Actions (test + GHCR 이미지 publish) | — |
 
 ---
 
@@ -522,7 +522,38 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 
 ### CI/CD
 
-`.github/workflows/ci.yml` — 전체 테스트 실행 + 7개 서비스 Docker 이미지 빌드 (matrix strategy)
+`.github/workflows/ci.yml` — 전체 테스트 실행 + 6개 서비스 Docker 이미지 빌드 및 GHCR publish (matrix strategy)
+
+`main` push가 성공하면 각 애플리케이션 이미지를 `ghcr.io/rrksns/notification-hub/<service>`에 다음 태그로 게시합니다.
+
+- `${GITHUB_SHA}`: 배포와 롤백에 사용하는 immutable release tag
+- `latest`: 사람이 확인하기 위한 최신 성공 빌드 포인터
+
+운영 배포는 `latest`가 아니라 반드시 커밋 SHA 태그를 사용합니다. GitHub Actions의 `GITHUB_TOKEN`에 `packages: write` 권한을 사용하므로 별도 registry secret은 필요하지 않습니다.
+
+### 백업과 복구
+
+백업 대상은 MySQL 전체 데이터베이스, MongoDB `analytics`, Redis RDB snapshot, Kafka 토픽 목록·파티션·설정 메타데이터입니다. Kafka 메시지 본문은 백업하지 않으므로 장기 보관이 필요하면 별도 Kafka retention 또는 외부 아카이브 정책을 추가해야 합니다.
+
+목표 운영 기준은 RPO 24시간, RTO 60분입니다. 백업은 최소 하루 한 번 실행하고, 생성된 디렉터리는 애플리케이션 호스트와 분리된 저장소로 복제합니다.
+
+```bash
+# Compose가 실행 중인 호스트에서 백업
+scripts/backup/backup.sh --output /secure-backups/notification-hub
+
+# 실제 변경 없이 백업 산출물과 복구 대상을 확인
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp>
+
+# 복구 리허설 또는 승인된 장애 대응에서만 실행
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp> \
+  --confirm
+```
+
+복구는 MySQL과 MongoDB 데이터를 덮어쓰고 Redis 컨테이너를 재기동하므로 반드시 별도 복구 환경에서 먼저 리허설합니다. Kafka 토픽은 파티션 수 기준으로 재생성되며, `kafka/topic-configs.txt`를 검토해 필요한 토픽 설정을 재적용한 후 애플리케이션 health endpoint와 DLQ 소비 상태를 확인합니다.
+
+월 1회 복구 리허설에서 백업 생성 시각, 복구 시작·종료 시각, 데이터 검증 결과, RPO/RTO 달성 여부를 `manual_test.md`에 기록합니다.
 
 ---
 
@@ -646,10 +677,9 @@ docker compose down -v
 # JAR 빌드
 mvn clean package -DskipTests
 
-# Docker 이미지 빌드 및 태깅
+# 로컬 Kubernetes용 Docker 이미지 빌드 및 태깅
 for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
-  docker build -t notification-hub/${svc}atest:latest ./$svc
-  docker tag notification-hub/${svc}atest:latest notification-hub/$svc:latest
+  docker build -t notification-hub/$svc:latest ./$svc
 done
 ```
 
@@ -713,6 +743,40 @@ kubectl exec -n notification-hub deployment/mysql -- mysql -u root -p"${MYSQL_RO
 kubectl apply -f k8s/discovery-service/ -f k8s/api-gateway/ \
   -f k8s/user-service/ -f k8s/notification-service/ \
   -f k8s/delivery-service/ -f k8s/analytics-service/
+```
+
+상용 클러스터에서는 GHCR 인증 Secret을 먼저 만들고, `latest`가 아닌 배포할 `GITHUB_SHA`를 지정합니다. GHCR package가 private이면 읽기 권한이 있는 별도 PAT를 사용합니다.
+
+```bash
+export GHCR_USERNAME="<github-username>"
+export GHCR_TOKEN="<read-packages-token>"
+export IMAGE_TAG="<github-sha>"
+
+kubectl create secret docker-registry ghcr-pull \
+  -n notification-hub \
+  --docker-server=ghcr.io \
+  --docker-username="${GHCR_USERNAME}" \
+  --docker-password="${GHCR_TOKEN}" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl patch serviceaccount default -n notification-hub \
+  -p '{"imagePullSecrets":[{"name":"ghcr-pull"}]}'
+
+for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
+  kubectl patch deployment "$svc" -n notification-hub --type=strategic \
+    -p '{"spec":{"template":{"spec":{"containers":[{"name":"'"$svc"'","imagePullPolicy":"IfNotPresent"}]}}}}'
+  kubectl set image deployment/"$svc" "$svc"="ghcr.io/rrksns/notification-hub/$svc:${IMAGE_TAG}" -n notification-hub
+  kubectl rollout status deployment/"$svc" -n notification-hub --timeout=180s
+done
+```
+
+배포 실패 시 마지막 정상 ReplicaSet으로 되돌립니다. 배포 전후의 SHA는 `kubectl rollout history`로 확인할 수 있습니다.
+
+```bash
+kubectl rollout history deployment/notification-service -n notification-hub
+for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
+  kubectl rollout undo deployment/"$svc" -n notification-hub
+  kubectl rollout status deployment/"$svc" -n notification-hub --timeout=180s
+done
 ```
 
 ### 6단계 — 내부 서비스 NetworkPolicy 적용

@@ -411,3 +411,23 @@
 - [x] Document environment variables and operations.
 - [x] Verify monitoring configuration and container readiness.
 - [x] Commit and push alerting implementation.
+
+## Image Deployment Strategy
+
+- [x] Create image deployment strategy plan.
+- [x] Add GHCR login and immutable SHA image publishing to CI.
+- [x] Document GHCR pull Secret and SHA-based Kubernetes deployment.
+- [x] Document rollout verification and rollback procedure.
+- [ ] Verify the workflow on the next `main` push.
+- [x] Commit and push image deployment strategy change.
+
+## Backup and Restore Rehearsal
+
+- [x] Create backup and restore design and implementation plans.
+- [x] Add MySQL, MongoDB, Redis, and Kafka metadata backup script.
+- [x] Add guarded restore script with dry-run default.
+- [x] Document RPO, RTO, backup storage, and restore verification procedure.
+- [x] Verify Bash syntax and backup dry-run.
+- [x] Verify restore missing-input guard and fixture dry-run.
+- [ ] Execute a real restore rehearsal in a separate environment.
+- [x] Commit and push backup and restore implementation.

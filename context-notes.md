@@ -366,3 +366,24 @@
 - Task 3 connected Prometheus to Alertmanager at `alertmanager:9093`, mounts the Prometheus rule file and Alertmanager entrypoint, and separates host password source path from the container password file path.
 - Alerting configuration verification passed with `docker compose config --quiet`, `sh -n monitoring/alertmanager/entrypoint.sh`, and containerized Prometheus rule/config checks. Alertmanager readiness and real Webhook/SMTP delivery remain environment-dependent because the image pull timed out and no external credentials are available.
 - Alertmanager image pull later succeeded. With a temporary SMTP password file, `docker compose up -d prometheus alertmanager` reached both readiness endpoints, and Prometheus API confirmed `ServiceDown` and `Http5xxRateHigh` were loaded. An invalid quoted `SMTP_FROM` was rejected before Alertmanager startup. Real external Webhook and SMTP delivery remains unverified because no external credentials are available.
+
+## 2026-08-28 Image deployment strategy
+
+- The next commercialization item is P1 7, image deployment strategy.
+- The current CI matrix built six application images with `push: false`, while Kubernetes manifests used local `notification-hub/*:latest` images with `imagePullPolicy: Never`.
+- Selected GHCR because the repository already runs on GitHub Actions and `GITHUB_TOKEN` can publish packages with job-scoped `packages: write` permission.
+- CI now publishes each service as `ghcr.io/rrksns/notification-hub/<service>:${GITHUB_SHA}` and `:latest`. Production deployment documentation uses only the SHA tag; `latest` is informational.
+- Local Kubernetes manifests remain unchanged for OrbStack image loading. Production operators create a GHCR pull Secret, patch the service account, switch pull policy to `IfNotPresent`, set all six images to one SHA, and wait for rollout.
+- Rollback uses `kubectl rollout undo` for each Deployment and waits for rollout completion.
+- Workflow execution and real GHCR publication remain pending until the next `main` push. No registry credentials were created or committed locally.
+
+## 2026-08-29 Backup and restore rehearsal
+
+- The next commercialization item is P1 8, backup and restore rehearsal.
+- The approved approach is operator-run Compose scripts for MySQL, MongoDB, Redis, and Kafka metadata.
+- `scripts/backup/backup.sh` writes timestamped artifacts: MySQL all-database SQL, MongoDB analytics gzip archive, Redis `dump.rdb`, and Kafka topic/spec/config metadata plus a manifest.
+- `scripts/backup/restore.sh` validates all required artifacts and is dry-run by default. `--confirm` is required before database writes, Redis replacement/restart, or Kafka topic creation.
+- Kafka message bodies are intentionally outside this backup scope. The backup preserves topic names, partition counts, and config output; operators must review and reapply topic-specific settings during restore.
+- Target RPO is 24 hours and target RTO is 60 minutes. Backup directories must be replicated to storage separate from the application host.
+- Bash syntax checks, backup dry-run, missing-input guard, and fixture restore dry-run passed locally.
+- A real restore rehearsal remains pending because it requires disposable infrastructure and production-equivalent credentials. No live data was modified.
