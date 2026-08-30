@@ -917,6 +917,16 @@ docker compose up -d grafana prometheus
 | 목표 기준 | RPO 24시간, RTO 60분으로 정의 |
 | 실제 복구 리허설 | 별도 임시 인프라와 운영 자격 증명이 필요해 미실행 |
 
+### main 병합 후 CI와 GHCR publish 검증 (2026-08-30)
+
+| 항목 | 결과 |
+|------|------|
+| 병합 | PR #2가 `main`에 merge commit `8928c0b`로 반영됨 |
+| Build & Test | 성공, 2분 55초 |
+| Docker 이미지 | discovery, gateway, user, notification, delivery, analytics 6개 이미지 publish 성공 |
+| 이미지 태그 | 커밋 SHA와 `latest` 태그 publish 확인 |
+| 실행 기록 | GitHub Actions run `33255885633` 성공 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

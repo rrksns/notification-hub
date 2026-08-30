@@ -418,7 +418,7 @@
 - [x] Add GHCR login and immutable SHA image publishing to CI.
 - [x] Document GHCR pull Secret and SHA-based Kubernetes deployment.
 - [x] Document rollout verification and rollback procedure.
-- [ ] Verify the workflow on the next `main` push.
+- [x] Verify the workflow on the next `main` push.
 - [x] Commit and push image deployment strategy change.
 
 ## Backup and Restore Rehearsal
