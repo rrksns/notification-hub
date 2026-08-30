@@ -387,3 +387,11 @@
 - Target RPO is 24 hours and target RTO is 60 minutes. Backup directories must be replicated to storage separate from the application host.
 - Bash syntax checks, backup dry-run, missing-input guard, and fixture restore dry-run passed locally.
 - A real restore rehearsal remains pending because it requires disposable infrastructure and production-equivalent credentials. No live data was modified.
+
+## 2026-08-30 Post-merge verification
+
+- PR #2 was merged into `main` as merge commit `8928c0bbebef315b6b119b59dbed6c2649aa2865`.
+- The post-merge GitHub Actions run `33255885633` completed successfully.
+- `Build & Test` passed and all six matrix jobs completed the GHCR login and image publish steps successfully.
+- The image deployment checklist item for verifying the next `main` push is now complete.
+- No new source code was changed today. This entry records the post-merge CI and GHCR verification.
