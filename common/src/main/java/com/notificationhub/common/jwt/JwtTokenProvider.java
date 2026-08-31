@@ -20,11 +20,16 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(String subject, String tenantId, String role) {
+        return generateAccessToken(subject, tenantId, role, "FREE");
+    }
+
+    public String generateAccessToken(String subject, String tenantId, String role, String plan) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(subject)
                 .claim("tenantId", tenantId)
                 .claim("role", role)
+                .claim("plan", plan)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessTokenExpireMs))
                 .signWith(secretKey)
@@ -54,5 +59,9 @@ public class JwtTokenProvider {
 
     public String getTenantId(String token) {
         return parseToken(token).get("tenantId", String.class);
+    }
+
+    public String getPlan(String token) {
+        return parseToken(token).get("plan", String.class);
     }
 }

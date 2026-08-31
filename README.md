@@ -531,6 +531,19 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 
 운영 배포는 `latest`가 아니라 반드시 커밋 SHA 태그를 사용합니다. GitHub Actions의 `GITHUB_TOKEN`에 `packages: write` 권한을 사용하므로 별도 registry secret은 필요하지 않습니다.
 
+### 테넌트별 쿼터
+
+알림 생성량은 로그인 JWT의 서명된 `plan` claim 기준으로 월별 제한됩니다. 클라이언트가 보낸 `X-Tenant-Plan`은 Gateway와 내부 서비스 필터가 제거하고 JWT 값으로 덮어씁니다.
+
+| 요금제 | 월간 알림 한도 |
+|---|---:|
+| `FREE` | 100건 |
+| `BASIC` | 1,000건 |
+| `PREMIUM` | 10,000건 |
+| `ENTERPRISE` | 100,000건 |
+
+카운터는 Redis의 `quota:notification:{tenantId}:{yyyy-MM}` 키에 저장되며, 월이 바뀌면 새 카운터를 사용합니다. 한도 초과 요청은 `429 Too Many Requests`와 `Monthly notification quota exceeded`를 반환하고 DB 저장과 Kafka 발행을 수행하지 않습니다. 중복 `idempotencyKey` 요청은 쿼터를 소비하지 않습니다.
+
 ### 백업과 복구
 
 백업 대상은 MySQL 전체 데이터베이스, MongoDB `analytics`, Redis RDB snapshot, Kafka 토픽 목록·파티션·설정 메타데이터입니다. Kafka 메시지 본문은 백업하지 않으므로 장기 보관이 필요하면 별도 Kafka retention 또는 외부 아카이브 정책을 추가해야 합니다.

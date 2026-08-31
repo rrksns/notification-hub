@@ -18,6 +18,7 @@ public enum ErrorCode {
 
     // Notification
     DUPLICATE_NOTIFICATION(HttpStatus.CONFLICT, "Duplicate notification request"),
+    QUOTA_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "Monthly notification quota exceeded"),
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Notification not found");
 
     private final HttpStatus status;

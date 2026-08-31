@@ -26,6 +26,7 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String TENANT_ID_HEADER = "X-Tenant-Id";
     private static final String USER_ID_HEADER = "X-User-Id";
+    private static final String TENANT_PLAN_HEADER = "X-Tenant-Plan";
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -62,13 +63,14 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
         try {
             String tenantId = jwtTokenProvider.getTenantId(token);
             String userId = jwtTokenProvider.getSubject(token);
-            if (!StringUtils.hasText(tenantId) || !StringUtils.hasText(userId)) {
+            String plan = jwtTokenProvider.getPlan(token);
+            if (!StringUtils.hasText(tenantId) || !StringUtils.hasText(userId) || !StringUtils.hasText(plan)) {
                 reject(response);
                 return;
             }
 
             setAuthentication(userId);
-            filterChain.doFilter(new TrustedHeaderRequestWrapper(request, tenantId, userId), response);
+            filterChain.doFilter(new TrustedHeaderRequestWrapper(request, tenantId, userId, plan), response);
         } catch (RuntimeException e) {
             SecurityContextHolder.clearContext();
             reject(response);
@@ -100,11 +102,13 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 
         private final String tenantId;
         private final String userId;
+        private final String plan;
 
-        private TrustedHeaderRequestWrapper(HttpServletRequest request, String tenantId, String userId) {
+        private TrustedHeaderRequestWrapper(HttpServletRequest request, String tenantId, String userId, String plan) {
             super(request);
             this.tenantId = tenantId;
             this.userId = userId;
+            this.plan = plan;
         }
 
         @Override
@@ -114,6 +118,9 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
             }
             if (isUserHeader(name)) {
                 return userId;
+            }
+            if (isPlanHeader(name)) {
+                return plan;
             }
             return super.getHeader(name);
         }
@@ -126,6 +133,9 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
             if (isUserHeader(name)) {
                 return Collections.enumeration(List.of(userId));
             }
+            if (isPlanHeader(name)) {
+                return Collections.enumeration(List.of(plan));
+            }
             return super.getHeaders(name);
         }
 
@@ -135,11 +145,12 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
             headerNames.removeIf(this::isTrustedHeader);
             headerNames.add(TENANT_ID_HEADER);
             headerNames.add(USER_ID_HEADER);
+            headerNames.add(TENANT_PLAN_HEADER);
             return Collections.enumeration(headerNames);
         }
 
         private boolean isTrustedHeader(String name) {
-            return isTenantHeader(name) || isUserHeader(name);
+            return isTenantHeader(name) || isUserHeader(name) || isPlanHeader(name);
         }
 
         private static boolean isTenantHeader(String name) {
@@ -148,6 +159,10 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 
         private static boolean isUserHeader(String name) {
             return USER_ID_HEADER.equalsIgnoreCase(name);
+        }
+
+        private static boolean isPlanHeader(String name) {
+            return TENANT_PLAN_HEADER.equalsIgnoreCase(name);
         }
     }
 }

@@ -42,7 +42,7 @@ public class AuthService implements AuthenticateUseCase {
             throw new BusinessException(ErrorCode.FORBIDDEN, "Tenant is inactive");
         }
 
-        String token = tokenProvider.generateToken(user.getId(), user.getTenantId(), user.getRole());
+        String token = tokenProvider.generateToken(user.getId(), user.getTenantId(), user.getRole(), tenant.getPlan().name());
         return new Result(token, user.getTenantId(), user.getId());
     }
 }

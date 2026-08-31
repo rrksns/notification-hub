@@ -431,3 +431,13 @@
 - [x] Verify restore missing-input guard and fixture dry-run.
 - [ ] Execute a real restore rehearsal in a separate environment.
 - [x] Commit and push backup and restore implementation.
+
+## Tenant Quota and Subscription Plan Limits
+
+- [x] Create quota design and implementation plans.
+- [x] Add signed subscription plan propagation.
+- [x] Add atomic Redis monthly quota counter.
+- [x] Enforce quota before notification persistence and publishing.
+- [x] Add quota tests and documentation.
+- [x] Run full multi-module Maven verification.
+- [ ] Commit, push, and merge quota implementation.
