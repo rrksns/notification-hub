@@ -440,4 +440,4 @@
 - [x] Enforce quota before notification persistence and publishing.
 - [x] Add quota tests and documentation.
 - [x] Run full multi-module Maven verification.
-- [ ] Commit, push, and merge quota implementation.
+- [x] Commit, push, and merge quota implementation.

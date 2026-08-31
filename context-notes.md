@@ -409,3 +409,4 @@
 - Focused verification passed for common JWT filter, user authentication, notification quota policy/service, and E2E test compilation.
 - Full `mvn test` verification passed with all 10 Maven modules and both Docker-backed E2E tests successful.
 - Existing security tests in user, notification, and delivery services were updated to include the required `FREE` plan claim fixture.
+- Quota implementation commit `b9cab16` was merged into `main` through PR #4 as merge commit `ca25d5df7b541239adef96b184a9dd54f8c014cb` after GitHub CI passed.
