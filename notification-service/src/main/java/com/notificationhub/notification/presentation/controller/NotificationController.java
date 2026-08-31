@@ -26,10 +26,11 @@ public class NotificationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CreateNotificationUseCase.Result> create(
             @RequestHeader("X-Tenant-Id") String tenantId,
+            @RequestHeader("X-Tenant-Plan") String plan,
             @Valid @RequestBody CreateNotificationRequest request
     ) {
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
-                tenantId, request.channel(), request.recipient(), request.content(), request.idempotencyKey()
+                tenantId, request.channel(), request.recipient(), request.content(), request.idempotencyKey(), plan
         );
         return ApiResponse.ok(createNotificationUseCase.create(cmd));
     }

@@ -9,6 +9,7 @@ import com.notificationhub.notification.domain.port.out.IdempotencyPort;
 import com.notificationhub.notification.domain.port.out.NotificationApplicationMetrics;
 import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
+import com.notificationhub.notification.domain.port.out.NotificationQuotaPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,22 +28,24 @@ class CreateNotificationServiceTest {
     @Mock IdempotencyPort idempotencyPort;
     @Mock NotificationEventPublisher eventPublisher;
     @Mock NotificationApplicationMetrics metrics;
+    @Mock NotificationQuotaPort quotaPort;
 
     CreateNotificationUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateNotificationService(notificationRepository, idempotencyPort, eventPublisher, metrics);
+        useCase = new CreateNotificationService(notificationRepository, idempotencyPort, eventPublisher, metrics, quotaPort);
     }
 
     @Test
     @DisplayName("정상 알림 생성 — 저장 + Kafka 이벤트 발행")
     void create_success() {
         given(idempotencyPort.isDuplicate("tenant-1", "key-001")).willReturn(false);
+        given(quotaPort.tryConsume("tenant-1", "FREE")).willReturn(true);
         given(notificationRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
-                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-001"
+                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-001", "FREE"
         );
         CreateNotificationUseCase.Result result = useCase.create(cmd);
 
@@ -57,7 +60,7 @@ class CreateNotificationServiceTest {
         given(idempotencyPort.isDuplicate("tenant-1", "key-001")).willReturn(true);
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
-                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-001"
+                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-001", "FREE"
         );
 
         assertThatThrownBy(() -> useCase.create(cmd))
@@ -68,15 +71,33 @@ class CreateNotificationServiceTest {
     @DisplayName("알림 저장 후 상태가 PUBLISHED로 변경됨")
     void create_statusBecomesPublished() {
         given(idempotencyPort.isDuplicate("tenant-1", "key-002")).willReturn(false);
+        given(quotaPort.tryConsume("tenant-1", "FREE")).willReturn(true);
         given(notificationRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
         CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
-                "tenant-1", "SMS", "010-1234-5678", "Hi", "key-002"
+                "tenant-1", "SMS", "010-1234-5678", "Hi", "key-002", "FREE"
         );
         useCase.create(cmd);
 
         then(notificationRepository).should().save(argThat(n ->
                 n.getStatus().name().equals("PUBLISHED")
         ));
+    }
+
+    @Test
+    @DisplayName("쿼터 초과 시 저장과 발행을 수행하지 않음")
+    void create_quotaExceeded_throws() {
+        given(idempotencyPort.isDuplicate("tenant-1", "key-003")).willReturn(false);
+        given(quotaPort.tryConsume("tenant-1", "FREE")).willReturn(false);
+
+        CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
+                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-003", "FREE"
+        );
+
+        assertThatThrownBy(() -> useCase.create(cmd))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Monthly notification quota exceeded");
+        then(notificationRepository).shouldHaveNoInteractions();
+        then(eventPublisher).shouldHaveNoInteractions();
     }
 }

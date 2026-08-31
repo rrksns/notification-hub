@@ -395,3 +395,17 @@
 - `Build & Test` passed and all six matrix jobs completed the GHCR login and image publish steps successfully.
 - The image deployment checklist item for verifying the next `main` push is now complete.
 - No new source code was changed today. This entry records the post-merge CI and GHCR verification.
+
+## 2026-08-31 Tenant quota and subscription plan limits
+
+- The next commercialization item is P2 9, tenant quotas and subscription plan limits.
+- The notification service does not currently own tenant plan data, so accepting a client-supplied plan header would allow quota bypass.
+- The approved design signs `SubscriptionPlan` into the JWT at login, then has the Gateway and internal JWT filter propagate only the verified `X-Tenant-Plan` header.
+- Monthly limits are `FREE=100`, `BASIC=1000`, `PREMIUM=10000`, and `ENTERPRISE=100000` notifications.
+- Redis will use an atomic Lua increment and the key `quota:notification:{tenantId}:{yyyy-MM}`. Duplicate idempotency requests are checked before quota consumption.
+- Implemented signed plan propagation through JWT, Gateway, and the internal servlet JWT filter. Client-supplied `X-Tenant-Plan` is removed and replaced with the verified claim.
+- Implemented `NotificationQuotaPort` and a Redis Lua adapter with monthly limits of FREE 100, BASIC 1,000, PREMIUM 10,000, and ENTERPRISE 100,000.
+- Notification creation checks duplicate idempotency before quota consumption, then rejects over-limit requests with `QUOTA_EXCEEDED` and HTTP 429 before persistence or Kafka publishing.
+- Focused verification passed for common JWT filter, user authentication, notification quota policy/service, and E2E test compilation.
+- Full `mvn test` verification passed with all 10 Maven modules and both Docker-backed E2E tests successful.
+- Existing security tests in user, notification, and delivery services were updated to include the required `FREE` plan claim fixture.

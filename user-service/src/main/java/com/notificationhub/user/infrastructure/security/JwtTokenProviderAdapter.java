@@ -19,6 +19,11 @@ public class JwtTokenProviderAdapter implements TokenProvider {
     }
 
     @Override
+    public String generateToken(String userId, String tenantId, String role, String plan) {
+        return jwtTokenProvider.generateAccessToken(userId, tenantId, role, plan);
+    }
+
+    @Override
     public boolean isValid(String token) {
         return jwtTokenProvider.isValid(token);
     }

@@ -46,7 +46,7 @@ class AuthenticateUseCaseTest {
         given(userRepository.findByEmail("user@test.com")).willReturn(Optional.of(user));
         given(tenantRepository.findById(user.getTenantId())).willReturn(Optional.of(tenant));
         given(passwordEncoder.matches("rawPw", "encodedPw")).willReturn(true);
-        given(tokenProvider.generateToken(anyString(), anyString(), anyString())).willReturn("jwt-token");
+        given(tokenProvider.generateToken(anyString(), anyString(), anyString(), eq("FREE"))).willReturn("jwt-token");
 
         AuthenticateUseCase.Command cmd = new AuthenticateUseCase.Command("user@test.com", "rawPw");
         AuthenticateUseCase.Result result = useCase.authenticate(cmd);
