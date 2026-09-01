@@ -8,6 +8,7 @@ import com.notificationhub.user.domain.port.in.RegisterTenantUseCase;
 import com.notificationhub.user.domain.port.out.TenantRepository;
 import com.notificationhub.user.domain.port.out.UserRepository;
 import com.notificationhub.user.domain.port.out.PasswordEncoder;
+import com.notificationhub.user.domain.port.out.AuditLogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +26,13 @@ class RegisterTenantUseCaseTest {
     @Mock TenantRepository tenantRepository;
     @Mock UserRepository userRepository;
     @Mock PasswordEncoder passwordEncoder;
+    @Mock AuditLogRepository auditLogRepository;
 
     RegisterTenantUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new TenantService(tenantRepository, userRepository, passwordEncoder);
+        useCase = new TenantService(tenantRepository, userRepository, passwordEncoder, auditLogRepository);
     }
 
     @Test
@@ -49,6 +51,11 @@ class RegisterTenantUseCaseTest {
         assertThat(result.tenantId()).isNotBlank();
         then(tenantRepository).should().save(any(Tenant.class));
         then(userRepository).should().save(any(User.class));
+        then(auditLogRepository).should().save(argThat(log ->
+                log.tenantId().equals(result.tenantId())
+                        && log.actorId().equals("system")
+                        && log.action().equals("TENANT_REGISTERED")
+                        && log.resource().equals(result.tenantId())));
     }
 
     @Test
@@ -62,5 +69,6 @@ class RegisterTenantUseCaseTest {
 
         assertThatThrownBy(() -> useCase.register(cmd))
                 .isInstanceOf(com.notificationhub.common.exception.BusinessException.class);
+        then(auditLogRepository).shouldHaveNoInteractions();
     }
 }
