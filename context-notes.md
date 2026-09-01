@@ -410,3 +410,14 @@
 - Full `mvn test` verification passed with all 10 Maven modules and both Docker-backed E2E tests successful.
 - Existing security tests in user, notification, and delivery services were updated to include the required `FREE` plan claim fixture.
 - Quota implementation commit `b9cab16` was merged into `main` through PR #4 as merge commit `ca25d5df7b541239adef96b184a9dd54f8c014cb` after GitHub CI passed.
+
+## 2026-09-01 Audit logs
+
+- The next commercialization item is P2 10, audit logs.
+- The approved minimal scope records successful tenant registration, login, and API key creation inside user-service.
+- Audit records store tenant, actor, action, resource, and UTC timestamp. Passwords, API key values, and failed login details are excluded.
+- A query API is intentionally deferred so this change establishes durable event capture without expanding the public contract.
+- Implemented `AuditLog`, `AuditLogRepository`, JPA entity/adapter, and Flyway `V2` migration with a tenant/time index.
+- Successful tenant registration, login, and API key creation now persist audit records. API key actors use the verified `X-User-Id` header; compatibility constructors default non-controller calls to `system`.
+- Passwords, API key values, and failed login details are not persisted.
+- Full `mvn test` passed with all 10 Maven modules and both Docker-backed E2E tests successful.

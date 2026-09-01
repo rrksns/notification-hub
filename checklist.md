@@ -441,3 +441,14 @@
 - [x] Add quota tests and documentation.
 - [x] Run full multi-module Maven verification.
 - [x] Commit, push, and merge quota implementation.
+
+## Audit Logs
+
+- [x] Create audit log design.
+- [x] Create audit log implementation plan.
+- [x] Add audit log event model and output port.
+- [x] Add user-service JPA persistence and Flyway migration.
+- [x] Record successful tenant registration, login, and API key creation.
+- [x] Add unit tests for audit log events and failure exclusions.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge audit log implementation.

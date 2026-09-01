@@ -4,6 +4,7 @@ import com.notificationhub.user.application.service.ApiKeyService;
 import com.notificationhub.user.domain.model.ApiKey;
 import com.notificationhub.user.domain.port.in.CreateApiKeyUseCase;
 import com.notificationhub.user.domain.port.out.ApiKeyRepository;
+import com.notificationhub.user.domain.port.out.AuditLogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,14 @@ class CreateApiKeyServiceTest {
     @Mock
     ApiKeyRepository apiKeyRepository;
 
+    @Mock
+    AuditLogRepository auditLogRepository;
+
     CreateApiKeyUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new ApiKeyService(apiKeyRepository);
+        useCase = new ApiKeyService(apiKeyRepository, auditLogRepository);
     }
 
     @Test
@@ -41,6 +45,11 @@ class CreateApiKeyServiceTest {
         assertThat(result.apiKeyId()).isNotBlank();
         assertThat(result.keyValue()).isNotBlank();
         then(apiKeyRepository).should().save(any(ApiKey.class));
+        then(auditLogRepository).should().save(argThat(log ->
+                log.tenantId().equals("tenant-1")
+                        && log.actorId().equals("system")
+                        && log.action().equals("API_KEY_CREATED")
+                        && log.resource().equals(result.apiKeyId())));
     }
 
     @Test

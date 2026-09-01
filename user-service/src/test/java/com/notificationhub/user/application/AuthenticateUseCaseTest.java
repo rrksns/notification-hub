@@ -8,6 +8,7 @@ import com.notificationhub.user.domain.port.in.AuthenticateUseCase;
 import com.notificationhub.user.domain.port.out.TenantRepository;
 import com.notificationhub.user.domain.port.out.UserRepository;
 import com.notificationhub.user.domain.port.out.PasswordEncoder;
+import com.notificationhub.user.domain.port.out.AuditLogRepository;
 import com.notificationhub.user.domain.port.out.TokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,12 +30,13 @@ class AuthenticateUseCaseTest {
     @Mock TenantRepository tenantRepository;
     @Mock PasswordEncoder passwordEncoder;
     @Mock TokenProvider tokenProvider;
+    @Mock AuditLogRepository auditLogRepository;
 
     AuthenticateUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new AuthService(userRepository, tenantRepository, passwordEncoder, tokenProvider);
+        useCase = new AuthService(userRepository, tenantRepository, passwordEncoder, tokenProvider, auditLogRepository);
     }
 
     @Test
@@ -52,6 +54,11 @@ class AuthenticateUseCaseTest {
         AuthenticateUseCase.Result result = useCase.authenticate(cmd);
 
         assertThat(result.accessToken()).isEqualTo("jwt-token");
+        then(auditLogRepository).should().save(argThat(log ->
+                log.tenantId().equals(user.getTenantId())
+                        && log.actorId().equals(user.getId())
+                        && log.action().equals("USER_LOGIN")
+                        && log.resource().equals(user.getId())));
     }
 
     @Test
@@ -66,6 +73,7 @@ class AuthenticateUseCaseTest {
 
         assertThatThrownBy(() -> useCase.authenticate(cmd))
                 .isInstanceOf(com.notificationhub.common.exception.BusinessException.class);
+        then(auditLogRepository).shouldHaveNoInteractions();
     }
 
     @Test
@@ -77,5 +85,6 @@ class AuthenticateUseCaseTest {
 
         assertThatThrownBy(() -> useCase.authenticate(cmd))
                 .isInstanceOf(com.notificationhub.common.exception.BusinessException.class);
+        then(auditLogRepository).shouldHaveNoInteractions();
     }
 }
