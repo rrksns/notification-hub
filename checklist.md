@@ -452,3 +452,13 @@
 - [x] Add unit tests for audit log events and failure exclusions.
 - [x] Run full Maven verification.
 - [x] Commit, push, and merge audit log implementation.
+
+## Provider Fallback Policy
+
+- [x] Create provider fallback design.
+- [x] Create provider fallback implementation plan.
+- [x] Add fail-closed fallback policy port and implementation.
+- [x] Connect the policy to the Circuit Breaker fallback.
+- [x] Add fallback and FAILED-result tests.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge provider fallback implementation.

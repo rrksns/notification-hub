@@ -421,3 +421,13 @@
 - Successful tenant registration, login, and API key creation now persist audit records. API key actors use the verified `X-User-Id` header; compatibility constructors default non-controller calls to `system`.
 - Passwords, API key values, and failed login details are not persisted.
 - Full `mvn test` passed with all 10 Maven modules and both Docker-backed E2E tests successful.
+
+## 2026-09-02 Provider fallback policy
+
+- The next commercialization item is P2 11, provider fallback policy.
+- delivery-service currently has one configured sender per channel and no secondary external provider implementation.
+- The selected scope is fail-closed after existing retry and Circuit Breaker handling. The fallback records channel, recipient, and cause, then rethrows so a provider outage cannot be reported as successful delivery.
+- Actual secondary providers, delayed delivery, and customer-facing alert delivery remain follow-up work.
+- Implemented `ProviderFallbackPolicy` and `LoggingProviderFallbackPolicy`, then connected the policy to `ChannelDelivererAdapter` Circuit Breaker fallback.
+- The fallback records channel, recipient, and provider cause, then rethrows so `ProcessDeliveryService` stores FAILED and publishes a failure event.
+- Focused delivery tests passed with 8 tests, and the full `mvn test` run passed across all 10 modules including both Docker-backed E2E tests.
