@@ -462,3 +462,13 @@
 - [x] Add fallback and FAILED-result tests.
 - [x] Run full Maven verification.
 - [x] Commit, push, and merge provider fallback implementation.
+
+## Privacy Retention and Deletion
+
+- [x] Create privacy retention design.
+- [x] Create privacy retention implementation plan.
+- [x] Add cutoff-based notification deletion port and adapter.
+- [x] Add scheduled UTC retention service with configurable period.
+- [x] Add retention tests and operational logging.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge privacy retention implementation.

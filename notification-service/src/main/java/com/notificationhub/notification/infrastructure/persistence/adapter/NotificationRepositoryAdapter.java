@@ -5,6 +5,7 @@ import com.notificationhub.notification.domain.port.out.NotificationRepository;
 import com.notificationhub.notification.infrastructure.persistence.mapper.NotificationMapper;
 import com.notificationhub.notification.infrastructure.persistence.repository.NotificationJpaRepository;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -29,5 +30,10 @@ public class NotificationRepositoryAdapter implements NotificationRepository {
     @Override
     public Optional<Notification> findByIdAndTenantId(String id, String tenantId) {
         return jpaRepository.findByIdAndTenantId(id, tenantId).map(NotificationMapper::toDomain);
+    }
+
+    @Override
+    public int deleteCreatedBefore(LocalDateTime cutoff) {
+        return jpaRepository.deleteByCreatedAtBefore(cutoff);
     }
 }
