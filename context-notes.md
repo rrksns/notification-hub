@@ -428,6 +428,16 @@
 - delivery-service currently has one configured sender per channel and no secondary external provider implementation.
 - The selected scope is fail-closed after existing retry and Circuit Breaker handling. The fallback records channel, recipient, and cause, then rethrows so a provider outage cannot be reported as successful delivery.
 - Actual secondary providers, delayed delivery, and customer-facing alert delivery remain follow-up work.
+
+## 2026-09-03 Privacy retention and deletion
+
+- The next commercialization item is P2 12, privacy retention and deletion.
+- The selected scope is notification-service data only: recipient and content are deleted after 90 days by a daily UTC scheduled job.
+- delivery and analytics history remain unchanged in this iteration because their retention policy needs a separate operational and compliance decision.
+- The deletion operation uses a cutoff-based bulk delete so repeated runs are safe and efficient.
+- Implemented `NotificationRetentionService` with configurable 90-day retention and UTC 03:00 scheduling, plus a cutoff-based repository bulk delete.
+- Added `NOTIFICATION_RETENTION_DAYS` and `NOTIFICATION_RETENTION_CRON` configuration while leaving delivery and analytics history unchanged.
+- Full `mvn test` passed with all 10 Maven modules and both Docker-backed E2E tests successful.
 - Implemented `ProviderFallbackPolicy` and `LoggingProviderFallbackPolicy`, then connected the policy to `ChannelDelivererAdapter` Circuit Breaker fallback.
 - The fallback records channel, recipient, and provider cause, then rethrows so `ProcessDeliveryService` stores FAILED and publishes a failure event.
 - Focused delivery tests passed with 8 tests, and the full `mvn test` run passed across all 10 modules including both Docker-backed E2E tests.
