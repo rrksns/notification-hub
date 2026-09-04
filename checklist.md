@@ -429,7 +429,7 @@
 - [x] Document RPO, RTO, backup storage, and restore verification procedure.
 - [x] Verify Bash syntax and backup dry-run.
 - [x] Verify restore missing-input guard and fixture dry-run.
-- [ ] Execute a real restore rehearsal in a separate environment.
+- [x] Execute a real restore rehearsal in a separate environment.
 - [x] Commit and push backup and restore implementation.
 
 ## Tenant Quota and Subscription Plan Limits

@@ -388,6 +388,15 @@
 - Bash syntax checks, backup dry-run, missing-input guard, and fixture restore dry-run passed locally.
 - A real restore rehearsal remains pending because it requires disposable infrastructure and production-equivalent credentials. No live data was modified.
 
+## 2026-09-04 Backup and restore rehearsal
+
+- Started the local Compose MySQL, MongoDB, Redis, and Kafka services in the rehearsal environment.
+- Fixed the backup and restore scripts to use the repository's fixed container names and Kafka's in-container `localhost:9092` endpoint. This avoids worktree Compose project-name and advertised-listener mismatches.
+- Created a real backup at `/tmp/notification-hub-restore-rehearsal.KRRKAl/20260904T133732Z` containing MySQL SQL, MongoDB archive, Redis RDB, Kafka topic metadata, and a manifest.
+- Ran `restore.sh --confirm` against that backup. MySQL and MongoDB restore completed, Redis was replaced and restarted, and Kafka topics were recreated or retained.
+- Post-restore checks passed: all four containers were healthy, MySQL returned `1`, MongoDB ping returned `1`, Redis returned `PONG`, and Kafka listed the expected topics.
+- The rehearsal used local disposable data services and did not touch production data or credentials.
+
 ## 2026-08-30 Post-merge verification
 
 - PR #2 was merged into `main` as merge commit `8928c0bbebef315b6b119b59dbed6c2649aa2865`.
