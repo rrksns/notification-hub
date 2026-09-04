@@ -69,18 +69,18 @@ if [[ "$confirm" != true ]]; then
 fi
 
 command -v docker >/dev/null 2>&1 || { echo "docker is required" >&2; exit 1; }
-docker compose exec -T mysql sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < "$input_dir/mysql/all-databases.sql"
-docker compose exec -T mongodb sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --archive --gzip --drop' < "$input_dir/mongodb/analytics.archive.gz"
+docker exec -i notification-hub-mysql sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < "$input_dir/mysql/all-databases.sql"
+docker exec -i notification-hub-mongodb sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --archive --gzip --drop' < "$input_dir/mongodb/analytics.archive.gz"
 
-docker compose stop redis >/dev/null
+docker stop notification-hub-redis >/dev/null
 docker cp "$input_dir/redis/dump.rdb" notification-hub-redis:/data/dump.rdb
-docker compose start redis >/dev/null
+docker start notification-hub-redis >/dev/null
 
 while IFS=$'\t' read -r topic partitions; do
   [[ -n "$topic" ]] || continue
   [[ "$topic" == __* ]] && continue
-  docker compose exec -T kafka /opt/kafka/bin/kafka-topics.sh \
-    --bootstrap-server kafka:9092 --create --if-not-exists \
+  docker exec notification-hub-kafka /opt/kafka/bin/kafka-topics.sh \
+    --bootstrap-server localhost:9092 --create --if-not-exists \
     --topic "$topic" --partitions "${partitions:-1}" --replication-factor 1 >/dev/null
 done < "$input_dir/kafka/topic-specs.txt"
 

@@ -58,35 +58,35 @@ timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 backup_dir="$backup_root/$timestamp"
 mkdir -p "$backup_dir/mysql" "$backup_dir/mongodb" "$backup_dir/redis" "$backup_dir/kafka"
 
-docker compose exec -T mysql sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --single-transaction --routines --events' \
+docker exec notification-hub-mysql sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --all-databases --single-transaction --routines --events' \
   > "$backup_dir/mysql/all-databases.sql"
-docker compose exec -T mongodb sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db analytics --archive --gzip' \
+docker exec notification-hub-mongodb sh -c 'mongodump --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --db analytics --archive --gzip' \
   > "$backup_dir/mongodb/analytics.archive.gz"
 
-docker compose exec -T redis redis-cli BGSAVE >/dev/null
+docker exec notification-hub-redis redis-cli BGSAVE >/dev/null
 for _ in {1..60}; do
-  if [[ "$(docker compose exec -T redis redis-cli INFO persistence | tr -d '\r' | awk -F: '/rdb_bgsave_in_progress/{print $2}')" == "0" ]]; then
+  if [[ "$(docker exec notification-hub-redis redis-cli INFO persistence | tr -d '\r' | awk -F: '/rdb_bgsave_in_progress/{print $2}')" == "0" ]]; then
     break
   fi
   sleep 1
 done
-if [[ "$(docker compose exec -T redis redis-cli INFO persistence | tr -d '\r' | awk -F: '/rdb_bgsave_in_progress/{print $2}')" != "0" ]]; then
+if [[ "$(docker exec notification-hub-redis redis-cli INFO persistence | tr -d '\r' | awk -F: '/rdb_bgsave_in_progress/{print $2}')" != "0" ]]; then
   echo "Redis BGSAVE did not complete within 60 seconds" >&2
   exit 1
 fi
 docker cp notification-hub-redis:/data/dump.rdb "$backup_dir/redis/dump.rdb"
 
-docker compose exec -T kafka bash -c '
+docker exec notification-hub-kafka bash -c '
   set -e
-  topics=$(/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list)
+  topics=$(/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list)
   printf "%s\n" "$topics" > /tmp/notification-hub-topics.txt
   : > /tmp/notification-hub-topic-specs.txt
   : > /tmp/notification-hub-topic-configs.txt
   while IFS= read -r topic; do
     [ -n "$topic" ] || continue
-    partitions=$(/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --describe --topic "$topic" | sed -n "1s/.*PartitionCount: \([0-9][0-9]*\).*/\1/p")
+    partitions=$(/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic "$topic" | sed -n "1s/.*PartitionCount: \([0-9][0-9]*\).*/\1/p")
     printf "%s\t%s\n" "$topic" "${partitions:-1}" >> /tmp/notification-hub-topic-specs.txt
-    /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9092 --entity-type topics --entity-name "$topic" --describe >> /tmp/notification-hub-topic-configs.txt || true
+    /opt/kafka/bin/kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics --entity-name "$topic" --describe >> /tmp/notification-hub-topic-configs.txt || true
   done < /tmp/notification-hub-topics.txt
 '
 docker cp notification-hub-kafka:/tmp/notification-hub-topics.txt "$backup_dir/kafka/topics.txt"
