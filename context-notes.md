@@ -431,6 +431,16 @@
 - Passwords, API key values, and failed login details are not persisted.
 - Full `mvn test` passed with all 10 Maven modules and both Docker-backed E2E tests successful.
 
+## 2026-09-05 Database index review
+
+- The next selected improvement item is P2 #13, database index review.
+- Repository inspection found that user login queries `users.email` without tenant criteria, while the existing composite tenant/email unique constraint cannot efficiently lead that lookup.
+- Notification retention deletes by `created_at` cutoff, but the notifications table only had a tenant index.
+- The approved scope adds only `users.email` and `notifications.created_at` indexes in both JPA metadata and Flyway migrations.
+- Added `idx_users_email` and `idx_notification_created_at` to the corresponding entities and Flyway migrations.
+- Added reflection tests that lock the two index declarations to the JPA mappings.
+- Focused index tests and the full `mvn test` run passed with 157 tests, 0 failures, 0 errors, and 2 Docker-dependent skips.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.
