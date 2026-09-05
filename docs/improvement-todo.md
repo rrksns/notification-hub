@@ -1,7 +1,7 @@
 # Notification Hub — 개선 사항 To-Do List
 
 **작성일**: 2026-03-23
-**최종 수정**: 2026-08-25 (핵심 E2E 통합 테스트 추가)
+**최종 수정**: 2026-09-05 (DB 인덱스 검토 및 보강)
 **기준**: 실무 관점 코드 리뷰 결과
 
 > 포트폴리오 프로젝트이므로 모든 항목을 구현할 필요는 없습니다.
@@ -69,7 +69,7 @@
 
 | # | 서비스 | 이슈 | 현재 상태 | 수정 방향 | 상태 |
 |---|--------|------|----------|----------|------|
-| 13 | 전체 (JPA) | DB 인덱스 누락 | notification, delivery, api key의 주요 tenant 조회 인덱스와 tenant/email 유니크 제약 일부 반영 | 남은 조회 패턴 기준으로 인덱스 추가 여부 재점검 | 부분 완료 |
+| 13 | 전체 (JPA) | DB 인덱스 누락 | users.email 로그인 조회와 notifications.created_at 보존 기간 삭제 인덱스를 JPA 및 Flyway에 반영. notification, delivery, api key의 주요 tenant 조회 인덱스와 유니크 제약도 확인 | 유지 | 완료 |
 | 14 | 전체 (JPA) | `@Version` 미적용 | JPA 엔티티 5개에 `@Version Long version` 필드 추가 | 유지 | 완료 |
 | 15 | user | Tenant ↔ User ↔ ApiKey FK 없음 | tenantId가 String — 참조 무결성 없음 | FK 제약 또는 최소한 애플리케이션 레벨 검증 | 미착수 |
 | 16 | analytics | `Long.parseLong()` 예외 미처리 | `RedisRealtimeCounterAdapter.parseLongSafe()`에서 경고 로그 후 0L 반환 | 유지 | 완료 |
@@ -91,7 +91,7 @@
 
 ```
 빌드:  mvn clean compile -DskipTests → BUILD SUCCESS (8모듈, 2026-03-24)
-테스트: mvn test → BUILD SUCCESS (9모듈, 2026-08-25)
+테스트: mvn test → BUILD SUCCESS (10모듈, 2026-09-05)
 E2E:   mvn test -pl e2e-tests -am → BUILD SUCCESS, MySQL, Redis, Kafka, MongoDB Testcontainers 기반 핵심 플로우 검증
 ```
 

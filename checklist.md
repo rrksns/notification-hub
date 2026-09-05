@@ -472,3 +472,12 @@
 - [x] Add retention tests and operational logging.
 - [x] Run full Maven verification.
 - [x] Commit, push, and merge privacy retention implementation.
+
+## Database Index Review
+
+- [x] Create database index review design.
+- [x] Create database index review implementation plan.
+- [x] Add users email index to entity and Flyway migration.
+- [x] Add notifications created_at index to entity and Flyway migration.
+- [x] Run full Maven verification.
+- [x] Update improvement status and push the change.
