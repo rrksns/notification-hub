@@ -441,6 +441,17 @@
 - Added reflection tests that lock the two index declarations to the JPA mappings.
 - Focused index tests and the full `mvn test` run passed with 157 tests, 0 failures, 0 errors, and 2 Docker-dependent skips.
 
+## 2026-09-06 Tenant FK integrity
+
+- The next selected improvement item is P2 #15, Tenant/User/ApiKey referential integrity.
+- The current entities intentionally store `tenantId` as strings, so the smallest compatible change is database-level FK constraints rather than changing domain associations.
+- The FK scope is `users.tenant_id` and `api_keys.tenant_id` referencing `tenants.id`; `audit_logs.tenant_id` remains outside this iteration because audit retention and deletion policy are separate concerns.
+- No `ON DELETE CASCADE` policy is added, so tenant deletion behavior is not implicitly changed.
+- Added Flyway V4 with `fk_users_tenant` and `fk_api_keys_tenant`, both referencing `tenants.id`.
+- Added a migration contract test covering both FK declarations.
+- Focused user-service verification passed. Full `mvn test` passed with 158 tests, 0 failures, 0 errors, and 2 Docker-dependent E2E skips because no Docker socket was available.
+- Actual migration application against MySQL remains an operational rollout check after orphan-row inspection.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.

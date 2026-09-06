@@ -481,3 +481,11 @@
 - [x] Add notifications created_at index to entity and Flyway migration.
 - [x] Run full Maven verification.
 - [x] Update improvement status and push the change.
+
+## Tenant FK Integrity
+
+- [x] Create tenant FK design and implementation plan.
+- [x] Add the FK migration contract test.
+- [x] Add users and api_keys tenant FK migration.
+- [x] Run focused and full Maven verification.
+- [x] Update improvement status and push the change.
