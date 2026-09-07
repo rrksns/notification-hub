@@ -1002,5 +1002,5 @@ notification-hub/
 ├── .github/workflows/ci.yml ← GitHub Actions CI/CD
 └── docs/
     ├── kafka-redis.md       ← Kafka & Redis 동작 상세 문서
-    └── improvement-todo.md  ← 코드 리뷰 기반 개선 사항 (P0/P1 완료, P2 미착수)
+    └── improvement-todo.md  ← 코드 리뷰 기반 개선 사항 (P0/P1/P2 기본 구현 완료)
 ```

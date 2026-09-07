@@ -452,6 +452,14 @@
 - Focused user-service verification passed. Full `mvn test` passed with 158 tests, 0 failures, 0 errors, and 2 Docker-dependent E2E skips because no Docker socket was available.
 - Actual migration application against MySQL remains an operational rollout check after orphan-row inspection.
 
+## 2026-09-07 Documentation status sync
+
+- The implementation status is complete through P2 technical items #13-#15, but README and the commercialization priority document still contain stale `P2 미착수` wording.
+- The selected scope is documentation-only: synchronize the README summary and priority execution history without changing application code or deployment configuration.
+- Updated the README tree summary and commercialization priority execution history to reflect completion through P2 technical items #13-#15.
+- The active documentation search found no stale `P2 미착수` reference outside the historical plan and the new plan's verification text.
+- Full `mvn test` passed with 158 tests, 0 failures, 0 errors, and 2 Docker-dependent E2E skips because no Docker socket was available.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.
