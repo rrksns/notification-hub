@@ -490,6 +490,15 @@
 - [x] Verify stale status references and run full Maven tests.
 - [x] Commit and push the documentation update.
 
+## Notification Outbox
+
+- [x] Create notification outbox design and implementation plan.
+- [ ] Add failing outbox persistence and dispatcher tests.
+- [ ] Add outbox entity, migration, and adapter.
+- [ ] Connect notification creation and Kafka dispatcher.
+- [ ] Run focused and full Maven verification.
+- [ ] Update portfolio documentation and push the change.
+
 ## Tenant FK Integrity
 
 - [x] Create tenant FK design and implementation plan.
