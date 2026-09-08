@@ -1,7 +1,7 @@
 package com.notificationhub.notification.domain.port.out;
 
-import com.notificationhub.notification.domain.model.Notification;
+import com.notificationhub.common.event.NotificationEvent;
 
 public interface NotificationEventPublisher {
-    void publish(Notification notification);
+    void publish(NotificationEvent event);
 }

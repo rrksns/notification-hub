@@ -7,7 +7,7 @@ import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.port.in.CreateNotificationUseCase;
 import com.notificationhub.notification.domain.port.out.IdempotencyPort;
 import com.notificationhub.notification.domain.port.out.NotificationApplicationMetrics;
-import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
+import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
 import com.notificationhub.notification.domain.port.out.NotificationQuotaPort;
 import org.springframework.stereotype.Service;
@@ -18,18 +18,18 @@ public class CreateNotificationService implements CreateNotificationUseCase {
 
     private final NotificationRepository notificationRepository;
     private final IdempotencyPort idempotencyPort;
-    private final NotificationEventPublisher eventPublisher;
+    private final NotificationOutboxPort outboxPort;
     private final NotificationApplicationMetrics metrics;
     private final NotificationQuotaPort quotaPort;
 
     public CreateNotificationService(NotificationRepository notificationRepository,
                                      IdempotencyPort idempotencyPort,
-                                     NotificationEventPublisher eventPublisher,
+                                     NotificationOutboxPort outboxPort,
                                      NotificationApplicationMetrics metrics,
                                      NotificationQuotaPort quotaPort) {
         this.notificationRepository = notificationRepository;
         this.idempotencyPort = idempotencyPort;
-        this.eventPublisher = eventPublisher;
+        this.outboxPort = outboxPort;
         this.metrics = metrics;
         this.quotaPort = quotaPort;
     }
@@ -57,12 +57,8 @@ public class CreateNotificationService implements CreateNotificationUseCase {
         Notification published = notification.publish();
         Notification saved = notificationRepository.save(published);
 
-        // NOTE: idempotencyPort(Redis)와 eventPublisher(Kafka) 모두 JPA 트랜잭션 밖에서 실행됩니다.
-        // idempotencyPort.save() 성공 후 eventPublisher.publish()가 실패하면
-        // DB는 롤백되지만 Redis 키는 남아 재시도가 불가능해집니다.
-        // 프로덕션에서는 Transactional Outbox Pattern 적용이 필요합니다.
         idempotencyPort.save(command.tenantId(), command.idempotencyKey());
-        eventPublisher.publish(saved);
+        outboxPort.save(saved);
         metrics.incrementSent();
 
         return new Result(saved.getId(), saved.getStatus().name());

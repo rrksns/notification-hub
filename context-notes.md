@@ -466,6 +466,9 @@
 - The approved scope is notification-service only: save an outbox payload in the same transaction, then publish pending rows with a scheduled dispatcher.
 - The outbox is at-least-once by design. A process failure after Kafka acknowledgement and before the status update can produce a duplicate, so the existing notification idempotency key remains in the event payload.
 - Delivery-service result publishing and retry-count/dead-letter outbox policies remain outside this iteration.
+- Added `notification_outbox` Flyway V3, JPA persistence, and a scheduled dispatcher with a one-second default polling delay.
+- The creation service now stores the outbox payload in the same transaction as the notification and no longer calls Kafka directly.
+- Focused outbox verification passed with 7 tests, notification-service verification passed with 24 tests, and full multi-module Maven verification passed with 161 tests, 0 failures, 0 errors, and 2 Docker-dependent E2E skips.
 
 ## 2026-09-02 Provider fallback policy
 

@@ -493,11 +493,11 @@
 ## Notification Outbox
 
 - [x] Create notification outbox design and implementation plan.
-- [ ] Add failing outbox persistence and dispatcher tests.
-- [ ] Add outbox entity, migration, and adapter.
-- [ ] Connect notification creation and Kafka dispatcher.
-- [ ] Run focused and full Maven verification.
-- [ ] Update portfolio documentation and push the change.
+- [x] Add failing outbox persistence and dispatcher tests.
+- [x] Add outbox entity, migration, and adapter.
+- [x] Connect notification creation and Kafka dispatcher.
+- [x] Run focused and full Maven verification.
+- [x] Update portfolio documentation and push the change.
 
 ## Tenant FK Integrity
 

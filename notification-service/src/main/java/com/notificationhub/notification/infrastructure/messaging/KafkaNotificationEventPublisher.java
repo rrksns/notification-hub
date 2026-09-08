@@ -1,7 +1,7 @@
 package com.notificationhub.notification.infrastructure.messaging;
 
 import com.notificationhub.common.event.NotificationEvent;
-import com.notificationhub.notification.domain.model.Notification;
+import com.notificationhub.common.event.NotificationEvent;
 import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,25 +26,17 @@ public class KafkaNotificationEventPublisher implements NotificationEventPublish
     }
 
     @Override
-    public void publish(Notification notification) {
-        NotificationEvent event = NotificationEvent.of(
-                notification.getId(),
-                notification.getTenantId(),
-                notification.getChannel().name(),
-                notification.getRecipient(),
-                notification.getContent(),
-                notification.getIdempotencyKey()
-        );
+    public void publish(NotificationEvent event) {
         try {
-            kafkaTemplate.send(TOPIC, notification.getTenantId(), event)
+            kafkaTemplate.send(TOPIC, event.tenantId(), event)
                     .get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            log.info("Published NotificationEvent: notificationId={}, tenantId={}", notification.getId(), notification.getTenantId());
+            log.info("Published NotificationEvent: notificationId={}, tenantId={}", event.notificationId(), event.tenantId());
         } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            log.error("Failed to publish NotificationEvent: notificationId={}, tenantId={}", notification.getId(), notification.getTenantId(), e);
+            log.error("Failed to publish NotificationEvent: notificationId={}, tenantId={}", event.notificationId(), event.tenantId(), e);
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            throw new RuntimeException("Kafka publish failed for notification: " + notification.getId(), e);
+            throw new RuntimeException("Kafka publish failed for notification: " + event.notificationId(), e);
         }
     }
 }
