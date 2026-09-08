@@ -7,7 +7,7 @@ import com.notificationhub.notification.domain.model.Notification;
 import com.notificationhub.notification.domain.port.in.CreateNotificationUseCase;
 import com.notificationhub.notification.domain.port.out.IdempotencyPort;
 import com.notificationhub.notification.domain.port.out.NotificationApplicationMetrics;
-import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
+import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
 import com.notificationhub.notification.domain.port.out.NotificationQuotaPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class CreateNotificationServiceTest {
 
     @Mock NotificationRepository notificationRepository;
     @Mock IdempotencyPort idempotencyPort;
-    @Mock NotificationEventPublisher eventPublisher;
+    @Mock NotificationOutboxPort outboxPort;
     @Mock NotificationApplicationMetrics metrics;
     @Mock NotificationQuotaPort quotaPort;
 
@@ -34,11 +34,11 @@ class CreateNotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new CreateNotificationService(notificationRepository, idempotencyPort, eventPublisher, metrics, quotaPort);
+        useCase = new CreateNotificationService(notificationRepository, idempotencyPort, outboxPort, metrics, quotaPort);
     }
 
     @Test
-    @DisplayName("정상 알림 생성 — 저장 + Kafka 이벤트 발행")
+    @DisplayName("정상 알림 생성 — 저장 + outbox 기록")
     void create_success() {
         given(idempotencyPort.isDuplicate("tenant-1", "key-001")).willReturn(false);
         given(quotaPort.tryConsume("tenant-1", "FREE")).willReturn(true);
@@ -51,7 +51,7 @@ class CreateNotificationServiceTest {
 
         assertThat(result.notificationId()).isNotBlank();
         then(idempotencyPort).should().save("tenant-1", "key-001");
-        then(eventPublisher).should().publish(any(Notification.class));
+        then(outboxPort).should().save(any(Notification.class));
     }
 
     @Test
@@ -98,6 +98,6 @@ class CreateNotificationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Monthly notification quota exceeded");
         then(notificationRepository).shouldHaveNoInteractions();
-        then(eventPublisher).shouldHaveNoInteractions();
+        then(outboxPort).shouldHaveNoInteractions();
     }
 }

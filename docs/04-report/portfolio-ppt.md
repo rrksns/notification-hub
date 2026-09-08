@@ -87,7 +87,7 @@ python3 -m venv /tmp/pptx-venv
 ## 후속 작업 (TODO)
 
 - [x] ~~PowerPoint에서 직접 열어 도형 정렬·줄바꿈 미세 조정~~ → 사용자 확인 결과 미세조정 불필요로 종료 (2026-06-05)
-- [ ] 강조 기술 포인트 추가 검토: ArchUnit, Outbox 패턴
+- [x] 강조 기술 포인트 추가 검토: ArchUnit, Transactional Outbox 패턴 반영 (2026-09-08)
 - [ ] 발표 리허설 후 슬라이드별 시간 배분 점검
 
 > 문구·수치 변경이 필요하면 `build_portfolio.py`만 수정 후 재빌드(재현 방법 참고).
