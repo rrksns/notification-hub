@@ -498,6 +498,7 @@
 - [x] Connect notification creation and Kafka dispatcher.
 - [x] Run focused and full Maven verification.
 - [x] Update portfolio documentation and push the change.
+- [x] Synchronize the portfolio build source with the implemented Outbox status.
 
 ## Tenant FK Integrity
 
