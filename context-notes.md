@@ -470,6 +470,11 @@
 - The creation service now stores the outbox payload in the same transaction as the notification and no longer calls Kafka directly.
 - Focused outbox verification passed with 7 tests, notification-service verification passed with 24 tests, and full multi-module Maven verification passed with 161 tests, 0 failures, 0 errors, and 2 Docker-dependent E2E skips.
 
+## 2026-09-09 Portfolio source sync
+
+- `docs/04-report/build_portfolio.py` still described Outbox as a future introduction even though notification-service now has the transactional outbox implementation.
+- The scope is limited to changing the generated portfolio source and summary wording to describe Outbox operational hardening as the remaining follow-up.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.

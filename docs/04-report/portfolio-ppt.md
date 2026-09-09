@@ -35,7 +35,7 @@
 | 5–6 | 시스템 아키텍처 | 6개 MSA + Clean Architecture, ArchUnit 검증 |
 | 7–9 | 핵심 플로우 / 신뢰성 | Kafka 파이프라인, 멱등성·Circuit Breaker·재시도/DLQ, 원자적 집계 |
 | 10–11 | 운영 & 품질 | Prometheus/Grafana/Zipkin, K8s/HPA, CI/CD, 커버리지 83.5~94.7% |
-| 12 | 성과 요약 & 배운 점 | 개선 방향(실채널 연동·Outbox·E2E) 포함 |
+| 12 | 성과 요약 & 배운 점 | 개선 방향(실채널 연동·Outbox 운영 고도화·E2E) 포함 |
 | 13 | Q & A | |
 
 ## 콘텐츠 원칙
