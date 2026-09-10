@@ -475,6 +475,12 @@
 - `docs/04-report/build_portfolio.py` still described Outbox as a future introduction even though notification-service now has the transactional outbox implementation.
 - The scope is limited to changing the generated portfolio source and summary wording to describe Outbox operational hardening as the remaining follow-up.
 
+## 2026-09-10 Portfolio presentation rehearsal
+
+- The only remaining explicit TODO is a real presentation rehearsal, which requires the user to present aloud and observe elapsed time.
+- Prepared a 10-minute timing plan for all 13 slides. It allocates the most time to the reliability slide because Outbox, retry, Circuit Breaker, and DLQ are the strongest technical discussion points.
+- The real timed rehearsal remains pending and is intentionally not marked complete by this automated session.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.
