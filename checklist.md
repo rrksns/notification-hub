@@ -500,6 +500,11 @@
 - [x] Update portfolio documentation and push the change.
 - [x] Synchronize the portfolio build source with the implemented Outbox status.
 
+## Portfolio Presentation Rehearsal
+
+- [x] Create the 10-minute slide timing and rehearsal plan.
+- [ ] Perform a real timed rehearsal and adjust slide timing from observed results.
+
 ## Tenant FK Integrity
 
 - [x] Create tenant FK design and implementation plan.
