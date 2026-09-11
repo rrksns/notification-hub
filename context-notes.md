@@ -480,6 +480,7 @@
 - The only remaining explicit TODO is a real presentation rehearsal, which requires the user to present aloud and observe elapsed time.
 - Prepared a 10-minute timing plan for all 13 slides. It allocates the most time to the reliability slide because Outbox, retry, Circuit Breaker, and DLQ are the strongest technical discussion points.
 - The real timed rehearsal remains pending and is intentionally not marked complete by this automated session.
+- Generated the portfolio deck in a temporary path and verified 13 slides with 5 presenter-note slides. Visual rendering remains pending because LibreOffice is unavailable.
 
 ## 2026-09-02 Provider fallback policy
 

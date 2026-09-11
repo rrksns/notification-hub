@@ -503,6 +503,7 @@
 ## Portfolio Presentation Rehearsal
 
 - [x] Create the 10-minute slide timing and rehearsal plan.
+- [x] Generate the portfolio deck and verify 13 slides with 5 presenter-note slides.
 - [ ] Perform a real timed rehearsal and adjust slide timing from observed results.
 
 ## Tenant FK Integrity
