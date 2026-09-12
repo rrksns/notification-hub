@@ -482,6 +482,11 @@
 - The real timed rehearsal remains pending and is intentionally not marked complete by this automated session.
 - Generated the portfolio deck in a temporary path and verified 13 slides with 5 presenter-note slides. Visual rendering remains pending because LibreOffice is unavailable.
 
+## 2026-09-12 Presentation Q&A preparation
+
+- Added expected technical questions and concise answer points for Outbox delivery semantics, Kafka failure handling, provider scope, idempotency, quota enforcement, Clean Architecture, and operational limitations.
+- A real timed rehearsal remains the only unchecked item because it requires the presenter to speak through the deck and measure elapsed time.
+
 ## 2026-09-02 Provider fallback policy
 
 - The next commercialization item is P2 11, provider fallback policy.

@@ -37,3 +37,15 @@
 - [ ] Outbox의 at-least-once 특성과 중복 가능성을 설명할 준비.
 - [ ] 실제 provider 연동이 stub이라는 한계와 후속 계획을 준비.
 - [ ] 질문이 나오면 코드보다 트레이드오프와 검증 근거부터 답변.
+
+## 예상 질문과 답변 핵심
+
+| 예상 질문 | 답변 핵심 |
+|---|---|
+| Kafka 발행이 저장보다 늦거나 실패하면 어떻게 하나요? | 알림과 outbox를 같은 트랜잭션으로 저장하고, dispatcher가 pending 이벤트를 재발행한다. at-least-once라 중복 가능성은 idempotency key로 설명한다. |
+| 왜 Kafka 발행을 fire-and-forget으로 두지 않았나요? | 현재 구현은 발행 결과를 동기 확인해 실패를 호출자와 로그에 명확히 전파한다. Outbox가 재시도 경로를 담당하므로 저장 성공과 발행 실패를 분리할 수 있다. |
+| 실제 이메일·SMS·Push provider를 연동했나요? | sender 경계와 설정 구조는 준비했지만 외부 과금·자격 증명이 필요한 실 provider 연동은 stub 범위다. 다음 단계에서 provider별 adapter와 운영 secret을 연결한다. |
+| 멱등성은 어디서 보장하나요? | Redis idempotency key로 빠른 중복 요청을 차단하고, DB unique 제약으로 최종 저장 경로도 보호한다. delivery 쪽은 notificationId 기준 중복 처리를 둔다. |
+| 쿼터 초과 요청은 언제 차단하나요? | notification 저장 전에 Redis 원자적 월간 counter를 증가시키고, 한도를 넘으면 DB와 Kafka 작업을 수행하지 않는다. |
+| 왜 Clean Architecture를 적용했나요? | domain이 Spring·Kafka·JPA를 몰라 단위 테스트가 쉽고, provider나 저장소 교체가 application 로직에 전파되지 않도록 하기 위해서다. |
+| 현재 가장 큰 운영 한계는 무엇인가요? | Docker 기반 E2E는 CI에서 검증하지만 로컬에는 Docker가 없으면 스킵된다. 실제 provider 연동과 운영 클러스터 enforcement는 배포 환경에서 별도 검증해야 한다. |
