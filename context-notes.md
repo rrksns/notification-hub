@@ -506,3 +506,16 @@
 - Implemented `ProviderFallbackPolicy` and `LoggingProviderFallbackPolicy`, then connected the policy to `ChannelDelivererAdapter` Circuit Breaker fallback.
 - The fallback records channel, recipient, and provider cause, then rethrows so `ProcessDeliveryService` stores FAILED and publishes a failure event.
 - Focused delivery tests passed with 8 tests, and the full `mvn test` run passed across all 10 modules including both Docker-backed E2E tests.
+
+## 2026-09-13 Refactoring and commercialization review
+
+- Reviewed commit `72010691926472d3166ac950de9fff86cedea066` across application code, persistence, messaging, security configuration, CI, and operational plans.
+- The review found no immediate compile or unit-test regression. `mvn test` passed with 161 tests and 2 Docker-dependent E2E skips because no Docker environment was available.
+- Highest-risk code findings are unlocked multi-instance notification outbox polling, direct delivery-result Kafka publishing outside the JPA transaction, and retention gaps for published outbox payloads.
+- Highest-risk operational findings are missing post-publish deployment verification, unverified NetworkPolicy enforcement on the target CNI, and backup/restore prerequisites that remain operator-dependent.
+- Default database credentials and JWT fallback secrets remain in local service configuration. The next implementation design must separate disposable local defaults from production-required secrets.
+- iOS remains explicitly excluded by user direction. Twilio verification and real presentation rehearsal are separate follow-up items, not implementation blockers for the first code improvement.
+- Created `docs/plans/2026-09-13-refactoring-priority-review.md` with the proposed sequence. Implementation is intentionally waiting for approval of priority 1.
+- Additional gate review identified delivery-log cross-tenant access, JWT fallback forgery risk, missing login abuse controls, plaintext Kafka, public ingress without TLS, committed DocumentDB credentials, and API-key authentication gaps.
+- Additional code review confirmed Redis quota/idempotency writes can outlive a rolled-back transaction, delivery read-then-insert deduplication is race-prone, and notification retention leaves outbox payloads and pending events behind.
+- The prioritized design was revised so external access and credential hardening precede outbox and delivery refactoring. These are documented requirements only; no production code was changed in this review.
