@@ -514,3 +514,12 @@
 - [x] Add users and api_keys tenant FK migration.
 - [x] Run focused and full Maven verification.
 - [x] Update improvement status and push the change.
+
+## Refactoring and Commercialization Review
+
+- [x] Review current code and operational documentation at the latest feature commit.
+- [x] Run the multi-module Maven test baseline.
+- [x] Classify findings into P0, P1, and P2 priorities.
+- [x] Write the prioritized design with scope, risks, and acceptance criteria.
+- [ ] Get approval before implementing the first priority.
+- [x] Exclude iOS work from this improvement cycle.
