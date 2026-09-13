@@ -24,6 +24,10 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
 
+notification:
+  retention-days: ${NOTIFICATION_RETENTION_DAYS:90}
+  retention-cron: ${NOTIFICATION_RETENTION_CRON:0 0 3 * * *}
+
 jwt:
   security:
     excluded-paths:

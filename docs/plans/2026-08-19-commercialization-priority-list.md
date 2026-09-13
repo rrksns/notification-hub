@@ -12,13 +12,13 @@
 | 1 | 내부 서비스 직접 호출 차단 | api-gateway 우회 시 tenant header 위조와 무인증 직접 호출 가능성이 남는다 | user, notification, delivery, analytics `SecurityConfig`가 `permitAll()`이다 |
 | 2 | K8s Secret 평문 제거 | 운영 secret이 Git에 평문으로 남으면 배포 전제 자체가 깨진다 | `k8s/secret.yaml` 추적 제거와 배포 시 Secret 생성 절차 필요 |
 | 3 | DB 마이그레이션 체계 도입 | `DDL_AUTO=validate`만으로는 운영 스키마 변경, 롤백, 배포 순서를 관리할 수 없다 | Flyway migration 추가와 기존 DB 전환 절차 필요 |
-| 4 | 핵심 E2E 통합 테스트 추가 | 단위 테스트만으로 Kafka, Redis, MySQL, Mongo 연동 장애를 잡기 어렵다 | Testcontainers 또는 Embedded Kafka 기반 테스트가 없다 |
+| 4 | 핵심 E2E 통합 테스트 추가 | 단위 테스트만으로 Kafka, Redis, MySQL, Mongo 연동 장애를 잡기 어렵다 | `e2e-tests` 모듈에서 Testcontainers 기반 접수와 파이프라인 검증을 수행한다 |
 
 ## P1. 운영 안정성 강화
 
 | 순위 | 작업 | 이유 | 권장 방향 |
 |---|---|---|---|
-| 5 | DLQ 운영 도구 추가 | 최종 실패 메시지가 로그에만 남으면 운영자가 재처리하기 어렵다 | DLQ 조회, 검색, 재처리 API 또는 운영 CLI |
+| 5 | DLQ 운영 도구 추가 | 최종 실패 메시지가 로그에만 남으면 운영자가 재처리하기 어렵다 | `dlq-ops` CLI로 DLQ 조회, JSONL export, dry-run 기본 replay를 수행한다 |
 | 6 | 알림/경보 체계 추가 | Prometheus/Grafana는 있으나 장애를 사람에게 알리는 Alertmanager 규칙이 필요하다 | 5xx, Kafka lag, DLQ 증가, 외부 provider 실패율 알림 |
 | 7 | 이미지 배포 전략 정리 | CI는 이미지를 빌드만 하고 push/release promotion이 없다 | registry push, immutable tag, rollback 절차 |
 | 8 | 백업과 복구 리허설 | MySQL, MongoDB, Redis/Kafka 상태 복구 절차가 운영 문서로 필요하다 | RPO/RTO, 백업 주기, 복구 테스트 기록 |
@@ -34,5 +34,18 @@
 
 ## 다음 실행 항목
 
-3번 `DB 마이그레이션 체계 도입`을 진행했다.
-다음 P0 작업은 4번 `핵심 E2E 통합 테스트 추가`다.
+4번 `핵심 E2E 통합 테스트 추가`를 진행했다.
+P1 5번 `DLQ 운영 도구 추가`를 진행했다.
+P1 6번 `알림/경보 체계 추가`를 진행했다.
+P1 7번 `이미지 배포 전략 정리`를 진행했다.
+P1 8번 `백업과 복구 리허설`의 운영 스크립트 구현을 진행했다.
+2026-09-04 로컬 격리 Compose 환경에서 실제 백업과 복구 리허설을 수행했으며, 데이터 서비스 검증까지 완료했다.
+P2 9번 `테넌트별 쿼터와 요금제 제한`을 구현했다.
+P2 10번 `감사 로그`를 구현했다. user-service에서 성공한 테넌트 등록, 로그인, API key 생성을 감사 로그로 저장한다.
+P2 11번 `Provider fallback 정책`을 구현했다. delivery-service는 재시도 소진 후 실패를 운영 로그에 기록하고 FAILED 상태를 유지한다.
+실제 보조 provider와 지연 발송, 고객 알림은 후속 범위로 남겼다.
+P2 12번 `개인정보 보존/삭제 정책`을 구현했다. notification-service는 90일이 지난 recipient와 content를 UTC 스케줄 작업으로 삭제한다.
+P2 비즈니스 운영 기능의 기본 구현을 완료했다.
+P2 기술 개선 항목 #13 `DB 인덱스 누락`을 보강했다. users.email과 notifications.created_at 조회 경로에 인덱스를 추가했다.
+P2 기술 개선 항목 #15 `Tenant ↔ User ↔ ApiKey FK 없음`을 보강했다. users와 api_keys의 tenant_id에 tenants.id 외래 키를 추가했다.
+P2 기술 개선 목록 #13-#27의 기본 구현을 완료했다. 운영 환경별 데이터 점검과 클러스터 enforcement 확인은 별도 운영 검증 항목으로 남겼다.

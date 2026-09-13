@@ -563,7 +563,7 @@ def s_conclusion(prs):
         ("성과", "Clean Architecture + Event-Driven MSA로 확장·교체·테스트가 용이한 알림 플랫폼 설계·구현"),
         ("기술 학습", "분산 환경의 멱등성/재시도/DLQ, Circuit Breaker, 원자적 집계로 신뢰성 확보"),
         ("운영 학습", "관측성(Prometheus/Zipkin)과 오케스트레이션(K8s/HPA)으로 운영 관점까지 경험"),
-        ("개선 방향", "실제 채널(SendGrid/Twilio/FCM) 연동, Outbox 패턴 도입, E2E 자동화 확대"),
+        ("개선 방향", "실제 채널(SendGrid/Twilio/FCM) 연동, Outbox 운영 고도화, E2E 자동화 확대"),
     ]
     top, step = 2.3, 0.92
     for i, (k, v) in enumerate(items):

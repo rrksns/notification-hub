@@ -358,3 +358,159 @@
 - [x] Update deployment and commercialization documentation.
 - [x] Verify Maven tests and migration checks.
 - [x] Commit DB migration change.
+
+## Core E2E Integration Tests
+
+- [x] Create isolated worktree for E2E integration test work.
+- [x] Verify baseline full Maven tests.
+- [x] Create E2E integration test design.
+- [x] Create E2E integration test implementation plan.
+- [x] Add dedicated `e2e-tests` Maven module.
+- [x] Add notification-service Testcontainers acceptance test.
+- [x] Verify notification-service E2E test.
+- [x] Add delivery-service and analytics-service pipeline E2E test.
+- [x] Verify delivery and analytics pipeline E2E test.
+- [x] Update commercialization documentation and manual test record.
+- [x] Verify full Maven tests and diff check.
+- [x] Commit E2E integration test implementation.
+
+## DLQ Ops Tool
+
+- [x] Create isolated worktree for DLQ ops tool work.
+- [x] Verify baseline full Maven tests.
+- [x] Create DLQ ops tool design.
+- [x] Create DLQ ops tool implementation plan.
+- [x] Add dedicated `dlq-ops` Maven module.
+- [x] Add minimal CLI skeleton and help surface.
+- [x] Add CLI option parsing and event filters.
+- [x] Add JSON Lines export/import codec.
+- [x] Add DLQ list and export commands.
+- [x] Add DLQ replay command with dry-run default.
+- [x] Update operator documentation.
+- [x] Verify focused `dlq-ops` tests.
+- [x] Verify full Maven tests.
+- [x] Manually exercise CLI help and invalid-command surfaces.
+- [x] Commit DLQ ops tool implementation.
+
+## CI Build Fix
+
+- [x] Reproduce the clean reactor CI failure in the E2E test module.
+- [x] Make service classes available to E2E test compilation.
+- [x] Verify clean Maven reactor build.
+- [x] Commit and push the CI build fix.
+
+## Alerting
+
+- [x] Explore existing Prometheus and application metrics.
+- [x] Approve Webhook and SMTP delivery design.
+- [x] Write alerting design document.
+- [x] Write alerting implementation plan.
+- [x] Add Prometheus alert rules.
+- [x] Add Alertmanager routing and receivers.
+- [x] Connect Alertmanager to Docker Compose.
+- [x] Document environment variables and operations.
+- [x] Verify monitoring configuration and container readiness.
+- [x] Commit and push alerting implementation.
+
+## Image Deployment Strategy
+
+- [x] Create image deployment strategy plan.
+- [x] Add GHCR login and immutable SHA image publishing to CI.
+- [x] Document GHCR pull Secret and SHA-based Kubernetes deployment.
+- [x] Document rollout verification and rollback procedure.
+- [x] Verify the workflow on the next `main` push.
+- [x] Commit and push image deployment strategy change.
+
+## Backup and Restore Rehearsal
+
+- [x] Create backup and restore design and implementation plans.
+- [x] Add MySQL, MongoDB, Redis, and Kafka metadata backup script.
+- [x] Add guarded restore script with dry-run default.
+- [x] Document RPO, RTO, backup storage, and restore verification procedure.
+- [x] Verify Bash syntax and backup dry-run.
+- [x] Verify restore missing-input guard and fixture dry-run.
+- [x] Execute a real restore rehearsal in a separate environment.
+- [x] Commit and push backup and restore implementation.
+
+## Tenant Quota and Subscription Plan Limits
+
+- [x] Create quota design and implementation plans.
+- [x] Add signed subscription plan propagation.
+- [x] Add atomic Redis monthly quota counter.
+- [x] Enforce quota before notification persistence and publishing.
+- [x] Add quota tests and documentation.
+- [x] Run full multi-module Maven verification.
+- [x] Commit, push, and merge quota implementation.
+
+## Audit Logs
+
+- [x] Create audit log design.
+- [x] Create audit log implementation plan.
+- [x] Add audit log event model and output port.
+- [x] Add user-service JPA persistence and Flyway migration.
+- [x] Record successful tenant registration, login, and API key creation.
+- [x] Add unit tests for audit log events and failure exclusions.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge audit log implementation.
+
+## Provider Fallback Policy
+
+- [x] Create provider fallback design.
+- [x] Create provider fallback implementation plan.
+- [x] Add fail-closed fallback policy port and implementation.
+- [x] Connect the policy to the Circuit Breaker fallback.
+- [x] Add fallback and FAILED-result tests.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge provider fallback implementation.
+
+## Privacy Retention and Deletion
+
+- [x] Create privacy retention design.
+- [x] Create privacy retention implementation plan.
+- [x] Add cutoff-based notification deletion port and adapter.
+- [x] Add scheduled UTC retention service with configurable period.
+- [x] Add retention tests and operational logging.
+- [x] Run full Maven verification.
+- [x] Commit, push, and merge privacy retention implementation.
+
+## Database Index Review
+
+- [x] Create database index review design.
+- [x] Create database index review implementation plan.
+- [x] Add users email index to entity and Flyway migration.
+- [x] Add notifications created_at index to entity and Flyway migration.
+- [x] Run full Maven verification.
+- [x] Update improvement status and push the change.
+
+## Documentation Status Sync
+
+- [x] Create documentation status sync plan.
+- [x] Update README improvement status.
+- [x] Update commercialization priority execution history.
+- [x] Verify stale status references and run full Maven tests.
+- [x] Commit and push the documentation update.
+
+## Notification Outbox
+
+- [x] Create notification outbox design and implementation plan.
+- [x] Add failing outbox persistence and dispatcher tests.
+- [x] Add outbox entity, migration, and adapter.
+- [x] Connect notification creation and Kafka dispatcher.
+- [x] Run focused and full Maven verification.
+- [x] Update portfolio documentation and push the change.
+- [x] Synchronize the portfolio build source with the implemented Outbox status.
+
+## Portfolio Presentation Rehearsal
+
+- [x] Create the 10-minute slide timing and rehearsal plan.
+- [x] Generate the portfolio deck and verify 13 slides with 5 presenter-note slides.
+- [x] Add expected technical questions and answer points to the rehearsal plan.
+- [ ] Perform a real timed rehearsal and adjust slide timing from observed results.
+
+## Tenant FK Integrity
+
+- [x] Create tenant FK design and implementation plan.
+- [x] Add the FK migration contract test.
+- [x] Add users and api_keys tenant FK migration.
+- [x] Run focused and full Maven verification.
+- [x] Update improvement status and push the change.

@@ -72,14 +72,15 @@ class JwtHeaderAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("유효한 JWT는 테넌트와 사용자 헤더를 JWT claim 기준으로 재주입한다")
+    @DisplayName("유효한 JWT는 테넌트와 사용자와 요금제 헤더를 JWT claim 기준으로 재주입한다")
     void doFilter_withValidJwt_reinjectsTrustedHeaders() throws Exception {
         JwtHeaderAuthenticationFilter filter = filterWithExcludedPaths();
-        String token = jwtTokenProvider.generateAccessToken("user-123", "tenant-123", "ADMIN");
+        String token = jwtTokenProvider.generateAccessToken("user-123", "tenant-123", "ADMIN", "PREMIUM");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/notifications");
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         request.addHeader("X-Tenant-Id", "forged-tenant");
         request.addHeader("X-User-Id", "forged-user");
+        request.addHeader("X-Tenant-Plan", "forged-plan");
         MockHttpServletResponse response = new MockHttpServletResponse();
         RecordingFilterChain chain = new RecordingFilterChain();
 
@@ -89,6 +90,7 @@ class JwtHeaderAuthenticationFilterTest {
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(forwardedRequest.getHeader("X-Tenant-Id")).isEqualTo("tenant-123");
         assertThat(forwardedRequest.getHeader("X-User-Id")).isEqualTo("user-123");
+        assertThat(forwardedRequest.getHeader("X-Tenant-Plan")).isEqualTo("PREMIUM");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assertThat(authentication).isNotNull();
         assertThat(authentication.isAuthenticated()).isTrue();

@@ -35,7 +35,7 @@
 | 5–6 | 시스템 아키텍처 | 6개 MSA + Clean Architecture, ArchUnit 검증 |
 | 7–9 | 핵심 플로우 / 신뢰성 | Kafka 파이프라인, 멱등성·Circuit Breaker·재시도/DLQ, 원자적 집계 |
 | 10–11 | 운영 & 품질 | Prometheus/Grafana/Zipkin, K8s/HPA, CI/CD, 커버리지 83.5~94.7% |
-| 12 | 성과 요약 & 배운 점 | 개선 방향(실채널 연동·Outbox·E2E) 포함 |
+| 12 | 성과 요약 & 배운 점 | 개선 방향(실채널 연동·Outbox 운영 고도화·E2E) 포함 |
 | 13 | Q & A | |
 
 ## 콘텐츠 원칙
@@ -82,12 +82,13 @@ python3 -m venv /tmp/pptx-venv
 ## 검증 메모
 
 - 구조 검증: 13장 정상 생성, S11 네이티브 차트 1개, S4/S6/S9 커넥터, 캔버스(13.33×7.5) 이탈 도형 0개.
+- 생성 검증: 2026-09-11 `build_portfolio.py` 실행 결과 13장과 발표자 노트 5개 생성 확인.
 - 시각 검증: 로컬에 LibreOffice 미설치로 이미지 렌더 미수행 → 좌표 산식·도형 인벤토리로 검증. PowerPoint/Keynote로 직접 열어 최종 확인 권장.
 
 ## 후속 작업 (TODO)
 
 - [x] ~~PowerPoint에서 직접 열어 도형 정렬·줄바꿈 미세 조정~~ → 사용자 확인 결과 미세조정 불필요로 종료 (2026-06-05)
-- [ ] 강조 기술 포인트 추가 검토: ArchUnit, Outbox 패턴
-- [ ] 발표 리허설 후 슬라이드별 시간 배분 점검
+- [x] 강조 기술 포인트 추가 검토: ArchUnit, Transactional Outbox 패턴 반영 (2026-09-08)
+- [ ] 실제 발표 리허설 후 슬라이드별 시간 배분 점검. 초안 시간표는 `docs/plans/2026-09-10-presentation-rehearsal.md`에 정리했다.
 
 > 문구·수치 변경이 필요하면 `build_portfolio.py`만 수정 후 재빌드(재현 방법 참고).

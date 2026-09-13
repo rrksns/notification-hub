@@ -70,6 +70,7 @@ class SecurityConfigTest {
         when(jwtTokenProvider.isValid("valid-token")).thenReturn(true);
         when(jwtTokenProvider.getTenantId("valid-token")).thenReturn("tenant-123");
         when(jwtTokenProvider.getSubject("valid-token")).thenReturn("user-123");
+        when(jwtTokenProvider.getPlan("valid-token")).thenReturn("FREE");
 
         mockMvc.perform(post("/api/keys/security-probe")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer valid-token")

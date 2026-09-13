@@ -21,9 +21,10 @@ public class ApiKeyController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CreateApiKeyUseCase.Result> create(
             @RequestHeader("X-Tenant-Id") String tenantId,
+            @RequestHeader("X-User-Id") String actorId,
             @Valid @RequestBody CreateApiKeyRequest request
     ) {
-        CreateApiKeyUseCase.Command cmd = new CreateApiKeyUseCase.Command(tenantId, request.name(), request.expiresAt());
+        CreateApiKeyUseCase.Command cmd = new CreateApiKeyUseCase.Command(tenantId, request.name(), request.expiresAt(), actorId);
         return ApiResponse.ok(createApiKeyUseCase.create(cmd));
     }
 }

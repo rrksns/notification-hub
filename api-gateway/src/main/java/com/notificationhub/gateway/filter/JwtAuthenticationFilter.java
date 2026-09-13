@@ -41,13 +41,16 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
                 String tenantId = jwtTokenProvider.getTenantId(token);
                 String userId = jwtTokenProvider.getSubject(token);
+                String plan = jwtTokenProvider.getPlan(token);
                 return chain.filter(
                     exchange.mutate()
                         .request(r -> r.headers(headers -> {
                             headers.remove("X-Tenant-Id");
                             headers.remove("X-User-Id");
+                            headers.remove("X-Tenant-Plan");
                             headers.add("X-Tenant-Id", tenantId);
                             headers.add("X-User-Id", userId);
+                            headers.add("X-Tenant-Plan", plan);
                         }))
                         .build()
                 );

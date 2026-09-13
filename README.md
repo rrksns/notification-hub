@@ -34,7 +34,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 | 모니터링 | Prometheus + Grafana + Micrometer + Zipkin | — |
 | 컨테이너 | Docker Compose / Kubernetes | — |
 | IaC | Terraform (local Docker + AWS 설계) | — |
-| CI/CD | GitHub Actions (test + Docker 이미지 빌드) | — |
+| CI/CD | GitHub Actions (test + GHCR 이미지 publish) | — |
 
 ---
 
@@ -274,7 +274,51 @@ Kafka: notifications 토픽 수신
 [@RetryableTopic — Kafka 토픽 기반 비차단 재시도]
   └─ 1회 실패 → notifications-retry-1000 토픽 (1초 후 재소비)
   └─ 2회 실패 → notifications-retry-2000 토픽 (2초 후 재소비)
-  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer가 로깅, 수동 확인 필요)
+  └─ 3회 실패 → notifications.dlq 토픽 (DlqConsumer 로깅, dlq-ops 조회와 재처리)
+```
+
+**DLQ 운영 CLI**
+
+`dlq-ops` 모듈은 `notifications.dlq` 메시지를 조회, JSON Lines 파일로 export, 원본 `notifications` 토픽으로 replay한다. replay는 기본적으로 dry-run이며 실제 재발행은 `--execute`가 있을 때만 수행한다.
+
+빌드.
+
+```bash
+mvn -pl dlq-ops -am package
+```
+
+조회.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar list \
+  --bootstrap-servers localhost:9092 \
+  --limit 20
+```
+
+테넌트 기준 export.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar export \
+  --bootstrap-servers localhost:9092 \
+  --tenant-id tenant-001 \
+  --output dlq-export.jsonl
+```
+
+dry-run replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl
+```
+
+실제 replay.
+
+```bash
+java -jar dlq-ops/target/dlq-ops-1.0.0-SNAPSHOT.jar replay \
+  --bootstrap-servers localhost:9092 \
+  --input dlq-export.jsonl \
+  --execute
 ```
 
 **Circuit Breaker 상태 전이:**
@@ -398,6 +442,21 @@ Kafka: delivery-results 토픽 수신
 
 **Grafana 대시보드:** `http://localhost:3000` (admin / admin1234)
 
+**Alertmanager 알림:**
+
+Alertmanager는 `ServiceDown`과 HTTP 5xx 경보를 Webhook과 SMTP 이메일로 동시에 전달합니다. 실행 전에 `.env.example`을 `.env`로 복사하고 Webhook, SMTP 값과 호스트 Secret 파일 경로를 설정합니다. SMTP 비밀번호는 `${SMTP_AUTH_PASSWORD_SOURCE}` 파일에 저장하고 저장소에 커밋하지 않습니다.
+
+```bash
+cp .env.example .env
+mkdir -p .secrets
+printf '%s' 'smtp-password' > .secrets/smtp-password
+docker compose up -d prometheus alertmanager
+curl -fsS http://localhost:9090/-/ready
+curl -fsS http://localhost:9093/-/ready
+```
+
+Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090/alerts`, `http://localhost:9090/rules`, `http://localhost:9093/#/alerts`에서 확인합니다. 외부 Webhook과 SMTP 전달은 실제 운영 Secret을 주입한 환경에서 별도로 확인합니다.
+
 | 패널 | 내용 |
 |------|------|
 | Notifications Sent | 발송 건수 추이 |
@@ -435,7 +494,7 @@ Kafka: delivery-results 토픽 수신
 | `notifications` | 3 | notification-service | delivery-service | 알림 발송 요청 |
 | `notifications-retry-1000` | 자동 | delivery-service | delivery-service | 1차 재시도 (1초 지연) |
 | `notifications-retry-2000` | 자동 | delivery-service | delivery-service | 2차 재시도 (2초 지연) |
-| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer) | 최종 실패 메시지 로깅 |
+| `notifications.dlq` | 1 | delivery-service | delivery-service (DlqConsumer), dlq-ops | 최종 실패 메시지 로깅, 조회, export, replay |
 | `delivery-results` | 3 | delivery-service | analytics-service | 발송 결과 집계 |
 
 ### Kubernetes
@@ -463,7 +522,51 @@ Kafka: delivery-results 토픽 수신
 
 ### CI/CD
 
-`.github/workflows/ci.yml` — 전체 테스트 실행 + 7개 서비스 Docker 이미지 빌드 (matrix strategy)
+`.github/workflows/ci.yml` — 전체 테스트 실행 + 6개 서비스 Docker 이미지 빌드 및 GHCR publish (matrix strategy)
+
+`main` push가 성공하면 각 애플리케이션 이미지를 `ghcr.io/rrksns/notification-hub/<service>`에 다음 태그로 게시합니다.
+
+- `${GITHUB_SHA}`: 배포와 롤백에 사용하는 immutable release tag
+- `latest`: 사람이 확인하기 위한 최신 성공 빌드 포인터
+
+운영 배포는 `latest`가 아니라 반드시 커밋 SHA 태그를 사용합니다. GitHub Actions의 `GITHUB_TOKEN`에 `packages: write` 권한을 사용하므로 별도 registry secret은 필요하지 않습니다.
+
+### 테넌트별 쿼터
+
+알림 생성량은 로그인 JWT의 서명된 `plan` claim 기준으로 월별 제한됩니다. 클라이언트가 보낸 `X-Tenant-Plan`은 Gateway와 내부 서비스 필터가 제거하고 JWT 값으로 덮어씁니다.
+
+| 요금제 | 월간 알림 한도 |
+|---|---:|
+| `FREE` | 100건 |
+| `BASIC` | 1,000건 |
+| `PREMIUM` | 10,000건 |
+| `ENTERPRISE` | 100,000건 |
+
+카운터는 Redis의 `quota:notification:{tenantId}:{yyyy-MM}` 키에 저장되며, 월이 바뀌면 새 카운터를 사용합니다. 한도 초과 요청은 `429 Too Many Requests`와 `Monthly notification quota exceeded`를 반환하고 DB 저장과 Kafka 발행을 수행하지 않습니다. 중복 `idempotencyKey` 요청은 쿼터를 소비하지 않습니다.
+
+### 백업과 복구
+
+백업 대상은 MySQL 전체 데이터베이스, MongoDB `analytics`, Redis RDB snapshot, Kafka 토픽 목록·파티션·설정 메타데이터입니다. Kafka 메시지 본문은 백업하지 않으므로 장기 보관이 필요하면 별도 Kafka retention 또는 외부 아카이브 정책을 추가해야 합니다.
+
+목표 운영 기준은 RPO 24시간, RTO 60분입니다. 백업은 최소 하루 한 번 실행하고, 생성된 디렉터리는 애플리케이션 호스트와 분리된 저장소로 복제합니다.
+
+```bash
+# Compose가 실행 중인 호스트에서 백업
+scripts/backup/backup.sh --output /secure-backups/notification-hub
+
+# 실제 변경 없이 백업 산출물과 복구 대상을 확인
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp>
+
+# 복구 리허설 또는 승인된 장애 대응에서만 실행
+scripts/backup/restore.sh \
+  --input /secure-backups/notification-hub/<timestamp> \
+  --confirm
+```
+
+복구는 MySQL과 MongoDB 데이터를 덮어쓰고 Redis 컨테이너를 재기동하므로 반드시 별도 복구 환경에서 먼저 리허설합니다. Kafka 토픽은 파티션 수 기준으로 재생성되며, `kafka/topic-configs.txt`를 검토해 필요한 토픽 설정을 재적용한 후 애플리케이션 health endpoint와 DLQ 소비 상태를 확인합니다.
+
+월 1회 복구 리허설에서 백업 생성 시각, 복구 시작·종료 시각, 데이터 검증 결과, RPO/RTO 달성 여부를 `manual_test.md`에 기록합니다.
 
 ---
 
@@ -587,10 +690,9 @@ docker compose down -v
 # JAR 빌드
 mvn clean package -DskipTests
 
-# Docker 이미지 빌드 및 태깅
+# 로컬 Kubernetes용 Docker 이미지 빌드 및 태깅
 for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
-  docker build -t notification-hub/${svc}atest:latest ./$svc
-  docker tag notification-hub/${svc}atest:latest notification-hub/$svc:latest
+  docker build -t notification-hub/$svc:latest ./$svc
 done
 ```
 
@@ -654,6 +756,40 @@ kubectl exec -n notification-hub deployment/mysql -- mysql -u root -p"${MYSQL_RO
 kubectl apply -f k8s/discovery-service/ -f k8s/api-gateway/ \
   -f k8s/user-service/ -f k8s/notification-service/ \
   -f k8s/delivery-service/ -f k8s/analytics-service/
+```
+
+상용 클러스터에서는 GHCR 인증 Secret을 먼저 만들고, `latest`가 아닌 배포할 `GITHUB_SHA`를 지정합니다. GHCR package가 private이면 읽기 권한이 있는 별도 PAT를 사용합니다.
+
+```bash
+export GHCR_USERNAME="<github-username>"
+export GHCR_TOKEN="<read-packages-token>"
+export IMAGE_TAG="<github-sha>"
+
+kubectl create secret docker-registry ghcr-pull \
+  -n notification-hub \
+  --docker-server=ghcr.io \
+  --docker-username="${GHCR_USERNAME}" \
+  --docker-password="${GHCR_TOKEN}" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl patch serviceaccount default -n notification-hub \
+  -p '{"imagePullSecrets":[{"name":"ghcr-pull"}]}'
+
+for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
+  kubectl patch deployment "$svc" -n notification-hub --type=strategic \
+    -p '{"spec":{"template":{"spec":{"containers":[{"name":"'"$svc"'","imagePullPolicy":"IfNotPresent"}]}}}}'
+  kubectl set image deployment/"$svc" "$svc"="ghcr.io/rrksns/notification-hub/$svc:${IMAGE_TAG}" -n notification-hub
+  kubectl rollout status deployment/"$svc" -n notification-hub --timeout=180s
+done
+```
+
+배포 실패 시 마지막 정상 ReplicaSet으로 되돌립니다. 배포 전후의 SHA는 `kubectl rollout history`로 확인할 수 있습니다.
+
+```bash
+kubectl rollout history deployment/notification-service -n notification-hub
+for svc in discovery-service api-gateway user-service notification-service delivery-service analytics-service; do
+  kubectl rollout undo deployment/"$svc" -n notification-hub
+  kubectl rollout status deployment/"$svc" -n notification-hub --timeout=180s
+done
 ```
 
 ### 6단계 — 내부 서비스 NetworkPolicy 적용
@@ -733,6 +869,7 @@ kubectl delete namespace notification-hub
 | notification-service | 17/17 | security config + domain + application + persistence entity + architecture |
 | delivery-service | 43/43 | security config + domain + application + provider sender + persistence entity + architecture |
 | analytics-service | 23/23 | security config + domain + application + infrastructure persistence + architecture |
+| e2e-tests | 2/2 | Testcontainers 기반 notification 접수와 delivery/analytics Kafka 파이프라인 |
 
 ```bash
 # 전체 테스트 실행
@@ -744,6 +881,14 @@ mvn test jacoco:report -pl user-service
 ```
 
 ### E2E 플로우 테스트
+
+자동화된 핵심 E2E 검증은 별도 `e2e-tests` Maven 모듈에서 실행합니다. Docker가 사용 가능하면 MySQL, Redis, Kafka, MongoDB Testcontainers를 띄워 실제 인프라 연동을 검증하고, Docker가 없으면 JUnit Testcontainers 설정에 따라 Docker 의존 테스트를 skip합니다.
+
+```bash
+mvn test -pl e2e-tests -am
+```
+
+로컬 Docker Engine 29 계열처럼 최소 Docker API가 높은 환경을 위해 `e2e-tests` Surefire 설정은 Testcontainers Docker client API version을 `1.44`로 고정합니다.
 
 **1. 테넌트 등록 → JWT 발급**
 
@@ -857,5 +1002,5 @@ notification-hub/
 ├── .github/workflows/ci.yml ← GitHub Actions CI/CD
 └── docs/
     ├── kafka-redis.md       ← Kafka & Redis 동작 상세 문서
-    └── improvement-todo.md  ← 코드 리뷰 기반 개선 사항 (P0/P1 완료, P2 미착수)
+    └── improvement-todo.md  ← 코드 리뷰 기반 개선 사항 (P0/P1/P2 기본 구현 완료)
 ```

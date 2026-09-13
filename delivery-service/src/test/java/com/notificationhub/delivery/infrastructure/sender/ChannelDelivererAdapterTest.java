@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ChannelDelivererAdapterTest {
 
@@ -16,7 +17,8 @@ class ChannelDelivererAdapterTest {
         ChannelDelivererAdapter adapter = new ChannelDelivererAdapter(
                 emailSender,
                 new RecordingSmsSender(),
-                new RecordingPushSender()
+                new RecordingPushSender(),
+                new RecordingFallbackPolicy()
         );
 
         adapter.deliver(ChannelType.EMAIL, "user@example.com", "Hello");
@@ -32,7 +34,8 @@ class ChannelDelivererAdapterTest {
         ChannelDelivererAdapter adapter = new ChannelDelivererAdapter(
                 new RecordingEmailSender(),
                 smsSender,
-                new RecordingPushSender()
+                new RecordingPushSender(),
+                new RecordingFallbackPolicy()
         );
 
         adapter.deliver(ChannelType.SMS, "+821012345678", "Hello");
@@ -48,13 +51,43 @@ class ChannelDelivererAdapterTest {
         ChannelDelivererAdapter adapter = new ChannelDelivererAdapter(
                 new RecordingEmailSender(),
                 new RecordingSmsSender(),
-                pushSender
+                pushSender,
+                new RecordingFallbackPolicy()
         );
 
         adapter.deliver(ChannelType.PUSH, "fcm-token", "Hello");
 
         assertThat(pushSender.recipient).isEqualTo("fcm-token");
         assertThat(pushSender.content).isEqualTo("Hello");
+    }
+
+    @Test
+    @DisplayName("Provider 실패 시 fallback 정책을 실행하고 예외를 유지한다")
+    void deliverFallback_recordsFailureAndRethrows() {
+        RecordingFallbackPolicy policy = new RecordingFallbackPolicy();
+        RuntimeException cause = new RuntimeException("provider down");
+        ChannelDelivererAdapter adapter = new ChannelDelivererAdapter(
+                new RecordingEmailSender(), new RecordingSmsSender(), new RecordingPushSender(), policy);
+
+        assertThatThrownBy(() -> adapter.deliverFallback(ChannelType.EMAIL, "user@example.com", "Hello", cause))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("provider down");
+        assertThat(policy.channel).isEqualTo(ChannelType.EMAIL);
+        assertThat(policy.recipient).isEqualTo("user@example.com");
+        assertThat(policy.cause).isSameAs(cause);
+    }
+
+    private static class RecordingFallbackPolicy implements ProviderFallbackPolicy {
+        private ChannelType channel;
+        private String recipient;
+        private Throwable cause;
+
+        @Override
+        public void recordFailure(ChannelType channel, String recipient, Throwable cause) {
+            this.channel = channel;
+            this.recipient = recipient;
+            this.cause = cause;
+        }
     }
 
     private static class RecordingEmailSender implements EmailSender {

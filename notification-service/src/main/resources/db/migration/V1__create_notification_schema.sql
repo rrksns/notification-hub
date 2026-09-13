@@ -3,11 +3,11 @@ CREATE TABLE notifications (
     id VARCHAR(255) NOT NULL,
     version BIGINT,
     tenant_id VARCHAR(255) NOT NULL,
-    channel ENUM('email', 'sms', 'push'),
+    channel ENUM('EMAIL', 'SMS', 'PUSH'),
     recipient VARCHAR(255) NOT NULL,
     content VARCHAR(2000) NOT NULL,
     idempotency_key VARCHAR(255) NOT NULL,
-    status ENUM('pending', 'published', 'failed'),
+    status ENUM('PENDING', 'PUBLISHED', 'FAILED'),
     created_at DATETIME(6),
     PRIMARY KEY (id),
     CONSTRAINT uk_notifications_idempotency_key UNIQUE (idempotency_key)

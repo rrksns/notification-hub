@@ -2,6 +2,7 @@
 package com.notificationhub.user.infrastructure.persistence.entity;
 
 import jakarta.persistence.Version;
+import jakarta.persistence.Table;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Optional;
@@ -18,6 +19,13 @@ class JpaOptimisticLockingTest {
         assertVersionField(TenantEntity.class);
         assertVersionField(UserEntity.class);
         assertVersionField(ApiKeyEntity.class);
+    }
+
+    @Test
+    @DisplayName("users email 조회 인덱스를 가진다")
+    void userEntity_hasEmailIndex() {
+        assertThat(Arrays.stream(UserEntity.class.getAnnotation(Table.class).indexes())
+                .anyMatch(index -> "idx_users_email".equals(index.name()))).isTrue();
     }
 
     private void assertVersionField(Class<?> entityClass) {

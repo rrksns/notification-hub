@@ -4,8 +4,6 @@ import com.notificationhub.delivery.domain.model.ChannelType;
 import com.notificationhub.delivery.domain.port.out.ChannelDelivererPort;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,15 +15,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChannelDelivererAdapter implements ChannelDelivererPort {
 
-    private static final Logger log = LoggerFactory.getLogger(ChannelDelivererAdapter.class);
     private final EmailSender emailSender;
     private final SmsSender smsSender;
     private final PushSender pushSender;
+    private final ProviderFallbackPolicy fallbackPolicy;
 
-    public ChannelDelivererAdapter(EmailSender emailSender, SmsSender smsSender, PushSender pushSender) {
+    public ChannelDelivererAdapter(EmailSender emailSender, SmsSender smsSender, PushSender pushSender,
+                                  ProviderFallbackPolicy fallbackPolicy) {
         this.emailSender = emailSender;
         this.smsSender = smsSender;
         this.pushSender = pushSender;
+        this.fallbackPolicy = fallbackPolicy;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ChannelDelivererAdapter implements ChannelDelivererPort {
     }
 
     void deliverFallback(ChannelType channel, String recipient, String content, Throwable t) {
-        log.warn("[FALLBACK] Circuit OPEN — channel={}, recipient={}, reason={}", channel, recipient, t.getMessage());
+        fallbackPolicy.recordFailure(channel, recipient, t);
         throw new RuntimeException("Delivery failed after circuit breaker fallback: " + t.getMessage(), t);
     }
 
