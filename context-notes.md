@@ -519,3 +519,9 @@
 - Additional gate review identified delivery-log cross-tenant access, JWT fallback forgery risk, missing login abuse controls, plaintext Kafka, public ingress without TLS, committed DocumentDB credentials, and API-key authentication gaps.
 - Additional code review confirmed Redis quota/idempotency writes can outlive a rolled-back transaction, delivery read-then-insert deduplication is race-prone, and notification retention leaves outbox payloads and pending events behind.
 - The prioritized design was revised so external access and credential hardening precede outbox and delivery refactoring. These are documented requirements only; no production code was changed in this review.
+
+## 2026-09-14 Production release gate
+
+- Started the first prioritized improvement by consolidating the existing deployment, rollback, NetworkPolicy, smoke test, and backup/restore procedures into `docs/operations/release-gate.md`.
+- The release gate is fail-closed. CI image publication or manifest dry-run does not count as production readiness without real CNI enforcement, smoke-test, rollback, and separate-environment restore evidence.
+- Added a README link and checklist items for the remaining operator-dependent evidence. No iOS scope was added.
