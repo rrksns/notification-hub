@@ -531,6 +531,8 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 
 운영 배포는 `latest`가 아니라 반드시 커밋 SHA 태그를 사용합니다. GitHub Actions의 `GITHUB_TOKEN`에 `packages: write` 권한을 사용하므로 별도 registry secret은 필요하지 않습니다.
 
+상용 배포 전 검증 순서와 승인 기준은 [`docs/operations/release-gate.md`](docs/operations/release-gate.md)에 정리되어 있습니다. CI 성공만으로 출시를 승인하지 않으며, 실제 클러스터의 smoke test, NetworkPolicy 차단 검증, rollback, 별도 환경 restore 증적이 필요합니다.
+
 ### 테넌트별 쿼터
 
 알림 생성량은 로그인 JWT의 서명된 `plan` claim 기준으로 월별 제한됩니다. 클라이언트가 보낸 `X-Tenant-Plan`은 Gateway와 내부 서비스 필터가 제거하고 JWT 값으로 덮어씁니다.

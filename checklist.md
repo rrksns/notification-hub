@@ -523,3 +523,11 @@
 - [x] Write the prioritized design with scope, risks, and acceptance criteria.
 - [ ] Get approval before implementing the first priority.
 - [x] Exclude iOS work from this improvement cycle.
+
+## Production Release Gate
+
+- [x] Consolidate deployment, smoke test, rollback, NetworkPolicy, and backup/restore criteria into an operations runbook.
+- [x] Link the release gate from README and define fail-closed approval rules.
+- [ ] Run the release gate against a real Kubernetes CNI.
+- [ ] Complete a separate-environment backup restore rehearsal with measured RPO/RTO.
+- [ ] Execute a release smoke test and record the result in `manual_test.md`.
