@@ -3,6 +3,14 @@ variable "environment" {}
 variable "vpc_id" {}
 variable "subnet_ids" { type = list(string) }
 variable "instance_class" { default = "db.t3.medium" }
+variable "username" {
+  type      = string
+  sensitive = true
+}
+variable "password" {
+  type      = string
+  sensitive = true
+}
 
 resource "aws_docdb_subnet_group" "main" {
   name       = "${var.project}-docdb-subnet"
@@ -12,8 +20,8 @@ resource "aws_docdb_subnet_group" "main" {
 resource "aws_docdb_cluster" "main" {
   cluster_identifier = "${var.project}-${var.environment}-docdb"
   engine             = "docdb"
-  master_username    = "nhub"
-  master_password    = "nhub1234changeme"
+  master_username    = var.username
+  master_password    = var.password
   db_subnet_group_name = aws_docdb_subnet_group.main.name
   skip_final_snapshot  = false
 }

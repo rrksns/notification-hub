@@ -10,6 +10,8 @@ jobs:
   test:
     name: Build & Test
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: dGVzdC1ub3RpZmljYXRpb24taHViLWp3dC1zZWNyZXQtdGVzdA==
 
     permissions:
       contents: read

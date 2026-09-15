@@ -19,8 +19,8 @@ public class GetDeliveryLogService implements GetDeliveryLogUseCase {
     }
 
     @Override
-    public DeliveryLog getById(String id) {
-        return deliveryLogRepository.findById(id)
+    public DeliveryLog getById(String id, String tenantId) {
+        return deliveryLogRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
