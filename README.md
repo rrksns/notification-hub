@@ -9,7 +9,7 @@ Clean Architecture(Port & Adapter) 기반 마이크로서비스로 설계되어,
 
 ### 주요 설계 포인트
 
-- **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수와 Kubernetes Secret으로 분리. `.env`와 실제 `k8s/secret.yaml`은 `.gitignore`에 포함
+- **시크릿 외부화**: DB 비밀번호, JWT 시크릿 등 민감 정보를 환경변수와 Kubernetes Secret으로 분리. `JWT_SECRET`은 모든 서비스에서 필수이며 fallback 값을 제공하지 않습니다. `.env`와 실제 `k8s/secret.yaml`은 `.gitignore`에 포함
 - **DB 마이그레이션**: MySQL 스키마는 Flyway `db/migration` SQL로 관리하고, Hibernate는 기본 `DDL_AUTO=validate`로 스키마 일치 여부만 검증
 - **테넌트 격리**: api-gateway와 내부 서비스 Servlet JWT 필터가 JWT 클레임 기반으로 `X-Tenant-Id` 헤더를 재주입. 클라이언트가 보낸 헤더는 제거 또는 덮어써서 위조 방지
 - **Kafka 발행 신뢰성**: fire-and-forget 대신 동기 확인(`.get(5초)`) + 실패 시 예외 전파/로깅

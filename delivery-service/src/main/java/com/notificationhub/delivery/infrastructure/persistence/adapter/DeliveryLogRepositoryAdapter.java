@@ -29,8 +29,8 @@ public class DeliveryLogRepositoryAdapter implements DeliveryLogRepository {
     }
 
     @Override
-    public Optional<DeliveryLog> findById(String id) {
-        return jpaRepository.findById(id).map(DeliveryLogEntity::toDomain);
+    public Optional<DeliveryLog> findByIdAndTenantId(String id, String tenantId) {
+        return jpaRepository.findByIdAndTenantId(id, tenantId).map(DeliveryLogEntity::toDomain);
     }
 
     @Override

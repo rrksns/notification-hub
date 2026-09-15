@@ -80,6 +80,13 @@
 - iOS 작업은 우선순위 목록에서 명시적으로 제외되어 있다.
 - 1번 운영 출시 게이트 문서화는 시작되었고, 실제 CNI·smoke test·rollback·restore 증적은 운영 환경 검증 대기다.
 
+## 2026-09-15 구현 상태
+
+- delivery log 단건 조회에 JWT에서 재주입된 `X-Tenant-Id`를 적용해 tenant 범위 조회를 강제했다.
+- 모든 서비스의 JWT fallback secret을 제거하고, CI 테스트 job에만 명시적인 비운영용 test secret을 주입했다.
+- Terraform DocumentDB master username/password를 필수 sensitive 변수로 분리해 소스 내 기본 비밀번호를 제거했다.
+- API key 인증 연결, Kafka TLS/SASL, public ingress TLS는 이번 커밋에 섞지 않고 다음 보안 설계 범위로 남겼다.
+
 ## 검토에서 통과한 범위
 
 - 서비스 JWT 검증과 신뢰 헤더 덮어쓰기.

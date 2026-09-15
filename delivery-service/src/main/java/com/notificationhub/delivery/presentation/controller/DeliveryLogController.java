@@ -20,8 +20,10 @@ public class DeliveryLogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<DeliveryLogResponse>> getById(@PathVariable("id") String id) {
-        DeliveryLog log = getDeliveryLogUseCase.getById(id);
+    public ResponseEntity<ApiResponse<DeliveryLogResponse>> getById(
+            @PathVariable("id") String id,
+            @RequestHeader("X-Tenant-Id") String tenantId) {
+        DeliveryLog log = getDeliveryLogUseCase.getById(id, tenantId);
         return ResponseEntity.ok(ApiResponse.ok(DeliveryLogResponse.from(log)));
     }
 

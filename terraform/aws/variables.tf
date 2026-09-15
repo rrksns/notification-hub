@@ -27,3 +27,13 @@ variable "db_password" {
   description = "RDS master password"
   sensitive   = true
 }
+
+variable "documentdb_username" {
+  description = "DocumentDB master username"
+  sensitive   = true
+}
+
+variable "documentdb_password" {
+  description = "DocumentDB master password"
+  sensitive   = true
+}

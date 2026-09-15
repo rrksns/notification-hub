@@ -5,6 +5,6 @@ import com.notificationhub.delivery.domain.model.DeliveryLog;
 import java.util.List;
 
 public interface GetDeliveryLogUseCase {
-    DeliveryLog getById(String id);
+    DeliveryLog getById(String id, String tenantId);
     List<DeliveryLog> getByTenantId(String tenantId);
 }

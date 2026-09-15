@@ -531,3 +531,14 @@
 - [ ] Run the release gate against a real Kubernetes CNI.
 - [ ] Complete a separate-environment backup restore rehearsal with measured RPO/RTO.
 - [ ] Execute a release smoke test and record the result in `manual_test.md`.
+
+## External Access and Secret Hardening
+
+- [x] Scope delivery log single-item lookup by the trusted JWT tenant header.
+- [x] Remove JWT fallback secrets from service runtime configuration.
+- [x] Inject a non-production JWT secret explicitly for CI tests.
+- [x] Remove the committed DocumentDB password and require sensitive Terraform variables.
+- [x] Add regression coverage for cross-tenant delivery lookup.
+- [ ] Connect API key authentication to the gateway or explicitly deprecate the unused API.
+- [ ] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
+- [ ] Require TLS on the public Kubernetes ingress.

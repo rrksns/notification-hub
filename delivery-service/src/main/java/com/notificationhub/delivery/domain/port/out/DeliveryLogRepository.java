@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface DeliveryLogRepository {
     DeliveryLog save(DeliveryLog deliveryLog);
-    Optional<DeliveryLog> findById(String id);
+    Optional<DeliveryLog> findByIdAndTenantId(String id, String tenantId);
     List<DeliveryLog> findByNotificationId(String notificationId);
     List<DeliveryLog> findByTenantId(String tenantId);
 }

@@ -75,9 +75,11 @@ module "elasticache" {
 module "documentdb" {
   source = "./modules/documentdb"
 
-  project      = var.project
-  environment  = var.environment
-  vpc_id       = module.vpc.vpc_id
-  subnet_ids   = module.vpc.private_subnet_ids
+  project        = var.project
+  environment    = var.environment
+  vpc_id         = module.vpc.vpc_id
+  subnet_ids     = module.vpc.private_subnet_ids
   instance_class = "db.t3.medium"
+  username       = var.documentdb_username
+  password       = var.documentdb_password
 }

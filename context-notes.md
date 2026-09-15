@@ -525,3 +525,11 @@
 - Started the first prioritized improvement by consolidating the existing deployment, rollback, NetworkPolicy, smoke test, and backup/restore procedures into `docs/operations/release-gate.md`.
 - The release gate is fail-closed. CI image publication or manifest dry-run does not count as production readiness without real CNI enforcement, smoke-test, rollback, and separate-environment restore evidence.
 - Added a README link and checklist items for the remaining operator-dependent evidence. No iOS scope was added.
+
+## 2026-09-15 External access and secret hardening
+
+- Changed delivery log single-item lookup to query by both delivery ID and the trusted JWT-derived tenant header. A wrong-tenant lookup now returns the existing resource-not-found error path.
+- Removed the shared JWT fallback value from all six service application configurations. CI supplies a public non-production test secret explicitly so missing production secrets fail application startup instead of silently using a known key.
+- Replaced the Terraform DocumentDB hard-coded master password with required sensitive root/module variables.
+- Added `GetDeliveryLogServiceTest` coverage for tenant-scoped lookup and wrong-tenant rejection.
+- API key authentication, Kafka TLS/SASL, and ingress TLS remain separate follow-up work because each changes deployment contracts and needs its own migration and rollout design.
