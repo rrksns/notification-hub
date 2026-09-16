@@ -1,8 +1,7 @@
 package com.notificationhub.delivery.domain.port.out;
 
-import com.notificationhub.delivery.domain.model.DeliveryLog;
+import com.notificationhub.delivery.domain.model.DeliveryResultOutbox;
 
 public interface DeliveryResultPublisher {
-    void publishSuccess(DeliveryLog deliveryLog);
-    void publishFailure(DeliveryLog deliveryLog);
+    void publish(DeliveryResultOutbox outbox);
 }

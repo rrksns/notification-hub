@@ -1,7 +1,7 @@
 package com.notificationhub.delivery.infrastructure.messaging;
 
 import com.notificationhub.common.event.DeliveryResultEvent;
-import com.notificationhub.delivery.domain.model.DeliveryLog;
+import com.notificationhub.delivery.domain.model.DeliveryResultOutbox;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,26 +26,11 @@ public class KafkaDeliveryResultPublisher implements DeliveryResultPublisher {
     }
 
     @Override
-    public void publishSuccess(DeliveryLog deliveryLog) {
-        DeliveryResultEvent event = DeliveryResultEvent.success(
-                deliveryLog.getId(),
-                deliveryLog.getNotificationId(),
-                deliveryLog.getTenantId(),
-                deliveryLog.getChannel().name()
-        );
-        sendWithErrorHandling(event, deliveryLog.getNotificationId());
-    }
-
-    @Override
-    public void publishFailure(DeliveryLog deliveryLog) {
-        DeliveryResultEvent event = DeliveryResultEvent.failure(
-                deliveryLog.getId(),
-                deliveryLog.getNotificationId(),
-                deliveryLog.getTenantId(),
-                deliveryLog.getChannel().name(),
-                deliveryLog.getFailureReason()
-        );
-        sendWithErrorHandling(event, deliveryLog.getNotificationId());
+    public void publish(DeliveryResultOutbox outbox) {
+        DeliveryResultEvent event = "SUCCESS".equals(outbox.status())
+                ? DeliveryResultEvent.success(outbox.deliveryLogId(), outbox.notificationId(), outbox.tenantId(), outbox.channel())
+                : DeliveryResultEvent.failure(outbox.deliveryLogId(), outbox.notificationId(), outbox.tenantId(), outbox.channel(), outbox.failureReason());
+        sendWithErrorHandling(event, outbox.notificationId());
     }
 
     private void sendWithErrorHandling(DeliveryResultEvent event, String notificationId) {
@@ -58,6 +43,7 @@ public class KafkaDeliveryResultPublisher implements DeliveryResultPublisher {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
+            throw new IllegalStateException("Delivery result event publish failed", e);
         }
     }
 }

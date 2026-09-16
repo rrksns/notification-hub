@@ -9,11 +9,13 @@ import com.notificationhub.delivery.infrastructure.sender.TwilioProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.retry.annotation.EnableRetry;
 import com.notificationhub.common.jwt.JwtProperties;
 
 @SpringBootApplication(scanBasePackages = {"com.notificationhub.delivery", "com.notificationhub.common"})
 @EnableRetry
+@EnableScheduling
 @EnableConfigurationProperties({
         JwtProperties.class,
         EmailDeliveryProperties.class,
