@@ -542,3 +542,12 @@
 - [ ] Connect API key authentication to the gateway or explicitly deprecate the unused API.
 - [ ] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
 - [ ] Require TLS on the public Kubernetes ingress.
+
+## Notification Outbox Concurrency and Lifecycle
+
+- [x] Protect pending outbox selection with a database pessimistic write lock.
+- [x] Keep publish and published-state transition in one transaction boundary.
+- [x] Delete published outbox payloads during the existing notification retention purge.
+- [x] Add retention cleanup regression coverage.
+- [ ] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
+- [ ] Add outbox backlog and publish-failure operational metrics.

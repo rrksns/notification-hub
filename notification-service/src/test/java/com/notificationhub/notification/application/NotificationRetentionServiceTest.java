@@ -3,6 +3,7 @@ package com.notificationhub.notification.application;
 
 import com.notificationhub.notification.application.service.NotificationRetentionService;
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
+import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,11 +25,14 @@ class NotificationRetentionServiceTest {
     @Mock
     NotificationRepository notificationRepository;
 
+    @Mock
+    NotificationOutboxPort notificationOutboxPort;
+
     NotificationRetentionService service;
 
     @BeforeEach
     void setUp() {
-        service = new NotificationRetentionService(notificationRepository, 90);
+        service = new NotificationRetentionService(notificationRepository, notificationOutboxPort, 90);
     }
 
     @Test
@@ -43,5 +47,8 @@ class NotificationRetentionServiceTest {
         then(notificationRepository).should().deleteCreatedBefore(argThat(cutoff ->
                 cutoff.isAfter(LocalDateTime.now(ZoneOffset.UTC).minusDays(91))
                         && cutoff.isBefore(LocalDateTime.now(ZoneOffset.UTC).minusDays(89))));
+        then(notificationOutboxPort).should().deletePublishedBefore(argThat(cutoff ->
+                cutoff.isAfter(java.time.Instant.now().minusSeconds(91L * 24 * 60 * 60))
+                        && cutoff.isBefore(java.time.Instant.now().minusSeconds(89L * 24 * 60 * 60))));
     }
 }

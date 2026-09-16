@@ -5,6 +5,7 @@ import com.notificationhub.common.event.NotificationEvent;
 import com.notificationhub.notification.domain.model.Notification;
 
 import java.util.List;
+import java.time.Instant;
 
 public interface NotificationOutboxPort {
     void save(Notification notification);
@@ -12,4 +13,6 @@ public interface NotificationOutboxPort {
     List<NotificationEvent> findPending();
 
     void markPublished(String notificationId);
+
+    int deletePublishedBefore(Instant cutoff);
 }

@@ -42,4 +42,9 @@ public class NotificationOutboxRepositoryAdapter implements NotificationOutboxPo
                 NotificationOutboxEntity.Status.PUBLISHED
         );
     }
+
+    @Override
+    public int deletePublishedBefore(Instant cutoff) {
+        return jpaRepository.deletePublishedBefore(cutoff, NotificationOutboxEntity.Status.PUBLISHED);
+    }
 }
