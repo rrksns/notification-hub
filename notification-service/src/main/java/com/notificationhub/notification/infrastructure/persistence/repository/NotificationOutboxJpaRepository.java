@@ -2,7 +2,9 @@
 package com.notificationhub.notification.infrastructure.persistence.repository;
 
 import com.notificationhub.notification.infrastructure.persistence.entity.NotificationOutboxEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 
 public interface NotificationOutboxJpaRepository extends JpaRepository<NotificationOutboxEntity, String> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<NotificationOutboxEntity> findTop100ByStatusOrderByOccurredAtAsc(NotificationOutboxEntity.Status status);
 
     @Modifying
@@ -21,4 +24,10 @@ public interface NotificationOutboxJpaRepository extends JpaRepository<Notificat
                       @Param("publishedAt") Instant publishedAt,
                       @Param("pendingStatus") NotificationOutboxEntity.Status pendingStatus,
                       @Param("publishedStatus") NotificationOutboxEntity.Status publishedStatus);
+
+    @Modifying
+    @Transactional
+    @Query("delete from NotificationOutboxEntity e where e.status = :publishedStatus and e.publishedAt < :cutoff")
+    int deletePublishedBefore(@Param("cutoff") Instant cutoff,
+                               @Param("publishedStatus") NotificationOutboxEntity.Status publishedStatus);
 }

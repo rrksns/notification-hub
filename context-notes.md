@@ -533,3 +533,10 @@
 - Replaced the Terraform DocumentDB hard-coded master password with required sensitive root/module variables.
 - Added `GetDeliveryLogServiceTest` coverage for tenant-scoped lookup and wrong-tenant rejection.
 - API key authentication, Kafka TLS/SASL, and ingress TLS remain separate follow-up work because each changes deployment contracts and needs its own migration and rollout design.
+
+## 2026-09-16 Notification outbox concurrency and lifecycle
+
+- Added a pessimistic write lock to pending outbox selection and marked the scheduled dispatcher as transactional. This serializes concurrent claim-and-publish work across notification-service replicas using the existing MySQL boundary.
+- Preserved at-least-once semantics: a process crash after Kafka acknowledgement but before database commit can still cause a republish, so downstream idempotency remains required.
+- Extended the existing UTC retention purge to delete published outbox rows before the same cutoff, removing recipient/content payloads that previously remained after notification deletion.
+- Notification-service verification passed with 24 tests. Multi-replica Kafka behavior and backlog metrics remain operational follow-up work.

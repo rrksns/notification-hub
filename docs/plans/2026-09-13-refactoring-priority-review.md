@@ -87,6 +87,13 @@
 - Terraform DocumentDB master username/password를 필수 sensitive 변수로 분리해 소스 내 기본 비밀번호를 제거했다.
 - API key 인증 연결, Kafka TLS/SASL, public ingress TLS는 이번 커밋에 섞지 않고 다음 보안 설계 범위로 남겼다.
 
+## 2026-09-16 Outbox concurrency and lifecycle
+
+- Pending outbox 조회에 `PESSIMISTIC_WRITE` lock을 적용하고 dispatcher 전체 발행 흐름을 하나의 트랜잭션으로 묶었다.
+- 같은 pending 행을 여러 notification-service 인스턴스가 동시에 조회해 발행하는 경쟁을 DB 잠금으로 차단한다. Kafka acknowledgement 이후 트랜잭션 커밋 전 장애에서 발생할 수 있는 중복은 기존 at-least-once 계약으로 남는다.
+- 기존 notification retention 주기에 published outbox 행 삭제를 추가해 outbox에 남던 recipient·content payload도 함께 정리한다.
+- 실제 다중 replica 경쟁과 Kafka 장애 복구 검증은 Docker/Kubernetes 운영 환경에서 추가로 수행해야 한다.
+
 ## 검토에서 통과한 범위
 
 - 서비스 JWT 검증과 신뢰 헤더 덮어쓰기.

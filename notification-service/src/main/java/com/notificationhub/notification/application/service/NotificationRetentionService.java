@@ -2,6 +2,7 @@
 package com.notificationhub.notification.application.service;
 
 import com.notificationhub.notification.domain.port.out.NotificationRepository;
+import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,11 +18,14 @@ public class NotificationRetentionService {
     private static final Logger log = LoggerFactory.getLogger(NotificationRetentionService.class);
 
     private final NotificationRepository notificationRepository;
+    private final NotificationOutboxPort notificationOutboxPort;
     private final int retentionDays;
 
     public NotificationRetentionService(NotificationRepository notificationRepository,
+                                        NotificationOutboxPort notificationOutboxPort,
                                         @Value("${notification.retention-days:90}") int retentionDays) {
         this.notificationRepository = notificationRepository;
+        this.notificationOutboxPort = notificationOutboxPort;
         this.retentionDays = retentionDays;
     }
 
@@ -29,7 +33,11 @@ public class NotificationRetentionService {
     public int purgeExpired() {
         LocalDateTime cutoff = LocalDateTime.now(ZoneOffset.UTC).minusDays(retentionDays);
         int deleted = notificationRepository.deleteCreatedBefore(cutoff);
-        log.info("Notification retention purge completed: cutoff={}, deleted={}", cutoff, deleted);
+        int deletedOutbox = notificationOutboxPort.deletePublishedBefore(
+                cutoff.toInstant(ZoneOffset.UTC)
+        );
+        log.info("Notification retention purge completed: cutoff={}, deleted={}, deletedOutbox={}",
+                cutoff, deleted, deletedOutbox);
         return deleted;
     }
 }
