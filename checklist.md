@@ -561,4 +561,4 @@
 - [x] Add duplicate delivery and Kafka failure regression tests.
 - [x] Run full Maven verification with Docker E2E.
 - [x] Update operational status documents.
-- [ ] Commit, push, and merge delivery result outbox implementation.
+- [x] Commit, push, and merge delivery result outbox implementation.
