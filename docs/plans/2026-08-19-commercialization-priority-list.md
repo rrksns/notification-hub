@@ -49,3 +49,5 @@ P2 비즈니스 운영 기능의 기본 구현을 완료했다.
 P2 기술 개선 항목 #13 `DB 인덱스 누락`을 보강했다. users.email과 notifications.created_at 조회 경로에 인덱스를 추가했다.
 P2 기술 개선 항목 #15 `Tenant ↔ User ↔ ApiKey FK 없음`을 보강했다. users와 api_keys의 tenant_id에 tenants.id 외래 키를 추가했다.
 P2 기술 개선 목록 #13-#27의 기본 구현을 완료했다. 운영 환경별 데이터 점검과 클러스터 enforcement 확인은 별도 운영 검증 항목으로 남겼다.
+
+2026-09-17 P1 기술 안정성 후속으로 `delivery result outbox와 중복 방지`를 구현했다. 발송 결과 로그와 Kafka 결과 이벤트의 트랜잭션 경계를 분리하고, `notification_id` 중복 생성을 DB 제약으로 차단했다. Kafka acknowledgement 직후 프로세스 중단에 따른 결과 이벤트 중복 가능성과 다중 replica 운영 검증은 후속 과제로 남겼다.

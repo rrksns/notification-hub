@@ -551,3 +551,14 @@
 - [x] Add retention cleanup regression coverage.
 - [ ] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
 - [ ] Add outbox backlog and publish-failure operational metrics.
+
+## Delivery Result Outbox
+
+- [x] Create delivery result outbox design and implementation plan.
+- [x] Add delivery log notification_id uniqueness and result outbox migration.
+- [x] Add result outbox domain, persistence adapter, and dispatcher.
+- [x] Save delivery results and result outbox rows in one transaction.
+- [x] Add duplicate delivery and Kafka failure regression tests.
+- [x] Run full Maven verification with Docker E2E.
+- [x] Update operational status documents.
+- [ ] Commit, push, and merge delivery result outbox implementation.

@@ -540,3 +540,14 @@
 - Preserved at-least-once semantics: a process crash after Kafka acknowledgement but before database commit can still cause a republish, so downstream idempotency remains required.
 - Extended the existing UTC retention purge to delete published outbox rows before the same cutoff, removing recipient/content payloads that previously remained after notification deletion.
 - Notification-service verification passed with 24 tests. Multi-replica Kafka behavior and backlog metrics remain operational follow-up work.
+
+## 2026-09-17 Delivery result outbox
+
+- The next prioritized implementation is delivery result outbox and duplicate delivery protection.
+- Delivery provider execution must not be repeated when Kafka result publishing fails, so result event persistence is separated from event publication.
+- The selected design stores the final delivery log and its result event payload in the same delivery-service MySQL transaction, then publishes pending rows through a scheduled dispatcher.
+- A unique constraint on `delivery_logs.notification_id` provides the database-level duplicate guard for concurrent notification delivery attempts.
+- Kafka acknowledgement followed by process failure can still produce a duplicate result event, so downstream analytics idempotency remains required.
+
+- Implemented Flyway V2, delivery result outbox persistence, transactional result recording, scheduled Kafka publishing, and regression tests.
+- Docker-backed delivery-analytics E2E and the full Maven suite passed with zero failures and zero skipped tests.
