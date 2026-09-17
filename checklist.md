@@ -572,4 +572,4 @@
 - [x] Add rollback and secret profile regression tests.
 - [x] Run full Maven verification with Docker E2E.
 - [x] Update operational status documents.
-- [ ] Commit, push, and merge Redis state and secret profile implementation.
+- [x] Commit, push, and merge Redis state and secret profile implementation.
