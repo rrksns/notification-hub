@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USER:nhub}:${MONGO_PASSWORD:nhub1234}@localhost:27017/analytics?authSource=admin

@@ -29,6 +29,8 @@ spec:
             - secretRef:
                 name: notification-hub-secret
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production
             - name: SPRING_DATA_MONGODB_URI
               value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@$(MONGODB_HOST):$(MONGODB_PORT)/analytics?authSource=admin"
           livenessProbe:

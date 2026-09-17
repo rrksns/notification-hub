@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    username: ${DB_USERNAME:nhub}
+    password: ${DB_PASSWORD:nhub1234}

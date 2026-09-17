@@ -2,12 +2,14 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    default: local
   application:
     name: user-service
   datasource:
     url: jdbc:mysql://localhost:3307/user_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USERNAME:nhub}
-    password: ${DB_PASSWORD:nhub1234}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -23,7 +25,7 @@ spring:
   security:
     user:
       name: actuator
-      password: actuator
+      password: ${ACTUATOR_PASSWORD}
 
 eureka:
   client:

@@ -551,3 +551,14 @@
 
 - Implemented Flyway V2, delivery result outbox persistence, transactional result recording, scheduled Kafka publishing, and regression tests.
 - Docker-backed delivery-analytics E2E and the full Maven suite passed with zero failures and zero skipped tests.
+
+## 2026-09-18 Redis state and secret profiles
+
+- The next prioritized implementation is Redis state compensation and production secret profile separation.
+- The current notification flow consumes quota before DB/outbox writes and saves idempotency after the DB write, so a later exception can leave Redis state ahead of the transaction.
+- The selected compensation order is idempotency delete followed by quota release, while preserving the original application exception if compensation itself fails.
+- Development DB and Mongo defaults will be loaded only by the local profile. Kubernetes deployments will explicitly activate the production profile so missing runtime secrets fail startup rather than falling back.
+- Added Redis idempotency deletion and atomic quota release compensation after notification persistence or outbox failures. Cleanup failures are logged without replacing the original application exception.
+- Added local Spring profiles for disposable development credentials and changed the base configuration to require `DB_USERNAME`, `DB_PASSWORD`, Mongo credentials, and `ACTUATOR_PASSWORD` where applicable.
+- Kubernetes deployments explicitly activate the production profile and the example Secret now includes `ACTUATOR_PASSWORD`.
+- Notification-service tests, full Maven verification, and Docker-backed E2E passed with zero failures and zero skipped tests. Kubernetes YAML parsed successfully; live `kubectl apply --dry-run=client` remains unavailable because the local Kubernetes API is not running.

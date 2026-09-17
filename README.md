@@ -706,6 +706,7 @@ export MYSQL_USERNAME="nhub"
 export MYSQL_PASSWORD="<mysql-password>"
 export MONGODB_USERNAME="nhub"
 export MONGODB_PASSWORD="<mongodb-password>"
+export ACTUATOR_PASSWORD="<actuator-password>"
 export JWT_SECRET="<base64-encoded-jwt-secret>"
 
 kubectl apply -f k8s/namespace.yaml -f k8s/configmap.yaml
@@ -716,12 +717,15 @@ kubectl create secret generic notification-hub-secret \
   --from-literal=MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
   --from-literal=MONGODB_USERNAME="${MONGODB_USERNAME}" \
   --from-literal=MONGODB_PASSWORD="${MONGODB_PASSWORD}" \
+  --from-literal=ACTUATOR_PASSWORD="${ACTUATOR_PASSWORD}" \
   --from-literal=JWT_SECRET="${JWT_SECRET}" \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 `k8s/secret.yaml`은 Git에 커밋하지 않습니다.
 키 이름만 확인할 때는 `k8s/secret.example.yaml`을 참고합니다.
+
+애플리케이션은 로컬 실행 시 `local` 프로필을 기본 사용하며 개발용 DB/Mongo 자격 증명은 각 서비스의 `application-local.yml`에만 있습니다. Kubernetes 배포는 `production` 프로필을 명시하므로 Secret에 필수 자격 증명이 없으면 fallback 없이 시작에 실패합니다.
 
 ### 3단계 — 인프라 배포
 

@@ -2,12 +2,14 @@ server:
   port: 8083
 
 spring:
+  profiles:
+    default: local
   application:
     name: delivery-service
   datasource:
     url: jdbc:mysql://localhost:3307/delivery_service?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:nhub}
-    password: ${DB_PASSWORD:nhub1234}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

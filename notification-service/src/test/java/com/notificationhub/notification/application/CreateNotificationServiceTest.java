@@ -100,4 +100,22 @@ class CreateNotificationServiceTest {
         then(notificationRepository).shouldHaveNoInteractions();
         then(outboxPort).shouldHaveNoInteractions();
     }
+
+    @Test
+    void create_outboxSaveFails_compensatesRedisState() {
+        given(idempotencyPort.isDuplicate("tenant-1", "key-004")).willReturn(false);
+        given(quotaPort.tryConsume("tenant-1", "FREE")).willReturn(true);
+        given(notificationRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+        willThrow(new IllegalStateException("outbox unavailable")).given(outboxPort).save(any());
+
+        CreateNotificationUseCase.Command cmd = new CreateNotificationUseCase.Command(
+                "tenant-1", "EMAIL", "user@test.com", "Hello", "key-004", "FREE"
+        );
+
+        assertThatThrownBy(() -> useCase.create(cmd))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("outbox unavailable");
+        then(idempotencyPort).should().delete("tenant-1", "key-004");
+        then(quotaPort).should().release("tenant-1", "FREE");
+    }
 }
