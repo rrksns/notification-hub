@@ -24,6 +24,14 @@ public class RedisNotificationQuotaAdapter implements NotificationQuotaPort {
             redis.call('EXPIRE', KEYS[1], ARGV[2])
             return next
             """, Long.class);
+    private static final DefaultRedisScript<Long> RELEASE_SCRIPT = new DefaultRedisScript<>("""
+            local current = tonumber(redis.call('GET', KEYS[1])) or 0
+            if current <= 1 then
+                redis.call('DEL', KEYS[1])
+                return 0
+            end
+            return redis.call('DECR', KEYS[1])
+            """, Long.class);
     private static final long MONTH_SECONDS = 2_678_400L;
 
     private final StringRedisTemplate redisTemplate;
@@ -44,5 +52,11 @@ public class RedisNotificationQuotaAdapter implements NotificationQuotaPort {
                 String.valueOf(MONTH_SECONDS)
         );
         return result != null && result > 0;
+    }
+
+    @Override
+    public void release(String tenantId, String plan) {
+        String key = policy.key(tenantId, plan, YearMonth.now());
+        redisTemplate.execute(RELEASE_SCRIPT, List.of(key));
     }
 }

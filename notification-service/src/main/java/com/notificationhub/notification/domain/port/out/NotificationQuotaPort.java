@@ -3,4 +3,5 @@ package com.notificationhub.notification.domain.port.out;
 
 public interface NotificationQuotaPort {
     boolean tryConsume(String tenantId, String plan);
+    void release(String tenantId, String plan);
 }

@@ -80,6 +80,13 @@
 - iOS 작업은 우선순위 목록에서 명시적으로 제외되어 있다.
 - 1번 운영 출시 게이트 문서화는 시작되었고, 실제 CNI·smoke test·rollback·restore 증적은 운영 환경 검증 대기다.
 
+## 2026-09-18 Redis 상태와 시크릿 실행 프로필
+
+- notification-service의 Redis quota 소비와 idempotency 기록은 DB 저장 또는 outbox 저장 실패 시 보상하도록 보강했다.
+- 로컬 자격 증명은 각 서비스의 `application-local.yml`로 이동했고, 기본 설정은 운영 환경 변수 없이는 시작되지 않도록 fallback을 제거했다.
+- Kubernetes 배포는 `production` profile을 명시적으로 활성화하고, `ACTUATOR_PASSWORD`를 Secret으로 주입하도록 갱신했다.
+- 전체 Maven 테스트와 Docker-backed E2E가 실패 0건, skip 0건으로 통과했다.
+
 ## 2026-09-15 구현 상태
 
 - delivery log 단건 조회에 JWT에서 재주입된 `X-Tenant-Id`를 적용해 tenant 범위 조회를 강제했다.

@@ -27,4 +27,9 @@ public class RedisIdempotencyAdapter implements IdempotencyPort {
     public void save(String tenantId, String idempotencyKey) {
         redisTemplate.opsForValue().set(KEY_PREFIX + tenantId + ":" + idempotencyKey, "1", TTL);
     }
+
+    @Override
+    public void delete(String tenantId, String idempotencyKey) {
+        redisTemplate.delete(KEY_PREFIX + tenantId + ":" + idempotencyKey);
+    }
 }

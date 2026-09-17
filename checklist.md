@@ -562,3 +562,14 @@
 - [x] Run full Maven verification with Docker E2E.
 - [x] Update operational status documents.
 - [x] Commit, push, and merge delivery result outbox implementation.
+
+## Redis State and Secret Profiles
+
+- [x] Create Redis consistency and secret profile design and implementation plan.
+- [x] Add quota release and idempotency delete ports and Redis adapters.
+- [x] Compensate Redis state after notification transaction failure.
+- [x] Move development credentials to local profiles and require production profile secrets.
+- [x] Add rollback and secret profile regression tests.
+- [x] Run full Maven verification with Docker E2E.
+- [x] Update operational status documents.
+- [ ] Commit, push, and merge Redis state and secret profile implementation.
