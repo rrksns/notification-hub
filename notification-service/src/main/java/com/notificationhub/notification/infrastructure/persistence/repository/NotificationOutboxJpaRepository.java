@@ -17,6 +17,8 @@ public interface NotificationOutboxJpaRepository extends JpaRepository<Notificat
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<NotificationOutboxEntity> findTop100ByStatusOrderByOccurredAtAsc(NotificationOutboxEntity.Status status);
 
+    long countByStatus(NotificationOutboxEntity.Status status);
+
     @Modifying
     @Transactional
     @Query("update NotificationOutboxEntity e set e.status = :publishedStatus, e.publishedAt = :publishedAt where e.notificationId = :notificationId and e.status = :pendingStatus")

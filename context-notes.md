@@ -562,3 +562,12 @@
 - Added local Spring profiles for disposable development credentials and changed the base configuration to require `DB_USERNAME`, `DB_PASSWORD`, Mongo credentials, and `ACTUATOR_PASSWORD` where applicable.
 - Kubernetes deployments explicitly activate the production profile and the example Secret now includes `ACTUATOR_PASSWORD`.
 - Notification-service tests, full Maven verification, and Docker-backed E2E passed with zero failures and zero skipped tests. Kubernetes YAML parsed successfully; live `kubectl apply --dry-run=client` remains unavailable because the local Kubernetes API is not running.
+
+## 2026-09-19 Outbox observability metrics
+
+- The next prioritized gap is operational visibility for notification and delivery result outboxes.
+- Backlog will be measured from repository pending counts after each dispatcher run, not inferred from the batch size.
+- Publish failures will remain retryable pending rows and increment service-local counters for Prometheus alerts.
+- Added `notification_outbox_backlog`, `notification_outbox_publish_failure_total`, `delivery_result_outbox_backlog`, and `delivery_result_outbox_publish_failure_total` through Micrometer.
+- Added Prometheus rules for backlog and publish failures, plus Grafana panels and README metric documentation.
+- Focused dispatcher tests, ArchUnit tests, Docker `promtool` rule validation, full Maven verification, and Testcontainers E2E passed with zero failures and zero skipped tests.

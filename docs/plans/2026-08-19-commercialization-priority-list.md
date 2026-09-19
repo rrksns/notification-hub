@@ -53,3 +53,5 @@ P2 기술 개선 목록 #13-#27의 기본 구현을 완료했다. 운영 환경�
 2026-09-17 P1 기술 안정성 후속으로 `delivery result outbox와 중복 방지`를 구현했다. 발송 결과 로그와 Kafka 결과 이벤트의 트랜잭션 경계를 분리하고, `notification_id` 중복 생성을 DB 제약으로 차단했다. Kafka acknowledgement 직후 프로세스 중단에 따른 결과 이벤트 중복 가능성과 다중 replica 운영 검증은 후속 과제로 남겼다.
 
 2026-09-18 P1 기술 안정성 후속으로 `Redis 상태와 시크릿 실행 프로필 정리`를 구현했다. 알림 트랜잭션 실패 시 idempotency 키 삭제와 quota 원자적 반환으로 Redis 보상 경계를 추가했고, 로컬 자격 증명과 Kubernetes production secret profile을 분리했다. 전체 Maven 테스트와 Docker-backed E2E가 통과했으며, 실제 Kubernetes CNI와 운영 smoke/restore 증적은 별도 출시 게이트로 남겼다.
+
+2026-09-19 P1 기술 안정성 후속으로 `Outbox 관측성 지표` 구현을 완료했다. 두 outbox의 실제 pending 건수와 Kafka 발행 실패를 Micrometer, Prometheus, Grafana에 연결했고 전체 Maven 및 Docker-backed E2E가 통과했다. 실제 Alertmanager 외부 전달은 운영 Secret 환경 검증 대기다.

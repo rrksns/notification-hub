@@ -5,7 +5,7 @@
   "tags": ["notification-hub"],
   "timezone": "browser",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "panels": [
     {
@@ -43,6 +43,42 @@
         "colorMode": "value",
         "graphMode": "area"
       }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Outbox Backlog",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {
+          "expr": "notification_outbox_backlog",
+          "legendFormat": "notification outbox",
+          "refId": "A"
+        },
+        {
+          "expr": "delivery_result_outbox_backlog",
+          "legendFormat": "delivery result outbox",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Outbox Publish Failures",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {
+          "expr": "sum(increase(notification_outbox_publish_failure_total[5m]))",
+          "legendFormat": "notification outbox",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(delivery_result_outbox_publish_failure_total[5m]))",
+          "legendFormat": "delivery result outbox",
+          "refId": "B"
+        }
+      ]
     },
     {
       "id": 3,

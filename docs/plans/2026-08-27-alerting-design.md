@@ -31,6 +31,10 @@ Prometheus는 15초 주기로 각 서비스의 `/actuator/prometheus`를 수집�
 | Http5xxRateHigh | 최근 5분 HTTP 5xx 비율이 5% 초과이고 요청 수가 존재 | warning |
 | DlqMessagesIncreasing | DLQ consumer group의 lag 또는 DLQ 메시지 증가 신호가 임계치를 초과 | critical |
 | ProviderFailureRateHigh | Provider 관련 실패 카운터 비율이 10% 초과이고 발송 시도가 존재 | critical |
+| NotificationOutboxBacklogHigh | notification outbox pending 건수가 100 초과로 5분 지속 | warning |
+| NotificationOutboxPublishFailed | 최근 5분 notification outbox 발행 실패가 존재 | critical |
+| DeliveryResultOutboxBacklogHigh | delivery result outbox pending 건수가 100 초과로 5분 지속 | warning |
+| DeliveryResultOutboxPublishFailed | 최근 5분 delivery result outbox 발행 실패가 존재 | critical |
 
 메트릭이 현재 노출되지 않는 DLQ lag와 Provider 실패 카운터는 규칙을 추가하기 전에 실제 Prometheus 시계열을 확인한다. 시계열이 없으면 존재하지 않는 메트릭을 가정해 무의미한 규칙을 배포하지 않고, 해당 신호를 노출하는 최소 애플리케이션 계측을 별도 작업으로 분리한다.
 

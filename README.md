@@ -439,6 +439,10 @@ Kafka: delivery-results 토픽 수신
 |--------|------|
 | `notification.sent.total` | 발송된 알림 건수 |
 | `notification.duplicate.total` | 멱등성 키 중복으로 거부된 건수 |
+| `notification.outbox.backlog` | notification outbox pending 건수 |
+| `notification.outbox.publish.failure` | notification outbox Kafka 발행 실패 누적 건수 |
+| `delivery.result.outbox.backlog` | delivery result outbox pending 건수 |
+| `delivery.result.outbox.publish.failure` | delivery result outbox Kafka 발행 실패 누적 건수 |
 
 **Grafana 대시보드:** `http://localhost:3000` (admin / admin1234)
 

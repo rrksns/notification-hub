@@ -34,4 +34,9 @@ public class DeliveryResultOutboxRepositoryAdapter implements DeliveryResultOutb
                         DeliveryResultOutboxEntity.Status.PENDING, PageRequest.of(0, limit))
                 .stream().map(DeliveryResultOutboxEntity::toDomain).toList();
     }
+
+    @Override
+    public long countPending() {
+        return jpaRepository.countByStatus(DeliveryResultOutboxEntity.Status.PENDING);
+    }
 }

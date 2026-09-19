@@ -8,4 +8,6 @@ import java.util.List;
 public interface DeliveryResultOutboxRepository {
     DeliveryResultOutbox save(DeliveryResultOutbox outbox);
     List<DeliveryResultOutbox> findPending(int limit);
+
+    long countPending();
 }

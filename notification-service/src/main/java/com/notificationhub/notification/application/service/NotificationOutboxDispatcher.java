@@ -4,6 +4,7 @@ package com.notificationhub.notification.application.service;
 import com.notificationhub.common.event.NotificationEvent;
 import com.notificationhub.notification.domain.port.out.NotificationEventPublisher;
 import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
+import com.notificationhub.notification.domain.port.out.NotificationOutboxMetricsPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,16 +18,24 @@ public class NotificationOutboxDispatcher {
 
     private final NotificationOutboxPort outboxPort;
     private final NotificationEventPublisher eventPublisher;
+    private final NotificationOutboxMetricsPort metrics;
 
-    public NotificationOutboxDispatcher(NotificationOutboxPort outboxPort, NotificationEventPublisher eventPublisher) {
+    public NotificationOutboxDispatcher(NotificationOutboxPort outboxPort,
+                                        NotificationEventPublisher eventPublisher,
+                                        NotificationOutboxMetricsPort metrics) {
         this.outboxPort = outboxPort;
         this.eventPublisher = eventPublisher;
+        this.metrics = metrics;
     }
 
     @Scheduled(fixedDelayString = "${notification.outbox-poll-delay-ms:1000}")
     @Transactional
     public void dispatch() {
-        outboxPort.findPending().forEach(this::dispatchOne);
+        try {
+            outboxPort.findPending().forEach(this::dispatchOne);
+        } finally {
+            metrics.recordBacklog(outboxPort.countPending());
+        }
     }
 
     private void dispatchOne(NotificationEvent event) {
@@ -34,6 +43,7 @@ public class NotificationOutboxDispatcher {
             eventPublisher.publish(event);
             outboxPort.markPublished(event.notificationId());
         } catch (RuntimeException e) {
+            metrics.incrementPublishFailure();
             log.warn("Notification outbox publish failed: notificationId={}", event.notificationId(), e);
         }
     }

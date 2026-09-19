@@ -13,4 +13,6 @@ public interface DeliveryResultOutboxJpaRepository extends JpaRepository<Deliver
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<DeliveryResultOutboxEntity> findByStatusOrderByCreatedAtAsc(
             DeliveryResultOutboxEntity.Status status, Pageable pageable);
+
+    long countByStatus(DeliveryResultOutboxEntity.Status status);
 }
