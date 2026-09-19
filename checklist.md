@@ -573,3 +573,13 @@
 - [x] Run full Maven verification with Docker E2E.
 - [x] Update operational status documents.
 - [x] Commit, push, and merge Redis state and secret profile implementation.
+
+## Outbox Observability Metrics
+
+- [x] Create outbox observability metrics design and implementation plan.
+- [x] Add pending-count contracts and repository queries for both outboxes.
+- [x] Add backlog gauges and publish-failure counters to both dispatchers.
+- [x] Add Prometheus alerts and Grafana panels for outbox backlog and failures.
+- [x] Update README and operational status documents.
+- [x] Run focused, full Maven, and Docker E2E verification.
+- [ ] Commit, push, and merge outbox observability metrics.

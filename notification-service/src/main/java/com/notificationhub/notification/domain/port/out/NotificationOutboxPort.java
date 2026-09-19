@@ -12,6 +12,8 @@ public interface NotificationOutboxPort {
 
     List<NotificationEvent> findPending();
 
+    long countPending();
+
     void markPublished(String notificationId);
 
     int deletePublishedBefore(Instant cutoff);

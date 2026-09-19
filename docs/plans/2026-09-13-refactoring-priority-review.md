@@ -87,6 +87,13 @@
 - Kubernetes 배포는 `production` profile을 명시적으로 활성화하고, `ACTUATOR_PASSWORD`를 Secret으로 주입하도록 갱신했다.
 - 전체 Maven 테스트와 Docker-backed E2E가 실패 0건, skip 0건으로 통과했다.
 
+## 2026-09-19 Outbox 관측성 지표
+
+- notification outbox와 delivery result outbox에 실제 pending 건수 gauge를 추가했다.
+- 두 dispatcher의 Kafka 발행 실패를 counter로 기록하고 Prometheus 경보와 Grafana 패널에 연결했다.
+- 전체 검증 결과와 운영 환경에서의 실제 경보 전달 확인은 구현 후 기록한다.
+- focused dispatcher 테스트, ArchUnit 테스트, Prometheus rule 검증, 전체 Maven 및 Docker-backed E2E가 실패 0건, skip 0건으로 통과했다. 실제 Alertmanager 외부 Webhook/SMTP 전달은 운영 Secret 환경에서 별도 확인이 필요하다.
+
 ## 2026-09-15 구현 상태
 
 - delivery log 단건 조회에 JWT에서 재주입된 `X-Tenant-Id`를 적용해 tenant 범위 조회를 강제했다.

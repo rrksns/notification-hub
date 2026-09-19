@@ -4,6 +4,7 @@ package com.notificationhub.delivery.application.service;
 import com.notificationhub.delivery.domain.model.DeliveryResultOutbox;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultOutboxRepository;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultPublisher;
+import com.notificationhub.delivery.domain.port.out.DeliveryResultOutboxMetricsPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,17 +20,24 @@ public class DeliveryResultOutboxDispatcher {
 
     private final DeliveryResultOutboxRepository outboxRepository;
     private final DeliveryResultPublisher resultPublisher;
+    private final DeliveryResultOutboxMetricsPort metrics;
 
     public DeliveryResultOutboxDispatcher(DeliveryResultOutboxRepository outboxRepository,
-                                          DeliveryResultPublisher resultPublisher) {
+                                          DeliveryResultPublisher resultPublisher,
+                                          DeliveryResultOutboxMetricsPort metrics) {
         this.outboxRepository = outboxRepository;
         this.resultPublisher = resultPublisher;
+        this.metrics = metrics;
     }
 
     @Scheduled(fixedDelayString = "${delivery.result-outbox.poll-delay-ms:1000}")
     @Transactional
     public void dispatch() {
-        outboxRepository.findPending(BATCH_SIZE).forEach(this::dispatchOne);
+        try {
+            outboxRepository.findPending(BATCH_SIZE).forEach(this::dispatchOne);
+        } finally {
+            metrics.recordBacklog(outboxRepository.countPending());
+        }
     }
 
     private void dispatchOne(DeliveryResultOutbox outbox) {
@@ -37,6 +45,7 @@ public class DeliveryResultOutboxDispatcher {
             resultPublisher.publish(outbox);
             outboxRepository.save(outbox.markPublished(Instant.now()));
         } catch (RuntimeException e) {
+            metrics.incrementPublishFailure();
             log.warn("Delivery result outbox publish failed: notificationId={}", outbox.notificationId(), e);
         }
     }

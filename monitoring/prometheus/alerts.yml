@@ -27,3 +27,41 @@ groups:
         annotations:
           summary: "High HTTP 5xx rate for {{ $labels.job }}"
           description: "HTTP 5xx responses exceed 5% of requests for 5 minutes."
+
+      - alert: NotificationOutboxBacklogHigh
+        expr: notification_outbox_backlog > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-service
+        annotations:
+          summary: "Notification outbox backlog is high"
+          description: "More than 100 notification outbox entries have remained pending for 5 minutes."
+
+      - alert: NotificationOutboxPublishFailed
+        expr: increase(notification_outbox_publish_failure_total[5m]) > 0
+        labels:
+          severity: critical
+          service: notification-service
+        annotations:
+          summary: "Notification outbox publishing is failing"
+          description: "Notification outbox publish failures were recorded during the last 5 minutes."
+
+      - alert: DeliveryResultOutboxBacklogHigh
+        expr: delivery_result_outbox_backlog > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: delivery-service
+        annotations:
+          summary: "Delivery result outbox backlog is high"
+          description: "More than 100 delivery result outbox entries have remained pending for 5 minutes."
+
+      - alert: DeliveryResultOutboxPublishFailed
+        expr: increase(delivery_result_outbox_publish_failure_total[5m]) > 0
+        labels:
+          severity: critical
+          service: delivery-service
+        annotations:
+          summary: "Delivery result outbox publishing is failing"
+          description: "Delivery result outbox publish failures were recorded during the last 5 minutes."

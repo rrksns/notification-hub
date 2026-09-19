@@ -34,6 +34,11 @@ public class NotificationOutboxRepositoryAdapter implements NotificationOutboxPo
     }
 
     @Override
+    public long countPending() {
+        return jpaRepository.countByStatus(NotificationOutboxEntity.Status.PENDING);
+    }
+
+    @Override
     public void markPublished(String notificationId) {
         jpaRepository.markPublished(
                 notificationId,

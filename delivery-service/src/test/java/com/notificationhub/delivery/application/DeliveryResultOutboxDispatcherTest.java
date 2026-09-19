@@ -5,6 +5,8 @@ import com.notificationhub.delivery.application.service.DeliveryResultOutboxDisp
 import com.notificationhub.delivery.domain.model.DeliveryResultOutbox;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultOutboxRepository;
 import com.notificationhub.delivery.domain.port.out.DeliveryResultPublisher;
+import com.notificationhub.delivery.infrastructure.metrics.DeliveryResultOutboxMetrics;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,16 +31,20 @@ class DeliveryResultOutboxDispatcherTest {
     private DeliveryResultPublisher resultPublisher;
 
     private DeliveryResultOutboxDispatcher dispatcher;
+    private SimpleMeterRegistry meterRegistry;
 
     @BeforeEach
     void setUp() {
-        dispatcher = new DeliveryResultOutboxDispatcher(outboxRepository, resultPublisher);
+        meterRegistry = new SimpleMeterRegistry();
+        dispatcher = new DeliveryResultOutboxDispatcher(outboxRepository, resultPublisher,
+                new DeliveryResultOutboxMetrics(meterRegistry));
     }
 
     @Test
     void dispatch_publishesPendingOutboxAndMarksPublished() {
         DeliveryResultOutbox outbox = outbox();
         given(outboxRepository.findPending(100)).willReturn(List.of(outbox));
+        given(outboxRepository.countPending()).willReturn(0L);
 
         dispatcher.dispatch();
 
@@ -46,17 +52,21 @@ class DeliveryResultOutboxDispatcherTest {
         ArgumentCaptor<DeliveryResultOutbox> captor = ArgumentCaptor.forClass(DeliveryResultOutbox.class);
         then(outboxRepository).should().save(captor.capture());
         assertThat(captor.getValue().isPublished()).isTrue();
+        assertThat(meterRegistry.get("delivery.result.outbox.backlog").gauge().value()).isZero();
     }
 
     @Test
     void dispatch_keepsPendingOutboxWhenPublishingFails() {
         DeliveryResultOutbox outbox = outbox();
         given(outboxRepository.findPending(100)).willReturn(List.of(outbox));
+        given(outboxRepository.countPending()).willReturn(1L);
         willThrow(new IllegalStateException("Kafka unavailable")).given(resultPublisher).publish(outbox);
 
         dispatcher.dispatch();
 
         then(outboxRepository).should(never()).save(any());
+        assertThat(meterRegistry.get("delivery.result.outbox.backlog").gauge().value()).isEqualTo(1);
+        assertThat(meterRegistry.get("delivery.result.outbox.publish.failure").counter().count()).isEqualTo(1);
     }
 
     private DeliveryResultOutbox outbox() {
