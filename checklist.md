@@ -582,4 +582,4 @@
 - [x] Add Prometheus alerts and Grafana panels for outbox backlog and failures.
 - [x] Update README and operational status documents.
 - [x] Run focused, full Maven, and Docker E2E verification.
-- [ ] Commit, push, and merge outbox observability metrics.
+- [x] Commit, push, and merge outbox observability metrics.
