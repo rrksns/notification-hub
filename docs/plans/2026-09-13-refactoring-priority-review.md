@@ -94,6 +94,12 @@
 - 전체 검증 결과와 운영 환경에서의 실제 경보 전달 확인은 구현 후 기록한다.
 - focused dispatcher 테스트, ArchUnit 테스트, Prometheus rule 검증, 전체 Maven 및 Docker-backed E2E가 실패 0건, skip 0건으로 통과했다. 실제 Alertmanager 외부 Webhook/SMTP 전달은 운영 Secret 환경에서 별도 확인이 필요하다.
 
+## 2026-09-20 Release Gate 정적 자동화
+
+- `scripts/release/release-gate.sh`를 추가해 Maven, backup/restore 스크립트, Compose, Kubernetes YAML, Prometheus rule을 fail-closed로 검증한다.
+- GitHub Actions는 Maven 성공 후 이미지 게시 전에 정적 게이트를 실행한다.
+- 실제 Kubernetes CNI enforcement, rollout, smoke, rollback, 별도 환경 restore 증적은 운영 환경 검증 대기로 분리했다.
+
 ## 2026-09-15 구현 상태
 
 - delivery log 단건 조회에 JWT에서 재주입된 `X-Tenant-Id`를 적용해 tenant 범위 조회를 강제했다.
