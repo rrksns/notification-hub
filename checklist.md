@@ -550,7 +550,7 @@
 - [x] Delete published outbox payloads during the existing notification retention purge.
 - [x] Add retention cleanup regression coverage.
 - [ ] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
-- [ ] Add outbox backlog and publish-failure operational metrics.
+- [x] Add outbox backlog and publish-failure operational metrics.
 
 ## Delivery Result Outbox
 
@@ -583,3 +583,12 @@
 - [x] Update README and operational status documents.
 - [x] Run focused, full Maven, and Docker E2E verification.
 - [x] Commit, push, and merge outbox observability metrics.
+
+## Release Gate Static Automation
+
+- [x] Create release gate automation design and implementation plan.
+- [x] Add fail-closed static release gate script.
+- [x] Run the static release gate in CI before image publication.
+- [x] Update release runbook and operational status documents.
+- [x] Verify normal and failure paths plus full Maven.
+- [ ] Commit, push, and merge release gate automation.
