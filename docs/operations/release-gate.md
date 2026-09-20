@@ -20,6 +20,15 @@ main 커밋을 상용 Kubernetes 클러스터에 배포하기 전에 이미지, 
 
 PR 또는 release 후보 커밋에서 실행한다.
 
+반복 가능한 저장소 수준 검증은 다음 명령으로 실행한다. CI에서는 Maven을 이미 실행했으므로 `--skip-maven`을 사용한다.
+
+```bash
+export JWT_SECRET="<base64-encoded-test-secret>"
+bash scripts/release/release-gate.sh
+```
+
+정적 게이트는 Maven, backup/restore 스크립트, Compose, Kubernetes YAML, Prometheus rule을 검사한다. 이 명령의 성공만으로 실제 클러스터 NetworkPolicy, rollout, smoke test, rollback, 별도 환경 restore가 완료된 것으로 간주하지 않는다.
+
 ```bash
 mvn clean verify -DskipTests=false
 bash -n scripts/backup/backup.sh scripts/backup/restore.sh

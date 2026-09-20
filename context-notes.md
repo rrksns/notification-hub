@@ -571,3 +571,10 @@
 - Added `notification_outbox_backlog`, `notification_outbox_publish_failure_total`, `delivery_result_outbox_backlog`, and `delivery_result_outbox_publish_failure_total` through Micrometer.
 - Added Prometheus rules for backlog and publish failures, plus Grafana panels and README metric documentation.
 - Focused dispatcher tests, ArchUnit tests, Docker `promtool` rule validation, full Maven verification, and Testcontainers E2E passed with zero failures and zero skipped tests.
+
+## 2026-09-20 Release gate static automation
+
+- The next high-priority gap is repeatable release-candidate preflight validation. Real Kubernetes CNI, rollout, smoke, rollback, and separate-environment restore evidence remain environment-dependent.
+- The selected scope is a fail-closed repository script that validates Maven, backup scripts, Compose, Kubernetes YAML, and Prometheus rules, then runs in CI before image publication.
+- Added `scripts/release/release-gate.sh` with `--skip-maven` for CI reuse. Normal execution ran full Maven and Testcontainers E2E; invalid options fail with a non-zero exit code.
+- The static gate passed backup dry-run, Compose config, all Kubernetes YAML parsing, and Docker `promtool` validation. Live Kubernetes CNI, rollout, smoke, rollback, and separate-environment restore remain operational evidence.
