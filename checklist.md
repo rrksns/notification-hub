@@ -591,4 +591,4 @@
 - [x] Run the static release gate in CI before image publication.
 - [x] Update release runbook and operational status documents.
 - [x] Verify normal and failure paths plus full Maven.
-- [ ] Commit, push, and merge release gate automation.
+- [x] Commit, push, and merge release gate automation.
