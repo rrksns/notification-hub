@@ -15,12 +15,12 @@ class GatewayRouteConfigTest {
     private final List<Map<String, Object>> routes = gatewayRoutes();
 
     @Test
-    @DisplayName("API key 라우트는 JWT 인증과 Rate Limit을 모두 적용한다")
-    void apiKeysRoute_requiresJwtAuthenticationAndRateLimiter() {
-        Map<String, Object> route = routeById("user-service-api-keys");
-
-        assertThat(pathPredicates(route)).containsExactly("Path=/api/keys/**");
-        assertThat(filterNames(route)).contains("JwtAuthentication", "RequestRateLimiter");
+    @DisplayName("미연결 API key 경로는 게이트웨이에 노출하지 않는다")
+    void apiKeysRoute_isNotExposed() {
+        assertThat(routes.stream().map(route -> route.get("id")))
+                .doesNotContain("user-service-api-keys");
+        assertThat(routes.stream().flatMap(route -> pathPredicates(route).stream()))
+                .doesNotContain("Path=/api/keys/**");
     }
 
     @Test

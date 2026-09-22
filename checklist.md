@@ -539,7 +539,7 @@
 - [x] Inject a non-production JWT secret explicitly for CI tests.
 - [x] Remove the committed DocumentDB password and require sensitive Terraform variables.
 - [x] Add regression coverage for cross-tenant delivery lookup.
-- [ ] Connect API key authentication to the gateway or explicitly deprecate the unused API.
+- [x] Explicitly deprecate the unused API key endpoint and remove its gateway route.
 - [ ] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
 - [ ] Require TLS on the public Kubernetes ingress.
 

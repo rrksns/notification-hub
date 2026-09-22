@@ -138,7 +138,9 @@ HTTP 요청 (email + password)
   → JWT 토큰 반환
 ```
 
-### 3. API Key 생성 (`POST /api/keys`)
+### 3. API Key 생성 (`POST /api/keys`, Deprecated)
+
+현재 API 키 생성 API는 게이트웨이에 공개 라우트가 없으며 외부 클라이언트 사용을 지원하지 않는다. API 키 검증·회전·폐기 계약이 완성되기 전까지 신규 연동에 사용하지 않는다.
 
 ```
 HTTP 요청 (name + 선택적 만료일)
