@@ -31,7 +31,7 @@ api-gateway/
 |------|------------|------|------------|------|
 | `/api/auth/**` | user-service | 없음 | 없음 | 공개 인증 엔드포인트 |
 | `/api/users/register` | user-service | 없음 | IP 기반 (100/s) | 공개 테넌트 등록 엔드포인트 |
-| `/api/keys/**` | user-service | JWT | 테넌트 우선, 없으면 IP 기반 (100/s) | API 키 관리 |
+| `/api/keys/**` | 미노출 | - | - | API 키 인증 계약 미완성으로 deprecated |
 | `/api/notifications/**` | notification-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
 | `/api/deliveries/**` | delivery-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |
 | `/api/analytics/**` | analytics-service | JWT | 테넌트 기반 (100/s) | X-Tenant-Id 헤더 주입 |

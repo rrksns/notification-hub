@@ -152,7 +152,7 @@ user-service (8081)             notification-service (8082)
 |--------|------|------|
 | POST | `/api/users/register` | 테넌트 + 관리자 계정 동시 생성, JWT 반환 |
 | POST | `/api/users/login` | JWT 재발급 |
-| POST | `/api/keys` | API Key 생성 (테넌트별 여러 개 가능) |
+| POST | `/api/keys` | Deprecated. 현재 API Gateway에 공개 라우트가 없어 외부 클라이언트에서 사용할 수 없음 |
 
 **`POST /api/users/register` 처리 흐름:**
 

@@ -27,17 +27,6 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**
-        - id: user-service-api-keys
-          uri: lb://user-service
-          predicates:
-            - Path=/api/keys/**
-          filters:
-            - JwtAuthentication
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 100
-                redis-rate-limiter.burstCapacity: 200
-                key-resolver: "#{@tenantRateLimitKeyResolver}"
         - id: notification-service
           uri: lb://notification-service
           predicates:

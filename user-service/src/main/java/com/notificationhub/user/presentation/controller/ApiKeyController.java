@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/keys")
+@Deprecated(forRemoval = false)
 public class ApiKeyController {
 
     private final CreateApiKeyUseCase createApiKeyUseCase;

@@ -578,3 +578,9 @@
 - The selected scope is a fail-closed repository script that validates Maven, backup scripts, Compose, Kubernetes YAML, and Prometheus rules, then runs in CI before image publication.
 - Added `scripts/release/release-gate.sh` with `--skip-maven` for CI reuse. Normal execution ran full Maven and Testcontainers E2E; invalid options fail with a non-zero exit code.
 - The static gate passed backup dry-run, Compose config, all Kubernetes YAML parsing, and Docker `promtool` validation. Live Kubernetes CNI, rollout, smoke, rollback, and separate-environment restore remain operational evidence.
+
+## 2026-09-22 API key deprecation
+
+- API keys were generated and stored by user-service but had no request authentication path in the gateway or downstream services.
+- The selected scope is explicit deprecation: remove `/api/keys/**` from the gateway, keep the existing creation implementation for future redesign, and mark its controller and documentation as deprecated.
+- API key validation, hashed storage, rotation, and service-to-service timeout/fail-closed behavior require a separate security design before the endpoint can be exposed again.
