@@ -584,3 +584,12 @@
 - API keys were generated and stored by user-service but had no request authentication path in the gateway or downstream services.
 - The selected scope is explicit deprecation: remove `/api/keys/**` from the gateway, keep the existing creation implementation for future redesign, and mark its controller and documentation as deprecated.
 - API key validation, hashed storage, rotation, and service-to-service timeout/fail-closed behavior require a separate security design before the endpoint can be exposed again.
+
+## 2026-09-23 Kafka TLS/SASL
+
+- The next unfinished hardening item is Kafka TLS/SASL for Kubernetes and AWS MSK.
+- Local Compose and Testcontainers retain PLAINTEXT defaults so existing developer and E2E workflows remain usable.
+- Kubernetes uses SASL_SSL with PLAIN and PEM certificate material from Secrets. AWS MSK uses TLS broker encryption and SCRAM authentication.
+- The service Kafka factories are configured explicitly because they do not inherit all `spring.kafka.properties` values automatically after custom ProducerFactory and ConsumerFactory construction.
+- Added `SASL_SSL`/`PLAIN` Kubernetes broker settings with PEM Secret inputs, TLS/SCRAM AWS MSK settings with optional SCRAM Secret associations, and VPC-scoped MSK security groups.
+- The common Kafka security property test, Terraform validate, full Maven suite, and Docker-backed E2E passed. Local E2E clients remained PLAINTEXT by default as designed.

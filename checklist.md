@@ -540,7 +540,7 @@
 - [x] Remove the committed DocumentDB password and require sensitive Terraform variables.
 - [x] Add regression coverage for cross-tenant delivery lookup.
 - [x] Explicitly deprecate the unused API key endpoint and remove its gateway route.
-- [ ] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
+- [x] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
 - [ ] Require TLS on the public Kubernetes ingress.
 
 ## Notification Outbox Concurrency and Lifecycle
