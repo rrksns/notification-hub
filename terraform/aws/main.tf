@@ -56,10 +56,12 @@ module "msk" {
   project        = var.project
   environment    = var.environment
   vpc_id         = module.vpc.vpc_id
+  vpc_cidr       = var.vpc_cidr
   subnet_ids     = module.vpc.private_subnet_ids
   instance_type  = "kafka.t3.small"
   kafka_version  = "3.5.1"
   broker_count   = 2
+  scram_secret_arns = var.msk_scram_secret_arns
 }
 
 module "elasticache" {

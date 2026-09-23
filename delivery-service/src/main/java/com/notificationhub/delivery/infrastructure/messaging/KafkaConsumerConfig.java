@@ -1,6 +1,7 @@
 package com.notificationhub.delivery.infrastructure.messaging;
 
 import com.notificationhub.common.event.NotificationEvent;
+import com.notificationhub.common.kafka.KafkaSecurityProperties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,16 @@ public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
+    @Value("${spring.kafka.properties.security.protocol:PLAINTEXT}")
+    private String securityProtocol;
+    @Value("${spring.kafka.properties.sasl.mechanism:}")
+    private String saslMechanism;
+    @Value("${spring.kafka.properties.sasl.jaas.config:}")
+    private String saslJaasConfig;
+    @Value("${spring.kafka.properties.ssl.truststore.certificates:}")
+    private String sslTruststoreCertificates;
+    @Value("${spring.kafka.properties.ssl.truststore.password:}")
+    private String sslTruststorePassword;
 
     @Bean
     public ConsumerFactory<String, NotificationEvent> consumerFactory() {
@@ -33,6 +44,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+        KafkaSecurityProperties.apply(props, securityProtocol, saslMechanism, saslJaasConfig,
+                sslTruststoreCertificates, sslTruststorePassword);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }

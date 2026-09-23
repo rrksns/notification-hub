@@ -524,6 +524,8 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 
 > AWS 구성은 설계 코드만 포함되어 있으며, 실제 `terraform apply`는 하지 않습니다.
 
+AWS MSK는 TLS 전송 암호화와 SCRAM-SHA-512 인증을 활성화합니다. `msk_scram_secret_arns`에는 `AmazonMSK_` 접두사를 가진 Secrets Manager ARN을 전달하고, 서비스에는 MSK의 `bootstrap_brokers_sasl_scram` output과 `KAFKA_SECURITY_PROTOCOL=SASL_SSL`, `KAFKA_SASL_MECHANISM=SCRAM-SHA-512`, `KAFKA_SASL_JAAS_CONFIG`를 주입합니다.
+
 ### CI/CD
 
 `.github/workflows/ci.yml` — 전체 테스트 실행 + 6개 서비스 Docker 이미지 빌드 및 GHCR publish (matrix strategy)
@@ -723,11 +725,18 @@ kubectl create secret generic notification-hub-secret \
   --from-literal=MONGODB_PASSWORD="${MONGODB_PASSWORD}" \
   --from-literal=ACTUATOR_PASSWORD="${ACTUATOR_PASSWORD}" \
   --from-literal=JWT_SECRET="${JWT_SECRET}" \
+  --from-literal=KAFKA_SASL_JAAS_CONFIG='org.apache.kafka.common.security.plain.PlainLoginModule required username="<kafka-user>" password="<kafka-password>";' \
+  --from-literal=KAFKA_SASL_SERVER_JAAS_CONFIG='org.apache.kafka.common.security.plain.PlainLoginModule required username="<kafka-user>" password="<kafka-password>";' \
+  --from-file=KAFKA_SSL_TRUSTSTORE_CERTIFICATES=./secrets/kafka-ca.pem \
+  --from-file=KAFKA_SSL_KEYSTORE_CERTIFICATE_CHAIN=./secrets/kafka-server-chain.pem \
+  --from-file=KAFKA_SSL_KEYSTORE_KEY=./secrets/kafka-server-key.pem \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 `k8s/secret.yaml`은 Git에 커밋하지 않습니다.
 키 이름만 확인할 때는 `k8s/secret.example.yaml`을 참고합니다.
+
+Kubernetes Kafka는 `SASL_SSL`/`PLAIN`으로만 접속하며, 위 인증서 파일과 SASL 값이 없으면 Kafka와 애플리케이션이 시작되지 않습니다. 인증서 SAN에는 `kafka-service`가 포함되어야 합니다.
 
 애플리케이션은 로컬 실행 시 `local` 프로필을 기본 사용하며 개발용 DB/Mongo 자격 증명은 각 서비스의 `application-local.yml`에만 있습니다. Kubernetes 배포는 `production` 프로필을 명시하므로 Secret에 필수 자격 증명이 없으면 fallback 없이 시작에 실패합니다.
 

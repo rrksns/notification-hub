@@ -37,3 +37,10 @@ variable "documentdb_password" {
   description = "DocumentDB master password"
   sensitive   = true
 }
+
+variable "msk_scram_secret_arns" {
+  description = "AWS Secrets Manager ARNs with the AmazonMSK_ prefix for MSK SCRAM authentication"
+  type        = list(string)
+  default     = []
+  sensitive   = true
+}

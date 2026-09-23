@@ -1,6 +1,7 @@
 package com.notificationhub.delivery.infrastructure.messaging;
 
 import com.notificationhub.common.event.DeliveryResultEvent;
+import com.notificationhub.common.kafka.KafkaSecurityProperties;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,16 @@ public class KafkaProducerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
+    @Value("${spring.kafka.properties.security.protocol:PLAINTEXT}")
+    private String securityProtocol;
+    @Value("${spring.kafka.properties.sasl.mechanism:}")
+    private String saslMechanism;
+    @Value("${spring.kafka.properties.sasl.jaas.config:}")
+    private String saslJaasConfig;
+    @Value("${spring.kafka.properties.ssl.truststore.certificates:}")
+    private String sslTruststoreCertificates;
+    @Value("${spring.kafka.properties.ssl.truststore.password:}")
+    private String sslTruststorePassword;
 
     @Bean
     public ProducerFactory<String, DeliveryResultEvent> producerFactory() {
@@ -30,6 +41,8 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         props.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
         props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
+        KafkaSecurityProperties.apply(props, securityProtocol, saslMechanism, saslJaasConfig,
+                sslTruststoreCertificates, sslTruststorePassword);
         return new DefaultKafkaProducerFactory<>(props);
     }
 

@@ -12,6 +12,11 @@ output "msk_bootstrap_brokers" {
   sensitive = true
 }
 
+output "msk_bootstrap_brokers_sasl_scram" {
+  value     = module.msk.bootstrap_brokers_sasl_scram
+  sensitive = true
+}
+
 output "elasticache_endpoint" {
   value = module.elasticache.endpoint
 }
