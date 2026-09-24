@@ -510,7 +510,7 @@ Prometheus 경보와 Alertmanager 수신 상태는 각각 `http://localhost:9090
 | Namespace | `notification-hub` |
 | ConfigMap / Secret | 공통 설정, DB/Kafka 접속 정보 |
 | Deployment + Service | 전 6개 서비스 |
-| Ingress | api-gateway (nginx, `notification-hub.local`) |
+| Ingress | api-gateway (nginx, `notification-hub.local`, TLS required) |
 | HPA | user-service, notification-service (CPU 70% 기준, min 2 / max 10 Pod) |
 
 > HPA는 트래픽 급증 시 자동으로 Pod를 2~10개 범위에서 스케일링합니다. delivery-service와 analytics-service는 Kafka Consumer이므로 파티션 수(3개)가 병렬 처리 상한을 결정합니다.
@@ -731,12 +731,23 @@ kubectl create secret generic notification-hub-secret \
   --from-file=KAFKA_SSL_KEYSTORE_CERTIFICATE_CHAIN=./secrets/kafka-server-chain.pem \
   --from-file=KAFKA_SSL_KEYSTORE_KEY=./secrets/kafka-server-key.pem \
   --dry-run=client -o yaml | kubectl apply -f -
+
+# 공개 Ingress TLS 인증서. 인증서 SAN에 notification-hub.local이 포함되어야 한다.
+export INGRESS_TLS_CERT=./secrets/notification-hub.local.crt
+export INGRESS_TLS_KEY=./secrets/notification-hub.local.key
+kubectl create secret tls notification-hub-ingress-tls \
+  -n notification-hub \
+  --cert="${INGRESS_TLS_CERT}" \
+  --key="${INGRESS_TLS_KEY}" \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 `k8s/secret.yaml`은 Git에 커밋하지 않습니다.
 키 이름만 확인할 때는 `k8s/secret.example.yaml`을 참고합니다.
 
 Kubernetes Kafka는 `SASL_SSL`/`PLAIN`으로만 접속하며, 위 인증서 파일과 SASL 값이 없으면 Kafka와 애플리케이션이 시작되지 않습니다. 인증서 SAN에는 `kafka-service`가 포함되어야 합니다.
+
+공개 API Gateway Ingress는 `notification-hub-ingress-tls` Secret을 사용하며 HTTP 요청을 HTTPS로 리다이렉트합니다. TLS Secret은 애플리케이션 Secret과 별도로 생성하고 Git에 커밋하지 않습니다.
 
 애플리케이션은 로컬 실행 시 `local` 프로필을 기본 사용하며 개발용 DB/Mongo 자격 증명은 각 서비스의 `application-local.yml`에만 있습니다. Kubernetes 배포는 `production` 프로필을 명시하므로 Secret에 필수 자격 증명이 없으면 fallback 없이 시작에 실패합니다.
 

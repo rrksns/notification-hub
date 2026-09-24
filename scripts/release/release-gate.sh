@@ -51,7 +51,17 @@ ruby -ryaml -e '
   files = Dir["k8s/**/*.yaml"].sort
   abort "no Kubernetes manifests found" if files.empty?
   files.each do |file|
-    YAML.load_stream(File.read(file))
+    documents = YAML.load_stream(File.read(file))
+    if file == "k8s/api-gateway/ingress.yaml"
+      ingress = documents.fetch(0)
+      annotations = ingress.fetch("metadata").fetch("annotations")
+      tls = ingress.fetch("spec").fetch("tls")
+      hosts = tls.fetch(0).fetch("hosts")
+      abort "public ingress must enforce ssl redirect" unless annotations["nginx.ingress.kubernetes.io/ssl-redirect"] == "true"
+      abort "public ingress must force ssl redirect" unless annotations["nginx.ingress.kubernetes.io/force-ssl-redirect"] == "true"
+      abort "public ingress must declare notification-hub.local TLS" unless hosts.include?("notification-hub.local")
+      abort "public ingress must use notification-hub-ingress-tls" unless tls.fetch(0).fetch("secretName") == "notification-hub-ingress-tls"
+    end
     puts "Validated #{file}"
   end
 '

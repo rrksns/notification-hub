@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.YamlMapFactoryBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 
 class GatewayRouteConfigTest {
 
@@ -53,6 +54,24 @@ class GatewayRouteConfigTest {
         assertThat(predicates)
                 .doesNotContain("Path=/api/users/**")
                 .doesNotContain("Path=/api/users/**, /api/keys/**");
+    }
+
+    @Test
+    @DisplayName("공개 Ingress는 TLS Secret을 사용하고 HTTP 접근을 HTTPS로 전환한다")
+    void ingress_requiresTlsAndHttpsRedirect() {
+        Map<String, Object> ingress = ingressManifest();
+        Map<String, Object> metadata = child(ingress, "metadata");
+        Map<String, Object> annotations = child(metadata, "annotations");
+        Map<String, Object> spec = child(ingress, "spec");
+        List<Map<String, Object>> tls = maps(spec, "tls");
+
+        assertThat(annotations)
+                .containsEntry("nginx.ingress.kubernetes.io/ssl-redirect", "true")
+                .containsEntry("nginx.ingress.kubernetes.io/force-ssl-redirect", "true");
+        assertThat(tls).singleElement().satisfies(tlsEntry -> {
+            assertThat(tlsEntry.get("secretName")).isEqualTo("notification-hub-ingress-tls");
+            assertThat(tlsEntry.get("hosts")).asList().containsExactly("notification-hub.local");
+        });
     }
 
     private Map<String, Object> routeById(String routeId) {
@@ -120,5 +139,22 @@ class GatewayRouteConfigTest {
 
         assertThat(config).isNotNull();
         return config;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> ingressManifest() {
+        YamlMapFactoryBean factory = new YamlMapFactoryBean();
+        factory.setResources(new FileSystemResource("../k8s/api-gateway/ingress.yaml"));
+        Map<String, Object> config = factory.getObject();
+
+        assertThat(config).isNotNull();
+        return config;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> maps(Map<String, Object> source, String key) {
+        Object value = source.get(key);
+        assertThat(value).isInstanceOf(List.class);
+        return (List<Map<String, Object>>) value;
     }
 }
