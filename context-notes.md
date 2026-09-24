@@ -593,3 +593,12 @@
 - The service Kafka factories are configured explicitly because they do not inherit all `spring.kafka.properties` values automatically after custom ProducerFactory and ConsumerFactory construction.
 - Added `SASL_SSL`/`PLAIN` Kubernetes broker settings with PEM Secret inputs, TLS/SCRAM AWS MSK settings with optional SCRAM Secret associations, and VPC-scoped MSK security groups.
 - The common Kafka security property test, Terraform validate, full Maven suite, and Docker-backed E2E passed. Local E2E clients remained PLAINTEXT by default as designed.
+
+## 2026-09-24 Public Kubernetes Ingress TLS
+
+- The next unfinished hardening item is TLS enforcement at the public Kubernetes Ingress boundary.
+- The selected design keeps `notification-hub-ingress-tls` separate from the application Secret so certificate key access is not coupled to database, JWT, or Kafka credentials.
+- The NGINX Ingress explicitly enables both `ssl-redirect` and `force-ssl-redirect`, and binds `notification-hub.local` to the TLS Secret.
+- A Gateway configuration test reads the repository Ingress manifest, while the release gate fails closed if the TLS host, Secret, or redirect annotations are missing.
+- Certificate issuance and renewal remain outside this change. A live cluster, external address, trusted certificate chain, and CNI are required for the final operational smoke evidence.
+- Focused Gateway route and Ingress tests passed, the static release gate passed, and the full Maven suite passed with 10 modules and 2 Docker-backed E2E tests successful.

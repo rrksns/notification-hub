@@ -541,7 +541,15 @@
 - [x] Add regression coverage for cross-tenant delivery lookup.
 - [x] Explicitly deprecate the unused API key endpoint and remove its gateway route.
 - [x] Enable Kafka TLS/SASL for Kubernetes and AWS MSK configurations.
-- [ ] Require TLS on the public Kubernetes ingress.
+- [x] Require TLS on the public Kubernetes ingress.
+
+## Public Kubernetes Ingress TLS
+
+- [x] Write the TLS implementation plan and define the separate Ingress Secret contract.
+- [x] Require `notification-hub-ingress-tls` and HTTPS redirects in the Ingress manifest.
+- [x] Add regression coverage and fail-closed release-gate checks for the TLS contract.
+- [x] Document certificate Secret creation and public HTTPS smoke verification.
+- [x] Run focused and full verification, then push and merge the change.
 
 ## Notification Outbox Concurrency and Lifecycle
 

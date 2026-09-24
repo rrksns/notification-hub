@@ -11,6 +11,7 @@ main 커밋을 상용 Kubernetes 클러스터에 배포하기 전에 이미지, 
 - 대상 이미지가 `GITHUB_SHA` immutable tag로 존재하고 모든 서비스가 같은 tag를 사용한다.
 - 모든 Deployment rollout과 actuator health check가 성공한다.
 - API Gateway 경유 요청은 성공하고 내부 서비스 Pod 직접 접근은 차단된다.
+- 공개 Ingress는 유효한 `notification-hub-ingress-tls` 인증서를 사용하고 HTTP 요청을 HTTPS로 리다이렉트한다.
 - rollback을 수행할 때 이전 ReplicaSet이 준비 상태로 복귀한다.
 - 최근 백업이 애플리케이션 호스트 외부에 저장되어 있고, 별도 환경 복원 리허설의 RPO/RTO가 목표 이내다.
 
@@ -83,6 +84,19 @@ curl -fsS -X POST http://127.0.0.1:18080/api/users/register \
   -H 'Content-Type: application/json' \
   -d '{"email":"release-gate@example.com","password":"change-me-now"}'
 ```
+
+공개 Ingress 경계도 별도로 확인한다. `${INGRESS_ADDRESS}`는 Ingress Controller의 외부 IP 또는 DNS가 해석되는 주소이며, 테스트 인증서 사용 시 `--cacert` 또는 명시적인 테스트용 `-k` 사용 사유를 기록한다.
+
+```bash
+export INGRESS_ADDRESS="<ingress-address>"
+curl --fail --resolve notification-hub.local:443:"${INGRESS_ADDRESS}" \
+  https://notification-hub.local/actuator/health
+curl --fail --silent --show-error --head \
+  --resolve notification-hub.local:80:"${INGRESS_ADDRESS}" \
+  http://notification-hub.local/actuator/health | grep -E '^HTTP/.* (301|308)'
+```
+
+첫 번째 요청은 인증서 검증과 HTTPS health 응답을, 두 번째 요청은 HTTP 요청의 HTTPS 리다이렉트를 증명한다. 인증서 Secret 누락, 인증서 호스트 불일치, 리다이렉트 미동작은 출시 실패로 기록한다.
 
 테스트 tenant로 로그인한 뒤 JWT를 사용해 알림 생성과 delivery 조회를 검증한다. 응답 상태, notification ID, delivery 상태, analytics 집계 결과를 기록한다. 실제 provider가 연결되지 않은 환경에서는 logging provider 검증으로 표시하고 상용 provider 성공으로 기록하지 않는다.
 
