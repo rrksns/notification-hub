@@ -560,6 +560,13 @@
 - [ ] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
 - [x] Add outbox backlog and publish-failure operational metrics.
 
+## Notification Outbox Replica Verification
+
+- [x] Define the multi-replica verification plan and shared infrastructure boundary.
+- [x] Add a two-context Testcontainers E2E for concurrent notification outbox dispatch.
+- [x] Assert one Kafka event and zero pending rows after concurrent dispatch.
+- [x] Run focused, full, and release-gate verification, then push and merge the change.
+
 ## Delivery Result Outbox
 
 - [x] Create delivery result outbox design and implementation plan.
