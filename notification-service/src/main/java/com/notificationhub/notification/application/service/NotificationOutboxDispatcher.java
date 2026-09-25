@@ -7,11 +7,17 @@ import com.notificationhub.notification.domain.port.out.NotificationOutboxPort;
 import com.notificationhub.notification.domain.port.out.NotificationOutboxMetricsPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@ConditionalOnProperty(
+        name = "notification.outbox-scheduling.enabled",
+        havingValue = "true",
+        matchIfMissing = true
+)
 public class NotificationOutboxDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationOutboxDispatcher.class);

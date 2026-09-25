@@ -602,3 +602,11 @@
 - A Gateway configuration test reads the repository Ingress manifest, while the release gate fails closed if the TLS host, Secret, or redirect annotations are missing.
 - Certificate issuance and renewal remain outside this change. A live cluster, external address, trusted certificate chain, and CNI are required for the final operational smoke evidence.
 - Focused Gateway route and Ingress tests passed, the static release gate passed, and the full Maven suite passed with 10 modules and 2 Docker-backed E2E tests successful.
+
+## 2026-09-25 Notification Outbox Replica Verification
+
+- The next unfinished item is operational verification that multiple notification-service replicas do not duplicate pending outbox publication.
+- The existing PESSIMISTIC_WRITE pending query and transactional dispatcher are retained. The test disables automatic scheduling only through `notification.outbox-scheduling.enabled=false` and invokes two real dispatcher dependency graphs inside separate transaction managers.
+- Added a Docker-backed E2E that starts two notification-service Spring contexts against the same MySQL, Redis, and Kafka containers, then dispatches one pending outbox concurrently.
+- The focused E2E passed with exactly one Kafka event and zero pending rows observed from both replica contexts.
+- Full Maven verification passed across 10 modules with three Docker-backed E2E tests, and the static release gate plus `git diff --check` passed.

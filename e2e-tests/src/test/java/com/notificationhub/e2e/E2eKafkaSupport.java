@@ -89,4 +89,37 @@ final class E2eKafkaSupport {
 
         throw new AssertionError("No Kafka event received from topic " + topic);
     }
+
+    static <T> List<T> readEvents(
+            String bootstrapServers,
+            String groupId,
+            String topic,
+            Class<T> eventType,
+            Duration timeout
+    ) {
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+
+        JsonDeserializer<T> valueDeserializer = new JsonDeserializer<>(eventType);
+        valueDeserializer.addTrustedPackages("com.notificationhub.common.event");
+        List<T> events = new java.util.ArrayList<>();
+
+        try (KafkaConsumer<String, T> consumer = new KafkaConsumer<>(
+                properties,
+                new StringDeserializer(),
+                valueDeserializer
+        )) {
+            consumer.subscribe(List.of(topic));
+            long deadline = System.nanoTime() + timeout.toNanos();
+            while (System.nanoTime() < deadline) {
+                consumer.poll(Duration.ofMillis(500)).forEach(record -> events.add(record.value()));
+            }
+        }
+
+        return events;
+    }
 }
