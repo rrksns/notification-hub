@@ -610,3 +610,11 @@
 - Added a Docker-backed E2E that starts two notification-service Spring contexts against the same MySQL, Redis, and Kafka containers, then dispatches one pending outbox concurrently.
 - The focused E2E passed with exactly one Kafka event and zero pending rows observed from both replica contexts.
 - Full Maven verification passed across 10 modules with three Docker-backed E2E tests, and the static release gate plus `git diff --check` passed.
+
+## 2026-09-26 Kubernetes live release gate
+
+- The next unfinished priority is evidence from a real Kubernetes CNI. Local manifest validation cannot prove rollout readiness, Ingress behavior, or NetworkPolicy enforcement.
+- Added `scripts/release/live-release-gate.sh` with fail-closed checks for cluster connectivity, namespace and six Deployment rollouts, Ingress TLS Secret binding, HTTPS health, HTTP to HTTPS redirect, and Gateway-only internal service access.
+- The script creates two short-lived debug Pods and removes them on exit. It does not perform rollback or backup restore, so those release requirements remain separate manual evidence.
+- Docker and kubectl are installed locally, but the configured Kubernetes API at `https://127.0.0.1:26443` refused connections. The live gate therefore remains unexecuted and is intentionally not marked complete.
+- The expected environment variable names were checked without printing values. `INGRESS_ADDRESS`, `INGRESS_CA_CERT`, and application secret variables were absent from the current shell; no secret value was added to the repository or persisted by this task.

@@ -119,6 +119,17 @@ kubectl run release-gate-debug -n notification-hub --rm -i --restart=Never \
 
 클러스터 CNI가 실제로 정책을 집행했는지 확인할 수 없는 경우, manifest 적용 성공만으로 통과 처리하지 않는다.
 
+반복 실행 가능한 live gate는 rollout, Ingress TLS, HTTPS health, HTTP 리다이렉트, 허용된 Gateway Pod의 내부 접근, 임의 Pod의 차단을 한 번에 검증한다. 이 명령은 실패하면 즉시 중단하고, debug Pod는 종료 시 삭제한다.
+
+```bash
+export INGRESS_ADDRESS="<ingress-address>"
+# 사설 또는 테스트 인증서를 쓰는 경우에만 설정한다.
+export INGRESS_CA_CERT="<ca-bundle-path>"
+bash scripts/release/live-release-gate.sh
+```
+
+`INGRESS_ADDRESS`가 없거나 Kubernetes API에 연결할 수 없으면 live gate는 통과하지 않는다. 명령의 전체 출력과 커밋 SHA를 `manual_test.md` 또는 release ticket에 보관한다. 이 스크립트는 rollback이나 backup restore를 자동으로 수행하지 않으므로 해당 증적은 별도 운영 절차로 기록한다.
+
 ## 5. Rollback
 
 새 ReplicaSet이 health check나 smoke test를 통과하지 못하면 해당 release를 중단하고 이전 revision으로 되돌린다.
