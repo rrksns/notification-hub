@@ -43,7 +43,7 @@ if [[ "$skip_maven" != true ]]; then
   mvn clean verify -DskipTests=false
 fi
 
-bash -n scripts/backup/backup.sh scripts/backup/restore.sh scripts/release/release-gate.sh
+bash -n scripts/backup/backup.sh scripts/backup/restore.sh scripts/release/release-gate.sh scripts/release/live-release-gate.sh
 scripts/backup/backup.sh --dry-run
 docker compose --env-file .env.example config --quiet
 

@@ -528,7 +528,8 @@
 
 - [x] Consolidate deployment, smoke test, rollback, NetworkPolicy, and backup/restore criteria into an operations runbook.
 - [x] Link the release gate from README and define fail-closed approval rules.
-- [ ] Run the release gate against a real Kubernetes CNI.
+- [x] Add a fail-closed live release gate for rollout, Ingress TLS, HTTPS, and NetworkPolicy evidence.
+- [ ] Run the live release gate against a real Kubernetes CNI.
 - [ ] Complete a separate-environment backup restore rehearsal with measured RPO/RTO.
 - [ ] Execute a release smoke test and record the result in `manual_test.md`.
 
@@ -557,7 +558,7 @@
 - [x] Keep publish and published-state transition in one transaction boundary.
 - [x] Delete published outbox payloads during the existing notification retention purge.
 - [x] Add retention cleanup regression coverage.
-- [ ] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
+- [x] Verify duplicate suppression with multiple notification-service replicas and a real Kafka broker.
 - [x] Add outbox backlog and publish-failure operational metrics.
 
 ## Notification Outbox Replica Verification
@@ -566,6 +567,13 @@
 - [x] Add a two-context Testcontainers E2E for concurrent notification outbox dispatch.
 - [x] Assert one Kafka event and zero pending rows after concurrent dispatch.
 - [x] Run focused, full, and release-gate verification, then push and merge the change.
+
+## Kubernetes Live Release Gate
+
+- [x] Define the live CNI verification scope and fail-closed behavior.
+- [x] Add rollout, Ingress TLS, HTTPS redirect, and NetworkPolicy probes.
+- [x] Document required environment variables and evidence retention.
+- [ ] Execute the live gate against a reachable Kubernetes cluster and record the result in `manual_test.md`.
 
 ## Delivery Result Outbox
 
