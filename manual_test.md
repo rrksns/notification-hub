@@ -3,6 +3,29 @@
 **테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검), 2026-08-01 (Android FCM 서버 경유 발송)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
+## Kubernetes live release gate 실행 기록 (2026-09-27)
+
+### 목적
+
+OrbStack Kubernetes에서 상용 출시 전 live gate가 실제 클러스터 연결과 배포 전제조건을 fail-closed로 검사하는지 확인했습니다.
+
+### 검증 과정
+
+1. `orbctl start k8s`로 로컬 Kubernetes를 기동했습니다.
+2. `kubectl cluster-info`와 `kubectl get nodes -o wide`로 control plane과 `orbstack` 노드가 Ready 상태임을 확인했습니다.
+3. `INGRESS_ADDRESS=127.0.0.1 bash scripts/release/live-release-gate.sh`를 실행했습니다.
+
+### 결과
+
+- [x] Kubernetes API 연결 및 CNI 노드 상태 확인.
+- [x] live gate가 namespace 조회 단계까지 실행됨.
+- [x] `notification-hub` namespace가 없어 exit 1로 중단됨.
+- [ ] 실제 Deployment rollout, Ingress TLS, HTTPS smoke, NetworkPolicy 허용·차단 검증.
+
+### 남은 prerequisite
+
+로컬 클러스터에 `notification-hub` namespace, production profile용 Secret, infra와 여섯 애플리케이션 Deployment, NGINX Ingress controller 및 TLS 인증서를 배포한 뒤 같은 명령을 재실행해야 합니다. 이번 실행은 API 연결 실패가 아니라 배포 대상 부재로 중단되었으며, live gate 완료로 표시하지 않습니다.
+
 ---
 
 ## SendGrid EMAIL 실제 발송 검증 (2026-07-11)

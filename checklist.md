@@ -573,6 +573,7 @@
 - [x] Define the live CNI verification scope and fail-closed behavior.
 - [x] Add rollout, Ingress TLS, HTTPS redirect, and NetworkPolicy probes.
 - [x] Document required environment variables and evidence retention.
+- [x] Execute the gate against the local Kubernetes API and record the missing deployment prerequisites.
 - [ ] Execute the live gate against a reachable Kubernetes cluster and record the result in `manual_test.md`.
 
 ## Delivery Result Outbox
