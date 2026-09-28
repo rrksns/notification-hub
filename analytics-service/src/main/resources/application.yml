@@ -8,16 +8,17 @@ spring:
     name: analytics-service
   data:
     mongodb:
-      uri: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/analytics?authSource=admin
+      uri: mongodb://${MONGODB_USERNAME:${MONGO_USER}}:${MONGODB_PASSWORD:${MONGO_PASSWORD}}@${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/analytics?authSource=admin
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     properties:
       security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
       sasl.mechanism: ${KAFKA_SASL_MECHANISM:}
       sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+      ssl.truststore.type: PEM
       ssl.truststore.certificates: ${KAFKA_SSL_TRUSTSTORE_CERTIFICATES:}
       ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
 
@@ -33,7 +34,7 @@ jwt:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 
 management:
   endpoints:

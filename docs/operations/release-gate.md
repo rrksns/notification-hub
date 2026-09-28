@@ -125,6 +125,9 @@ kubectl run release-gate-debug -n notification-hub --rm -i --restart=Never \
 export INGRESS_ADDRESS="<ingress-address>"
 # 사설 또는 테스트 인증서를 쓰는 경우에만 설정한다.
 export INGRESS_CA_CERT="<ca-bundle-path>"
+# NodePort를 사용하는 테스트 클러스터에서는 실제 HTTP/HTTPS 포트를 설정한다.
+export INGRESS_HTTP_PORT="<http-port>"
+export INGRESS_HTTPS_PORT="<https-port>"
 bash scripts/release/live-release-gate.sh
 ```
 

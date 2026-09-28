@@ -19,6 +19,9 @@ public final class KafkaSecurityProperties {
         properties.put("security.protocol", securityProtocol);
         putIfHasText(properties, "sasl.mechanism", saslMechanism);
         putIfHasText(properties, "sasl.jaas.config", saslJaasConfig);
+        if (sslTruststoreCertificates != null && !sslTruststoreCertificates.isBlank()) {
+            properties.put("ssl.truststore.type", "PEM");
+        }
         putIfHasText(properties, "ssl.truststore.certificates", sslTruststoreCertificates);
         putIfHasText(properties, "ssl.truststore.password", sslTruststorePassword);
     }

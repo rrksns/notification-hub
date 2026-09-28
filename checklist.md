@@ -529,7 +529,7 @@
 - [x] Consolidate deployment, smoke test, rollback, NetworkPolicy, and backup/restore criteria into an operations runbook.
 - [x] Link the release gate from README and define fail-closed approval rules.
 - [x] Add a fail-closed live release gate for rollout, Ingress TLS, HTTPS, and NetworkPolicy evidence.
-- [ ] Run the live release gate against a real Kubernetes CNI.
+- [x] Run the live release gate against a disposable OrbStack Kubernetes CNI.
 - [ ] Complete a separate-environment backup restore rehearsal with measured RPO/RTO.
 - [ ] Execute a release smoke test and record the result in `manual_test.md`.
 
@@ -574,7 +574,7 @@
 - [x] Add rollout, Ingress TLS, HTTPS redirect, and NetworkPolicy probes.
 - [x] Document required environment variables and evidence retention.
 - [x] Execute the gate against the local Kubernetes API and record the missing deployment prerequisites.
-- [ ] Execute the live gate against a reachable Kubernetes cluster and record the result in `manual_test.md`.
+- [x] Execute the live gate against a reachable disposable Kubernetes cluster and record the result in `manual_test.md`.
 
 ## Delivery Result Outbox
 
