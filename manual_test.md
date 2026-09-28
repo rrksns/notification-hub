@@ -950,6 +950,23 @@ docker compose up -d grafana prometheus
 | 이미지 태그 | 커밋 SHA와 `latest` 태그 publish 확인 |
 | 실행 기록 | GitHub Actions run `33255885633` 성공 |
 
+### Kubernetes live release gate 검증 (2026-09-28)
+
+| 항목 | 결과 |
+|------|------|
+| 클러스터 | OrbStack Kubernetes, `orbstack` 노드 Ready |
+| Kafka | `apache/kafka:3.7.0` SASL_SSL broker Ready, PKCS12 broker Secret과 JAAS 파일 마운트 확인 |
+| 애플리케이션 | discovery, gateway, user, notification, delivery, analytics Deployment 롤아웃 성공 |
+| 데이터 인프라 | MySQL, MongoDB, Redis Deployment Ready |
+| Ingress | NGINX controller LoadBalancer, HTTP NodePort `31193`, HTTPS NodePort `31856` |
+| HTTPS health | `https://notification-hub.local:31856/actuator/health` 200, `{"status":"UP"}` |
+| HTTP redirect | HTTP health 요청이 308 HTTPS redirect 반환 |
+| NetworkPolicy 허용 | Gateway debug Pod에서 내부 health 요청 성공 |
+| NetworkPolicy 차단 | untrusted debug Pod의 내부 health 요청 차단 확인 |
+| 실행 명령 | `INGRESS_ADDRESS=127.0.0.1 INGRESS_HTTP_PORT=31193 INGRESS_HTTPS_PORT=31856 INGRESS_CA_CERT=/tmp/notification-hub-live-gate-20260928/ingress.crt ROLLOUT_TIMEOUT=600s bash scripts/release/live-release-gate.sh` |
+| 게이트 결과 | `Live Kubernetes release gate passed.` |
+| 남은 별도 증적 | rollback, release smoke, separate-environment backup restore 및 RPO/RTO 측정 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

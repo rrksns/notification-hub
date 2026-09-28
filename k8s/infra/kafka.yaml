@@ -38,27 +38,33 @@ spec:
             - name: KAFKA_LISTENER_NAME_SASL_SSL_PLAIN_SASL_JAAS_CONFIG
               valueFrom:
                 secretKeyRef:
-                  name: notification-hub-secret
+                  name: notification-hub-kafka-secret
                   key: KAFKA_SASL_SERVER_JAAS_CONFIG
             - name: KAFKA_SSL_KEYSTORE_TYPE
-              value: "PEM"
+              value: "PKCS12"
             - name: KAFKA_SSL_TRUSTSTORE_TYPE
-              value: "PEM"
-            - name: KAFKA_SSL_KEYSTORE_CERTIFICATE_CHAIN
+              value: "PKCS12"
+            - name: KAFKA_SSL_KEYSTORE_FILENAME
+              value: "kafka.keystore.p12"
+            - name: KAFKA_SSL_KEY_CREDENTIALS
+              value: "kafka-key-password"
+            - name: KAFKA_SSL_KEYSTORE_CREDENTIALS
+              value: "kafka-keystore-password"
+            - name: KAFKA_SSL_TRUSTSTORE_FILENAME
+              value: "kafka.truststore.p12"
+            - name: KAFKA_SSL_TRUSTSTORE_CREDENTIALS
+              value: "kafka-truststore-password"
+            - name: KAFKA_SSL_CLIENT_AUTH
+              value: "none"
+            - name: KAFKA_SSL_TRUSTSTORE_LOCATION
+              value: "/etc/kafka/secrets/kafka.truststore.p12"
+            - name: KAFKA_SSL_TRUSTSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: notification-hub-secret
-                  key: KAFKA_SSL_KEYSTORE_CERTIFICATE_CHAIN
-            - name: KAFKA_SSL_KEYSTORE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: notification-hub-secret
-                  key: KAFKA_SSL_KEYSTORE_KEY
-            - name: KAFKA_SSL_TRUSTSTORE_CERTIFICATES
-              valueFrom:
-                secretKeyRef:
-                  name: notification-hub-secret
-                  key: KAFKA_SSL_TRUSTSTORE_CERTIFICATES
+                  name: notification-hub-kafka-secret
+                  key: KAFKA_SSL_TRUSTSTORE_CREDENTIALS
+            - name: KAFKA_OPTS
+              value: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf"
             - name: KAFKA_CONTROLLER_QUORUM_VOTERS
               value: "1@localhost:9093"
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
@@ -67,6 +73,27 @@ spec:
               value: "MkU3OEVBNTcwNTJENDM2Qk"
           ports:
             - containerPort: 9092
+          volumeMounts:
+            - name: kafka-secrets
+              mountPath: /etc/kafka/secrets
+              readOnly: true
+      volumes:
+        - name: kafka-secrets
+          secret:
+            secretName: notification-hub-kafka-secret
+            items:
+              - key: KAFKA_SSL_KEYSTORE_FILE
+                path: kafka.keystore.p12
+              - key: KAFKA_SSL_TRUSTSTORE_FILE
+                path: kafka.truststore.p12
+              - key: KAFKA_SSL_KEY_CREDENTIALS
+                path: kafka-key-password
+              - key: KAFKA_SSL_KEYSTORE_CREDENTIALS
+                path: kafka-keystore-password
+              - key: KAFKA_SSL_TRUSTSTORE_CREDENTIALS
+                path: kafka-truststore-password
+              - key: KAFKA_SASL_SERVER_JAAS_CONFIG_FILE
+                path: kafka_server_jaas.conf
 ---
 apiVersion: v1
 kind: Service

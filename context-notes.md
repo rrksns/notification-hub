@@ -618,3 +618,13 @@
 - The script creates two short-lived debug Pods and removes them on exit. It does not perform rollback or backup restore, so those release requirements remain separate manual evidence.
 - OrbStack Kubernetes was started and the control plane plus `orbstack` node became Ready. The live gate reached the namespace check, then exited 1 because `notification-hub` has not been deployed locally. Deployment, Ingress controller, TLS Secret, and application Secret prerequisites remain outstanding, so the live gate is intentionally not marked complete.
 - The expected environment variable names were checked without printing values. `INGRESS_ADDRESS`, `INGRESS_CA_CERT`, and application secret variables were absent from the current shell; no secret value was added to the repository or persisted by this task.
+
+## 2026-09-28 Kubernetes live release gate execution
+
+- Started OrbStack Kubernetes and installed the disposable NGINX Ingress controller. Local host access uses `127.0.0.1` with NodePorts `31193` and `31856`; the release gate now accepts explicit HTTP and HTTPS port variables.
+- Kafka initially failed because the Apache Kafka image requires file-backed PKCS12 keystore/truststore credentials and a JAAS file for SASL_SSL. Broker binary material was split into `notification-hub-kafka-secret` so it is not injected into application environments.
+- Kafka also needed an explicit truststore location/password and `KAFKA_SSL_CLIENT_AUTH=none`; after that change the broker stayed Ready.
+- Service configuration now consumes Kubernetes service DNS for Eureka, Redis, MongoDB, and Kafka. The common Kafka security helper explicitly sets PEM truststore type when application PEM certificates are supplied.
+- Six JVMs on one disposable node needed extended liveness/readiness startup budgets. The probe fields are direct probe properties, with liveness 300 seconds and readiness 240 seconds.
+- The disposable MySQL schemas were recreated for the live rehearsal. Kubernetes app Deployments enable Flyway baseline and pass the Spring property explicitly; application Hibernate remains `ddl-auto=validate`.
+- Final live gate passed rollout, HTTPS health, HTTP 308 redirect, trusted Gateway debug access, and untrusted debug denial. Rollback, release smoke, and separate-environment backup restore remain separate manual release requirements.

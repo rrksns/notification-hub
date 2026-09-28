@@ -10,6 +10,8 @@ readonly ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-180s}"
 readonly DEBUG_TTL="${DEBUG_TTL:-300}"
 readonly INGRESS_ADDRESS="${INGRESS_ADDRESS:-}"
 readonly INGRESS_CA_CERT="${INGRESS_CA_CERT:-}"
+readonly INGRESS_HTTP_PORT="${INGRESS_HTTP_PORT:-80}"
+readonly INGRESS_HTTPS_PORT="${INGRESS_HTTPS_PORT:-443}"
 readonly GATEWAY_DEBUG_POD="release-gate-gateway-debug"
 readonly UNTRUSTED_DEBUG_POD="release-gate-untrusted-debug"
 
@@ -25,6 +27,8 @@ Required environment:
 
 Optional environment:
   INGRESS_CA_CERT  CA bundle for a private or test certificate
+  INGRESS_HTTP_PORT  Ingress HTTP port, default: 80
+  INGRESS_HTTPS_PORT Ingress HTTPS port, default: 443
   NAMESPACE        Kubernetes namespace, default: notification-hub
   INGRESS_HOST     Ingress host, default: notification-hub.local
   TLS_SECRET       Ingress TLS Secret, default: notification-hub-ingress-tls
@@ -72,14 +76,14 @@ actual_tls_secret=$(kubectl get ingress api-gateway-ingress -n "$NAMESPACE" \
 }
 kubectl get secret "$TLS_SECRET" -n "$NAMESPACE" -o jsonpath='{.type}' | grep -Fx 'kubernetes.io/tls' >/dev/null
 
-curl_args=(--fail --silent --show-error --resolve "$INGRESS_HOST:443:$INGRESS_ADDRESS")
+curl_args=(--fail --silent --show-error --resolve "$INGRESS_HOST:$INGRESS_HTTPS_PORT:$INGRESS_ADDRESS")
 if [[ -n "$INGRESS_CA_CERT" ]]; then
   curl_args+=(--cacert "$INGRESS_CA_CERT")
 fi
-curl "${curl_args[@]}" "https://$INGRESS_HOST/actuator/health" >/dev/null
+curl "${curl_args[@]}" "https://$INGRESS_HOST:$INGRESS_HTTPS_PORT/actuator/health" >/dev/null
 
 http_status=$(curl --silent --show-error --head --output /dev/null --write-out '%{http_code}' \
-  --resolve "$INGRESS_HOST:80:$INGRESS_ADDRESS" "http://$INGRESS_HOST/actuator/health")
+  --resolve "$INGRESS_HOST:$INGRESS_HTTP_PORT:$INGRESS_ADDRESS" "http://$INGRESS_HOST:$INGRESS_HTTP_PORT/actuator/health")
 [[ "$http_status" == 301 || "$http_status" == 308 ]] || {
   echo "Expected HTTP to HTTPS redirect, received status=$http_status" >&2
   exit 1
