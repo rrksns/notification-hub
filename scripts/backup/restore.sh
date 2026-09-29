@@ -5,6 +5,7 @@ set -euo pipefail
 
 input_dir=""
 confirm=false
+readonly CONTAINER_PREFIX="${NOTIFICATION_HUB_CONTAINER_PREFIX:-notification-hub}"
 
 usage() {
   cat <<'EOF'
@@ -57,6 +58,7 @@ done
 
 cat <<EOF
 Backup directory: $input_dir
+Compose container prefix: $CONTAINER_PREFIX
 MySQL: all databases
 MongoDB: analytics database
 Redis: /data/dump.rdb replacement and container restart
@@ -69,17 +71,17 @@ if [[ "$confirm" != true ]]; then
 fi
 
 command -v docker >/dev/null 2>&1 || { echo "docker is required" >&2; exit 1; }
-docker exec -i notification-hub-mysql sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < "$input_dir/mysql/all-databases.sql"
-docker exec -i notification-hub-mongodb sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --archive --gzip --drop' < "$input_dir/mongodb/analytics.archive.gz"
+docker exec -i "$CONTAINER_PREFIX-mysql" sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' < "$input_dir/mysql/all-databases.sql"
+docker exec -i "$CONTAINER_PREFIX-mongodb" sh -c 'mongorestore --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --archive --gzip --drop' < "$input_dir/mongodb/analytics.archive.gz"
 
-docker stop notification-hub-redis >/dev/null
-docker cp "$input_dir/redis/dump.rdb" notification-hub-redis:/data/dump.rdb
-docker start notification-hub-redis >/dev/null
+docker stop "$CONTAINER_PREFIX-redis" >/dev/null
+docker cp "$input_dir/redis/dump.rdb" "$CONTAINER_PREFIX-redis:/data/dump.rdb"
+docker start "$CONTAINER_PREFIX-redis" >/dev/null
 
 while IFS=$'\t' read -r topic partitions; do
   [[ -n "$topic" ]] || continue
   [[ "$topic" == __* ]] && continue
-  docker exec notification-hub-kafka /opt/kafka/bin/kafka-topics.sh \
+  docker exec "$CONTAINER_PREFIX-kafka" /opt/kafka/bin/kafka-topics.sh \
     --bootstrap-server localhost:9092 --create --if-not-exists \
     --topic "$topic" --partitions "${partitions:-1}" --replication-factor 1 >/dev/null
 done < "$input_dir/kafka/topic-specs.txt"

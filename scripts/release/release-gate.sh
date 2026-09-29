@@ -45,6 +45,7 @@ fi
 
 bash -n scripts/backup/backup.sh scripts/backup/restore.sh scripts/release/release-gate.sh scripts/release/live-release-gate.sh
 scripts/backup/backup.sh --dry-run
+NOTIFICATION_HUB_CONTAINER_PREFIX=release-gate scripts/backup/backup.sh --dry-run | grep -F 'release-gate-mysql' >/dev/null
 docker compose --env-file .env.example config --quiet
 
 ruby -ryaml -e '

@@ -967,6 +967,16 @@ docker compose up -d grafana prometheus
 | 게이트 결과 | `Live Kubernetes release gate passed.` |
 | 남은 별도 증적 | rollback, release smoke, separate-environment backup restore 및 RPO/RTO 측정 |
 
+### Separate-environment backup restore rehearsal 준비 검증 (2026-09-29)
+
+| 항목 | 결과 |
+|------|------|
+| 컨테이너 격리 | `NOTIFICATION_HUB_CONTAINER_PREFIX=rehearsal`로 기존 `notification-hub-*` 중지 컨테이너와 충돌 없이 `rehearsal-*` 컨테이너 생성 |
+| 스크립트 계약 | 기본 prefix와 custom prefix backup dry-run 출력, Compose config 검증 통과 |
+| 실제 복원 | 미실행. 공유 OrbStack VM 과부하로 MySQL, MongoDB, Kafka 초기화와 Docker/Kubernetes CLI가 timeout 됨 |
+| RPO/RTO | 미측정. 새로 만든 rehearsal container, network, volume은 모두 제거 |
+| 후속 조건 | OrbStack 자원 회복 후 source backup, clean restore, fixture 검증, elapsed time 기록을 다시 수행 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항
