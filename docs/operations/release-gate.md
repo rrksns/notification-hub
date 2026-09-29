@@ -157,6 +157,8 @@ scripts/backup/restore.sh \
   --input /secure-backups/notification-hub/<timestamp>
 ```
 
+기존 Compose 컨테이너가 있는 Docker host에서 별도 복원 환경을 만들 때는 `NOTIFICATION_HUB_CONTAINER_PREFIX`를 source와 restore 환경별로 지정한다. Compose manifest와 backup/restore 스크립트가 동일한 prefix를 사용해야 한다.
+
 월 1회 별도 복원 환경에서 `--confirm` 복원을 실행한다. 다음 값을 기록한다.
 
 | 항목 | 목표 | 실제 기록 |

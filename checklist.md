@@ -530,7 +530,7 @@
 - [x] Link the release gate from README and define fail-closed approval rules.
 - [x] Add a fail-closed live release gate for rollout, Ingress TLS, HTTPS, and NetworkPolicy evidence.
 - [x] Run the live release gate against a disposable OrbStack Kubernetes CNI.
-- [ ] Complete a separate-environment backup restore rehearsal with measured RPO/RTO.
+- [ ] Complete a disposable separate-environment backup restore rehearsal with measured RPO/RTO.
 - [ ] Execute a release smoke test and record the result in `manual_test.md`.
 
 ## External Access and Secret Hardening

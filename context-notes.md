@@ -628,3 +628,10 @@
 - Six JVMs on one disposable node needed extended liveness/readiness startup budgets. The probe fields are direct probe properties, with liveness 300 seconds and readiness 240 seconds.
 - The disposable MySQL schemas were recreated for the live rehearsal. Kubernetes app Deployments enable Flyway baseline and pass the Spring property explicitly; application Hibernate remains `ddl-auto=validate`.
 - Final live gate passed rollout, HTTPS health, HTTP 308 redirect, trusted Gateway debug access, and untrusted debug denial. Rollback, release smoke, and separate-environment backup restore remain separate manual release requirements.
+
+## 2026-09-29 Separate-environment backup restore rehearsal
+
+- The next remaining release-gate priority is a measured backup and restore rehearsal. The local Compose topology is chosen as a disposable source and restore environment because no external backup store or separate production cluster is connected to this workspace.
+- The initial rehearsal was blocked by exited `notification-hub-*` containers retaining fixed names. `NOTIFICATION_HUB_CONTAINER_PREFIX` now scopes all Compose container names and backup/restore targets while preserving `notification-hub` as the default.
+- The retry created only `rehearsal-*` containers, but the shared OrbStack VM became resource constrained. MySQL, MongoDB, and Kafka initialization remained unhealthy and Docker/Kubernetes CLI calls stalled, so no backup artifact, restore write, or RPO/RTO measurement was recorded.
+- Evidence will retain only fixture identifiers, UTC times, elapsed durations, and verification results. Temporary backup archives and test-only Secret files must not be staged or committed.

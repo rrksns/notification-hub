@@ -572,6 +572,14 @@ scripts/backup/restore.sh \
   --confirm
 ```
 
+같은 Docker host에서 기존 Compose 컨테이너를 보존한 채 별도 리허설을 수행할 때는 `NOTIFICATION_HUB_CONTAINER_PREFIX`를 지정한다. `docker-compose.yml`과 두 스크립트에 같은 값을 사용해야 한다.
+
+```bash
+export NOTIFICATION_HUB_CONTAINER_PREFIX=restore-rehearsal
+docker compose up -d mysql mongodb redis kafka kafka-init
+scripts/backup/backup.sh --output /secure-backups/notification-hub
+```
+
 복구는 MySQL과 MongoDB 데이터를 덮어쓰고 Redis 컨테이너를 재기동하므로 반드시 별도 복구 환경에서 먼저 리허설합니다. Kafka 토픽은 파티션 수 기준으로 재생성되며, `kafka/topic-configs.txt`를 검토해 필요한 토픽 설정을 재적용한 후 애플리케이션 health endpoint와 DLQ 소비 상태를 확인합니다.
 
 월 1회 복구 리허설에서 백업 생성 시각, 복구 시작·종료 시각, 데이터 검증 결과, RPO/RTO 달성 여부를 `manual_test.md`에 기록합니다.
