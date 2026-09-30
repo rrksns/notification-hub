@@ -635,3 +635,10 @@
 - The initial rehearsal was blocked by exited `notification-hub-*` containers retaining fixed names. `NOTIFICATION_HUB_CONTAINER_PREFIX` now scopes all Compose container names and backup/restore targets while preserving `notification-hub` as the default.
 - The retry created only `rehearsal-*` containers, but the shared OrbStack VM became resource constrained. MySQL, MongoDB, and Kafka initialization remained unhealthy and Docker/Kubernetes CLI calls stalled, so no backup artifact, restore write, or RPO/RTO measurement was recorded.
 - Evidence will retain only fixture identifiers, UTC times, elapsed durations, and verification results. Temporary backup archives and test-only Secret files must not be staged or committed.
+
+## 2026-09-30 Separate-environment backup restore execution
+
+- OrbStack restart alone did not free enough capacity because the disposable Kubernetes namespace retained 28 Pods, including two 10-replica application Deployments. All Deployment desired replicas were temporarily set to zero, then OrbStack was restarted again before the Compose rehearsal.
+- A fresh Compose source environment used the `backup-rehearsal` prefix. The backup captured a fixture row, document, key, and Kafka topic metadata in 6 seconds.
+- After source volume deletion, a clean Compose environment restored the same artifacts with `restore.sh --confirm` in 17 seconds. Direct MySQL, MongoDB, Redis, and Kafka checks returned the source fixture values and the expected one-partition topic.
+- The measured disposable-environment RPO was below one minute and RTO was 17 seconds, satisfying the 24-hour and 60-minute targets. External backup storage and production restore approval remain separate requirements.

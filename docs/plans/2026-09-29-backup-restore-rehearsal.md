@@ -49,4 +49,6 @@
 ## Execution Status
 
 - Container prefix support and its static release-gate check are complete.
-- The real source backup and restore remains pending because the shared OrbStack VM was resource constrained during the rehearsal attempt. No fixture data or backup archive was retained.
+- The initial source backup and restore attempt was blocked by shared OrbStack VM resource contention. The disposable Kubernetes Deployments were scaled to zero, OrbStack restarted, and the original replica counts were restored after the rehearsal.
+- The real source backup completed in 6 seconds. A clean-volume restore completed in 17 seconds, with MySQL, MongoDB, Redis, and Kafka topic fixture verification successful.
+- The disposable-environment RPO was below one minute and RTO was 17 seconds. External backup storage and production restore approval remain outside this rehearsal.

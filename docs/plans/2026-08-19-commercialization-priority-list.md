@@ -57,3 +57,5 @@ P2 기술 개선 목록 #13-#27의 기본 구현을 완료했다. 운영 환경�
 2026-09-19 P1 기술 안정성 후속으로 `Outbox 관측성 지표` 구현을 완료했다. 두 outbox의 실제 pending 건수와 Kafka 발행 실패를 Micrometer, Prometheus, Grafana에 연결했고 전체 Maven 및 Docker-backed E2E가 통과했다. 실제 Alertmanager 외부 전달은 운영 Secret 환경 검증 대기다.
 
 2026-09-20 P0 운영 출시 게이트 후속으로 정적 release gate 자동화를 구현했다. Maven, backup/restore script, Compose, Kubernetes YAML, Prometheus rule 검증을 CI 이미지 게시 전에 실행하며, 실제 CNI·smoke·rollback·restore 증적은 운영 클러스터 검증 대기로 남겼다.
+
+2026-09-30 P0 운영 출시 게이트 후속으로 disposable Compose 환경의 backup/restore 리허설을 완료했다. MySQL, MongoDB, Redis, Kafka topic metadata fixture를 backup 6초, clean restore 17초로 검증해 RPO 24시간과 RTO 60분 목표를 충족했다. 외부 저장소 복제와 운영 환경 restore 승인은 별도 운영 증적으로 남긴다.
