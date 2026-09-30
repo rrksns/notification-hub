@@ -977,6 +977,20 @@ docker compose up -d grafana prometheus
 | RPO/RTO | 미측정. 새로 만든 rehearsal container, network, volume은 모두 제거 |
 | 후속 조건 | OrbStack 자원 회복 후 source backup, clean restore, fixture 검증, elapsed time 기록을 다시 수행 |
 
+### Separate-environment backup restore rehearsal 검증 (2026-09-30)
+
+| 항목 | 결과 |
+|------|------|
+| 환경 | 기존 `notification-hub-*` 컨테이너를 보존한 `backup-rehearsal-*` disposable Compose source 및 clean restore 환경 |
+| Fixture | MySQL row, MongoDB `analytics` document, Redis key, Kafka topic metadata에 동일한 UTC fixture ID 기록 |
+| Backup | 7개 산출물 생성, 6초 소요 |
+| Restore | clean volume 환경에서 `restore.sh --confirm` 실행, 17초 소요 |
+| 데이터 검증 | MySQL `source` row, MongoDB `source` document, Redis `source` key, Kafka 1 partition topic 복원 확인 |
+| RPO | backup 생성 후 restore 시작까지 1분 미만으로 24시간 목표 충족 |
+| RTO | 17초로 60분 목표 충족 |
+| 정리 | disposable container, network, volume 및 backup artifact를 삭제하고 Kubernetes replica를 원래 값으로 복구 |
+| 남은 별도 증적 | 외부 저장소 복제와 운영 환경 restore 승인 |
+
 ---
 
 ## 발견된 이슈 및 수정 사항

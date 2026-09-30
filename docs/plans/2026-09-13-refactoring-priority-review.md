@@ -100,6 +100,12 @@
 - GitHub Actions는 Maven 성공 후 이미지 게시 전에 정적 게이트를 실행한다.
 - 실제 Kubernetes CNI enforcement, rollout, smoke, rollback, 별도 환경 restore 증적은 운영 환경 검증 대기로 분리했다.
 
+## 2026-09-30 Backup restore rehearsal
+
+- `NOTIFICATION_HUB_CONTAINER_PREFIX`를 사용해 기존 Compose 컨테이너와 분리된 disposable source 및 restore 환경을 구성했다.
+- MySQL, MongoDB, Redis, Kafka topic metadata fixture를 실제 backup과 clean restore로 검증했다. backup은 6초, restore는 17초였으며 데이터와 topic partition이 복원됐다.
+- 외부 backup storage 복제, 운영 environment restore 승인, release smoke test, rollback 증적은 계속 별도 운영 검증 항목이다.
+
 ## 2026-09-15 구현 상태
 
 - delivery log 단건 조회에 JWT에서 재주입된 `X-Tenant-Id`를 적용해 tenant 범위 조회를 강제했다.
