@@ -3,6 +3,30 @@
 **테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검), 2026-08-01 (Android FCM 서버 경유 발송)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
+## Kubernetes release smoke test 실행 기록 (2026-10-01)
+
+### 목적
+
+OrbStack Kubernetes의 현재 배포본에서 API Gateway를 통한 health 및 공개 Ingress smoke test를 실행할 수 있는지 확인했습니다.
+
+### 검증 과정
+
+1. `orbctl start k8s` 후 `kubectl cluster-info`와 `kubectl get nodes -o wide`로 Kubernetes API와 `orbstack` 노드의 Ready 상태를 확인했습니다.
+2. `notification-hub` namespace의 Deployment, Pod, Service, Ingress 및 Secret을 조회했습니다.
+3. `kubectl wait --for=condition=Available deployment --all -n notification-hub --timeout=90s`로 rollout 준비를 대기했습니다.
+
+### 결과
+
+- [x] Kubernetes API와 `notification-hub` namespace 확인.
+- [ ] 여섯 애플리케이션 및 MySQL, MongoDB, Redis, Kafka Deployment가 Available 상태가 아님.
+- [ ] API Gateway Service에 Ready endpoint가 없어 port-forward health 및 사용자 등록 요청을 실행할 수 없음.
+- [ ] Ingress NGINX controller가 Error 상태라 공개 HTTPS 및 HTTP redirect를 검증할 수 없음.
+- [ ] rollout 대기 중 Kubernetes API가 TLS handshake timeout으로 응답을 멈춰 smoke test를 fail-closed로 종료함.
+
+### 다음 조치
+
+OrbStack Kubernetes API 안정화 후 인프라와 여섯 애플리케이션 Deployment를 Ready 상태로 복구하고, immutable image tag를 적용한 뒤 이 smoke test와 live release gate를 다시 실행합니다. 이 실행은 출시 승인 증적이 아닙니다.
+
 ## Kubernetes live release gate 실행 기록 (2026-09-27)
 
 ### 목적
