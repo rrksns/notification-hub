@@ -642,3 +642,10 @@
 - A fresh Compose source environment used the `backup-rehearsal` prefix. The backup captured a fixture row, document, key, and Kafka topic metadata in 6 seconds.
 - After source volume deletion, a clean Compose environment restored the same artifacts with `restore.sh --confirm` in 17 seconds. Direct MySQL, MongoDB, Redis, and Kafka checks returned the source fixture values and the expected one-partition topic.
 - The measured disposable-environment RPO was below one minute and RTO was 17 seconds, satisfying the 24-hour and 60-minute targets. External backup storage and production restore approval remain separate requirements.
+
+## 2026-10-01 Kubernetes release smoke test
+
+- Restarted the local OrbStack Kubernetes control plane and confirmed the API and `orbstack` node became reachable.
+- The `notification-hub` namespace existed, but every application and data-infrastructure Deployment remained unavailable; the Ingress NGINX controller was also Error.
+- The 90-second rollout wait ended with a Kubernetes API TLS handshake timeout before Gateway health or registration requests could run.
+- Recorded the fail-closed result in `manual_test.md`. Deployment recovery, immutable release images, Gateway health, public HTTPS, and HTTP redirect verification remain prerequisites for release approval.

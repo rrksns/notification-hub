@@ -531,7 +531,7 @@
 - [x] Add a fail-closed live release gate for rollout, Ingress TLS, HTTPS, and NetworkPolicy evidence.
 - [x] Run the live release gate against a disposable OrbStack Kubernetes CNI.
 - [x] Complete a disposable separate-environment backup restore rehearsal with measured RPO/RTO.
-- [ ] Execute a release smoke test and record the result in `manual_test.md`.
+- [x] Execute a release smoke test and record the result in `manual_test.md`.
 
 ## External Access and Secret Hardening
 
