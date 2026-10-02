@@ -649,3 +649,8 @@
 - The `notification-hub` namespace existed, but every application and data-infrastructure Deployment remained unavailable; the Ingress NGINX controller was also Error.
 - The 90-second rollout wait ended with a Kubernetes API TLS handshake timeout before Gateway health or registration requests could run.
 - Recorded the fail-closed result in `manual_test.md`. Deployment recovery, immutable release images, Gateway health, public HTTPS, and HTTP redirect verification remain prerequisites for release approval.
+
+## 2026-10-02 Refactoring priority approval
+
+- The project operator explicitly approved proceeding with the next prioritized work and merging the resulting change. The checklist approval gate for the refactoring and commercialization review is now recorded as complete.
+- iOS Firebase/APNs setup and the timed portfolio rehearsal remain operator-owned external tasks; no credential, account, or rehearsal result was created by this change.
