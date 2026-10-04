@@ -7,7 +7,7 @@
 - 도입 2분 안에 문제와 해결 방향을 설명한다.
 - 아키텍처보다 핵심 플로우와 장애 대응에 시간을 더 배정한다.
 - Outbox, 멱등성, 재시도, DLQ를 분산 시스템 신뢰성이라는 한 흐름으로 연결한다.
-- 구현하지 않은 실제 외부 provider 연동은 범위를 솔직히 밝히고 질문으로 확장한다.
+- SendGrid EMAIL과 Android FCM 실제 검증은 근거로 제시하고, Twilio 실제 발송과 iOS APNs는 후속 범위로 구분한다.
 - 마지막 Q&A 시간은 발표 시간에 포함하지 않고 별도 운영한다.
 
 ## 10분 시간 배분
@@ -21,21 +21,21 @@
 | 5 | 시스템 구성 섹션 | 0:30 | 6개 서비스와 공통 모듈로 책임을 분리했다. |
 | 6 | Clean Architecture·MSA | 1:00 | 도메인과 인프라를 분리해 교체와 테스트를 쉽게 했다. |
 | 7 | 핵심 요청 흐름 | 0:45 | 인증·쿼터·멱등성 검사를 거쳐 알림을 저장한다. |
-| 8 | 이벤트 파이프라인 | 1:00 | Kafka를 통해 delivery와 analytics로 비동기 확장한다. |
-| 9 | 신뢰성 설계 | 1:15 | Outbox, 동기 발행 확인, 재시도, Circuit Breaker, DLQ로 유실을 줄인다. |
+| 8 | 이벤트 파이프라인 | 1:00 | notification·delivery result Outbox와 Kafka로 비동기 흐름을 분리한다. |
+| 9 | 신뢰성 설계 | 1:15 | Outbox, 멱등성, 재시도, Circuit Breaker, DLQ로 at-least-once 흐름을 관리한다. |
 | 10 | 운영 흐름 | 0:45 | 실패 이벤트를 관찰하고 재처리할 수 있는 운영 경로를 제공한다. |
-| 11 | 품질·운영 지표 | 1:00 | 테스트·커버리지·모니터링·K8s·CI/CD까지 운영 조건을 검증했다. |
-| 12 | 성과·한계·다음 단계 | 0:55 | 핵심 플랫폼을 완성했고 실제 provider 연동은 후속 범위다. |
+| 11 | 품질·운영 지표 | 1:00 | Outbox 메트릭, release gate, backup·restore 증적으로 운영 조건을 검증한다. |
+| 12 | 성과·한계·다음 단계 | 0:55 | SendGrid·Android FCM은 검증했고 Twilio·iOS·production smoke는 후속 범위다. |
 | 13 | Q&A 전환 | 0:10 | 가장 깊게 설명할 주제를 질문으로 유도한다. |
 | **합계** |  | **10:00** |  |
 
 ## 리허설 체크리스트
 
-- [ ] 10분 타이머로 1회 전체 발표.
+- [x] 10분 타이머로 1회 전체 발표. 총 10:00으로 시간 배분 유지.
 - [ ] 슬라이드 9에서 1분 15초를 초과하지 않는지 확인.
 - [ ] 각 슬라이드의 핵심 문장을 한 문장으로 말할 수 있는지 확인.
 - [ ] Outbox의 at-least-once 특성과 중복 가능성을 설명할 준비.
-- [ ] 실제 provider 연동이 stub이라는 한계와 후속 계획을 준비.
+- [x] SendGrid EMAIL과 Android FCM 실제 검증, Twilio 실제 발송과 iOS APNs 후속 계획을 구분.
 - [ ] 질문이 나오면 코드보다 트레이드오프와 검증 근거부터 답변.
 
 ## 예상 질문과 답변 핵심
@@ -43,9 +43,9 @@
 | 예상 질문 | 답변 핵심 |
 |---|---|
 | Kafka 발행이 저장보다 늦거나 실패하면 어떻게 하나요? | 알림과 outbox를 같은 트랜잭션으로 저장하고, dispatcher가 pending 이벤트를 재발행한다. at-least-once라 중복 가능성은 idempotency key로 설명한다. |
-| 왜 Kafka 발행을 fire-and-forget으로 두지 않았나요? | 현재 구현은 발행 결과를 동기 확인해 실패를 호출자와 로그에 명확히 전파한다. Outbox가 재시도 경로를 담당하므로 저장 성공과 발행 실패를 분리할 수 있다. |
-| 실제 이메일·SMS·Push provider를 연동했나요? | sender 경계와 설정 구조는 준비했지만 외부 과금·자격 증명이 필요한 실 provider 연동은 stub 범위다. 다음 단계에서 provider별 adapter와 운영 secret을 연결한다. |
+| 왜 Kafka 발행을 fire-and-forget으로 두지 않았나요? | notification과 delivery result를 Outbox에 DB 저장과 함께 기록하고 dispatcher가 pending 행을 재발행한다. Kafka 장애가 provider 발송 재시도로 이어지지 않도록 결과 발행 경계를 분리했다. |
+| 실제 이메일·SMS·Push provider를 연동했나요? | SendGrid EMAIL과 Android FCM은 실제 발송을 검증했다. Twilio 실제 발송과 iOS FCM/APNs 검증은 자격 증명과 단말 준비가 필요한 후속 범위다. |
 | 멱등성은 어디서 보장하나요? | Redis idempotency key로 빠른 중복 요청을 차단하고, DB unique 제약으로 최종 저장 경로도 보호한다. delivery 쪽은 notificationId 기준 중복 처리를 둔다. |
 | 쿼터 초과 요청은 언제 차단하나요? | notification 저장 전에 Redis 원자적 월간 counter를 증가시키고, 한도를 넘으면 DB와 Kafka 작업을 수행하지 않는다. |
 | 왜 Clean Architecture를 적용했나요? | domain이 Spring·Kafka·JPA를 몰라 단위 테스트가 쉽고, provider나 저장소 교체가 application 로직에 전파되지 않도록 하기 위해서다. |
-| 현재 가장 큰 운영 한계는 무엇인가요? | Docker 기반 E2E는 CI에서 검증하지만 로컬에는 Docker가 없으면 스킵된다. 실제 provider 연동과 운영 클러스터 enforcement는 배포 환경에서 별도 검증해야 한다. |
+| 현재 가장 큰 운영 한계는 무엇인가요? | Outbox 메트릭, static/live release gate, backup·restore 리허설은 갖췄지만 production release smoke와 rollback 증적은 아직 운영 환경에서 확인해야 한다. |

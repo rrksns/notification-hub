@@ -654,3 +654,9 @@
 
 - The project operator explicitly approved proceeding with the next prioritized work and merging the resulting change. The checklist approval gate for the refactoring and commercialization review is now recorded as complete.
 - iOS Firebase/APNs setup and the timed portfolio rehearsal remain operator-owned external tasks; no credential, account, or rehearsal result was created by this change.
+
+## 2026-10-05 Portfolio status sync and rehearsal
+
+- The project operator reported a 10:00 timed rehearsal, so the existing 13-slide timing allocation remains unchanged.
+- Updated the portfolio source, generated deck, and rehearsal material to describe the implemented notification and delivery-result Outboxes, Outbox metrics, release gates, and the measured 6-second backup with 17-second clean restore.
+- The material now distinguishes verified SendGrid EMAIL and Android FCM delivery from pending Twilio delivery, iOS APNs setup, and production release smoke/rollback evidence.
