@@ -249,7 +249,7 @@ def s_title(prs):
     text(s, "멀티테넌트 알림 발송 플랫폼 · Clean Architecture 기반 Event-Driven MSA",
          0.92, 4.32, 10.5, 0.6, size=17, color=MUTED)
     rect(s, 0.92, 5.05, 2.6, 0.045, CORAL)
-    text(s, "이설      |      2026-06-05", 0.92, 6.55, 8.0, 0.4, size=13, color=TEXT)
+    text(s, "이설      |      2026-10-05", 0.92, 6.55, 8.0, 0.4, size=13, color=TEXT)
     # 우측 장식: 살짝 겹친 카드 3장
     for i, c in enumerate([CARD_DK, CARD, CORAL_SOFT]):
         rrect(s, 9.7 + i * 0.28, 1.5 + i * 0.55, 2.7, 1.5, c, line=BORDER, line_w=1.0, radius=0.10)
@@ -396,7 +396,7 @@ def s_pipeline(prs):
     y0 = content_header(
         s, "03 — 핵심 플로우",
         "핵심 플로우 — 이벤트 드리븐",
-        "Kafka 기반 비동기 파이프라인으로 '접수 → 발송 → 집계'를 분리해, 발송 지연이 알림 접수 응답을 막지 않도록 설계")
+        "notification과 delivery result를 Outbox로 저장해, DB commit 뒤에도 Kafka 재발행 경로를 남기는 비동기 파이프라인")
     # 파이프라인 밴드
     py = y0 + 0.25
     bh = 0.78
@@ -439,12 +439,12 @@ def s_pipeline(prs):
     # 하단 불릿 (2열)
     by = py + bh + 0.62
     left = [
-        "접수: 멱등성 체크 → MySQL 저장 → notifications 발행 → 즉시 응답",
-        "발송: Kafka 소비 → 채널별 발송 → delivery-results 발행",
+        "접수: 멱등성 체크 → notification outbox와 MySQL 동시 저장 → 즉시 응답",
+        "발송: pending outbox 발행 → 채널 전송 → delivery result outbox 저장",
     ]
     right = [
         "집계: 결과 소비 → MongoDB 일별 통계 + Redis 실시간 카운터",
-        "각 단계는 토픽으로만 통신 → 독립 배포·확장 가능",
+        "Outbox는 at-least-once로 재발행하고, downstream 멱등성으로 중복을 관리",
     ]
     bullets(s, left, 0.7, by, 5.9, 1.3, size=11.5, gap=9)
     bullets(s, right, 6.85, by, 5.9, 1.3, size=11.5, gap=9)
@@ -457,10 +457,10 @@ def s_reliability(prs):
     y0 = content_header(
         s, "04 — 신뢰성 엔지니어링",
         "신뢰성 엔지니어링",
-        "멱등성·Circuit Breaker·재시도/DLQ·원자적 집계로 '메시지 유실 없고 중복 없는' 발송을 보장")
+        "두 Outbox·멱등성·재시도/DLQ·원자적 집계로 유실 위험을 줄이고 at-least-once 발송을 관리")
     bullets(s, [
-        "멱등성 이중 방어: 접수단 Redis 키 + 발송단 notificationId 중복 체크",
-        "Kafka 발행 신뢰성: fire-and-forget 대신 동기 확인(.get 5초) + 실패 시 예외 전파",
+        "트랜잭션 Outbox: notification과 delivery result를 DB 저장과 같은 경계에 기록",
+        "중복 방어: 접수단 Redis 키 + delivery_logs.notification_id unique 제약",
         "장애 격리: Resilience4j Circuit Breaker(실패율 50% 초과 시 차단)",
         "최종 실패 보존: 3회 재시도 후 DLQ 격리 + $inc·upsert 원자적 집계",
     ], 0.7, y0 + 0.15, 5.0, 3.9, size=12.5, gap=12)
@@ -507,12 +507,12 @@ def s_ops(prs):
     y0 = content_header(
         s, "05 — 운영 & 품질",
         "운영 & 품질",
-        "모니터링·컨테이너 오케스트레이션·CI/CD·높은 테스트 커버리지로 '운영 가능한' 수준까지 완성")
+        "Outbox backlog·발행 실패 지표, release gate, 백업·복구 리허설을 운영 증적으로 관리")
     bullets(s, [
-        "관측성: Prometheus + Grafana(발송량·5xx·Lag) + Zipkin 분산 트레이싱",
-        "배포: Docker Compose(로컬) · Kubernetes(HPA 2~10 Pod) · Terraform IaC",
-        "CI/CD: GitHub Actions 전체 테스트 + 7개 서비스 Docker 이미지 매트릭스 빌드",
-        "테스트: 도메인+애플리케이션 계층 커버리지 83.5% ~ 94.7%",
+        "관측성: Prometheus/Grafana로 두 Outbox backlog·발행 실패, 5xx, Lag 추적",
+        "출시 게이트: 정적 CI 검사와 live rollout·TLS·NetworkPolicy 검증 경로 분리",
+        "복구: 격리 Compose backup 6초, clean restore 17초로 RPO/RTO 측정",
+        "테스트: Maven 10모듈과 Testcontainers E2E로 메시지 흐름 검증",
     ], 0.7, y0 + 0.15, 5.4, 3.9, size=12.5, gap=12)
 
     # 네이티브 막대 차트
@@ -561,9 +561,9 @@ def s_conclusion(prs):
     text(s, "성과 요약 & 배운 점", 0.68, 1.05, 11.0, 0.8, size=32, bold=True, color=WHITE)
     items = [
         ("성과", "Clean Architecture + Event-Driven MSA로 확장·교체·테스트가 용이한 알림 플랫폼 설계·구현"),
-        ("기술 학습", "분산 환경의 멱등성/재시도/DLQ, Circuit Breaker, 원자적 집계로 신뢰성 확보"),
-        ("운영 학습", "관측성(Prometheus/Zipkin)과 오케스트레이션(K8s/HPA)으로 운영 관점까지 경험"),
-        ("개선 방향", "실제 채널(SendGrid/Twilio/FCM) 연동, Outbox 운영 고도화, E2E 자동화 확대"),
+        ("기술 학습", "notification·delivery result Outbox, 멱등성, 재시도/DLQ로 at-least-once 흐름 관리"),
+        ("운영 학습", "Outbox 지표, release gate, 6초 backup과 17초 clean restore로 운영 증적 축적"),
+        ("다음 단계", "Twilio 실제 발송, iOS FCM/APNs, production release smoke와 rollback 증적"),
     ]
     top, step = 2.3, 0.92
     for i, (k, v) in enumerate(items):
@@ -597,11 +597,11 @@ def s_qa(prs):
 
 # 발표자 노트
 NOTES = {
-    "problem": "도입부에서 '왜 만들었는가'를 공감시키는 슬라이드입니다. 알림은 거의 모든 서비스가 필요로 하지만 재시도·통계·멀티채널을 제대로 구현하려면 부담이 큽니다. 채널 실제 연동(SendGrid/Twilio/FCM)은 스텁이며 아키텍처 설계에 집중했다는 점을 솔직히 밝힙니다.",
+    "problem": "도입부에서 '왜 만들었는가'를 공감시키는 슬라이드입니다. 알림은 거의 모든 서비스가 필요로 하지만 재시도·통계·멀티채널을 제대로 구현하려면 부담이 큽니다. SendGrid EMAIL과 Android FCM은 실제 발송까지 검증했고, Twilio 실제 발송과 iOS APNs 연동은 후속 범위로 남아 있습니다.",
     "arch": "핵심은 '왜 Clean Architecture인가'입니다. 도메인이 프레임워크를 모르기 때문에 인프라 없이 단위 테스트가 쉽고 기술 교체에 강합니다. ArchUnit으로 'domain이 infrastructure를 import하면 빌드 실패'하도록 강제해 설계가 시간이 지나도 무너지지 않게 했습니다.",
-    "pipeline": "동기 호출이 아니라 이벤트로 단계를 분리한 이유를 설명합니다. 발송 채널이 느리거나 장애여도 고객사는 접수 응답을 즉시 받습니다. 파티션 3개로 발송을 병렬 처리하고, Zipkin으로 Kafka 구간까지 추적합니다.",
-    "reliability": "기술 면접관이 가장 주목할 부분입니다. 멱등성으로 중복을 흡수하고, 재시도·DLQ로 유실을 막고, Circuit Breaker로 장애 전파를 차단했습니다. 통계 집계 동시성 버그를 read-modify-write에서 MongoDB 원자적 연산으로 바꾼 경험도 함께 언급합니다.",
-    "ops": "기능 구현으로 끝내지 않고 '운영'까지 고려했음을 보여줍니다. 커버리지 수치는 도메인·애플리케이션 계층 기준이며, 비즈니스 로직이 프레임워크와 분리되어 높은 커버리지가 가능했다는 점을 Clean Architecture 효과와 연결합니다.",
+    "pipeline": "접수와 발송 결과를 각각 Outbox에 같은 DB 트랜잭션으로 저장합니다. dispatcher가 pending 행을 Kafka로 재발행하므로 Kafka 발행 실패가 provider 발송 재시도로 이어지지 않습니다. 이 구조는 at-least-once를 전제로 downstream 멱등성을 함께 설명합니다.",
+    "reliability": "기술 면접관이 가장 주목할 부분입니다. notification Outbox와 delivery-result Outbox가 DB 저장과 이벤트 발행 사이의 간격을 줄입니다. Redis 멱등성, delivery_logs의 notification_id unique 제약, 재시도·DLQ, Circuit Breaker가 함께 중복과 장애 전파를 관리합니다.",
+    "ops": "운영 근거는 Outbox backlog·발행 실패 메트릭, 정적 및 live release gate, 격리 Compose 복구 리허설입니다. backup은 6초, clean restore는 17초였고, production smoke와 rollback 증적은 아직 별도 운영 과제입니다.",
 }
 
 
