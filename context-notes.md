@@ -660,3 +660,9 @@
 - The project operator reported a 10:00 timed rehearsal, so the existing 13-slide timing allocation remains unchanged.
 - Updated the portfolio source, generated deck, and rehearsal material to describe the implemented notification and delivery-result Outboxes, Outbox metrics, release gates, and the measured 6-second backup with 17-second clean restore.
 - The material now distinguishes verified SendGrid EMAIL and Android FCM delivery from pending Twilio delivery, iOS APNs setup, and production release smoke/rollback evidence.
+
+## 2026-10-10 Live gate retry and Twilio preflight
+
+- OrbStack Kubernetes initially refused the API connection immediately after startup, then served the `orbstack` context after 15 seconds; the retry distinguishes startup delay from the earlier TLS handshake timeout.
+- The live release gate reached `discovery-service` rollout and failed closed after 90 seconds because the Deployment remained 0/1 Ready. Gateway smoke, Ingress, NetworkPolicy, and rollback evidence remain blocked by unhealthy workloads.
+- `.env.local` contains none of the Twilio provider, credential, sender, or Messaging Service settings, and no recipient was supplied. No Twilio API request or SMS was sent; the required settings and actual receipt remain external prerequisites.
