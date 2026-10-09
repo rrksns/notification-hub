@@ -1,6 +1,6 @@
 # Manual Test 기록
 
-**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검), 2026-08-01 (Android FCM 서버 경유 발송)
+**테스트 일자**: 2026-03-19 (Phase 3~4), 2026-03-20 (Phase 5), 2026-03-24 (Phase 6 - k8s/CI/모니터링), 2026-07-11 (SendGrid EMAIL 실제 발송), 2026-07-15 (Twilio SMS 실제 발송 준비), 2026-07-17 (Android FCM 실제 발송 준비), 2026-07-18 (SMS/PUSH 실패 흐름 검증), 2026-07-19 (iOS FCM 검증 계획), 2026-07-20 (Android FCM 실제 발송 사전 점검), 2026-08-01 (Android FCM 서버 경유 발송), 2026-10-10 (Kubernetes live gate 재실행, Twilio 사전 점검)
 **테스트 환경**: 로컬 (MacOS), docker-compose 인프라 기동 상태 / OrbStack Kubernetes
 
 ## Kubernetes release smoke test 실행 기록 (2026-10-01)
@@ -26,6 +26,23 @@ OrbStack Kubernetes의 현재 배포본에서 API Gateway를 통한 health 및 �
 ### 다음 조치
 
 OrbStack Kubernetes API 안정화 후 인프라와 여섯 애플리케이션 Deployment를 Ready 상태로 복구하고, immutable image tag를 적용한 뒤 이 smoke test와 live release gate를 다시 실행합니다. 이 실행은 출시 승인 증적이 아닙니다.
+
+## Kubernetes live release gate 재실행 기록 (2026-10-10)
+
+### 검증 과정
+
+1. `orbctl start k8s` 뒤 초기 API 연결 거부를 확인하고 15초 후 Kubernetes API가 응답하는 것을 확인했습니다.
+2. `orbstack` 노드와 `notification-hub` namespace를 조회했습니다.
+3. `INGRESS_ADDRESS=127.0.0.1 ROLLOUT_TIMEOUT=90s bash scripts/release/live-release-gate.sh`를 실행했습니다.
+
+### 결과
+
+- [x] Kubernetes API와 `orbstack` 노드가 Ready 상태로 응답.
+- [ ] `discovery-service` Deployment가 0/1 Ready여서 rollout이 90초 후 timeout.
+- [ ] Gateway health, Ingress TLS/redirect, NetworkPolicy 허용·차단은 rollout 전제조건 미충족으로 실행되지 않음.
+- [ ] 정상 배포 revision이 없어 rollback 증적을 만들지 않음.
+
+이 실행은 fail-closed 동작을 재확인한 것이며, release approval 증적이 아닙니다. 여섯 애플리케이션과 MySQL을 Ready 상태로 복구하고 immutable image tag를 적용한 뒤 live gate, smoke test, rollback을 순서대로 재실행해야 합니다.
 
 ## Kubernetes live release gate 실행 기록 (2026-09-27)
 
@@ -161,6 +178,14 @@ curl -sS -o /tmp/twilio-response.json -w "%{http_code}\n" \
 - [x] Twilio sender 단위 테스트로 요청 형식, Basic Auth, 오류 처리를 검증
 - [ ] 실제 Twilio 계정으로 SMS 발송 검증
 - [ ] 테스트 수신 전화번호에서 SMS 수신 확인
+
+### Twilio 사전 점검 (2026-10-10)
+
+- [x] `.env.local`의 설정 존재 여부만 확인하고 값은 출력하지 않음.
+- [ ] `SMS_PROVIDER`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` 또는 `TWILIO_MESSAGING_SERVICE_SID`가 설정되지 않아 API 호출을 실행하지 않음.
+- [ ] 테스트 수신 전화번호가 없어 실제 SMS 수신을 확인하지 않음.
+
+자격 증명, 발신자, 수신 번호가 준비된 뒤 기존 직접 호출 절차로 `201 Created`와 실제 수신을 함께 확인해야 합니다.
 
 ---
 
