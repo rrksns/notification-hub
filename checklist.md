@@ -625,7 +625,7 @@
 - [x] 백업·복구 설계 문서 작성.
 - [x] 단계별 AWS 구현 계획 및 완료 기준 작성.
 - [x] 승인 결정과 현재 AWS 미적용 상태를 context notes에 기록.
-- [ ] AWS account/region, 예산, KMS 키 운영자 확정.
-- [ ] 비운영 AWS에 Terraform 백업 정책과 S3 bucket 구성.
-- [ ] 복구 검증 경보 및 운영 runbook 구현.
-- [ ] AWS 격리 복구 리허설로 RPO 24시간/RTO 60분 검증.
+- [ ] **보류** AWS account/region, 예산, KMS 키 운영자 확정.
+- [ ] **보류** 비운영 AWS에 Terraform 백업 정책과 S3 bucket 구성.
+- [ ] **보류** 복구 검증 경보 및 운영 runbook 구현.
+- [ ] **보류** AWS 격리 복구 리허설로 RPO 24시간/RTO 60분 검증.
