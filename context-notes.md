@@ -676,3 +676,9 @@
 - AWS 관리형 RDS/DocumentDB 백업의 저장소는 고객 소유 S3 객체와 다를 수 있다. 전용 S3는 manifest·검증 증거와 승인된 portable export용이며 관리형 백업을 대체하지 않는다.
 - Redis snapshot 복원 후 quota와 idempotency 상태의 정합성을 검증해야 한다. KMS 고객 관리형 키, 장기 export 보존, 교차 리전 복사는 비용/운영책임 승인 게이트로 남긴다.
 - 조사 중인 OrbStack 상태는 시작 전 중지 상태였고 조사 후 다시 중지했다. 10월 10일 90초 rollout timeout은 discovery readiness probe의 240초 지연보다 짧아 timeout 설정이 부족했던 사실은 확인했지만, workload 불안정의 근본 원인은 과거 로그 부재로 확정하지 못했다.
+
+## 2026-10-23 백업 보존기간 결정
+
+- 사용자는 현재 백업 체계 구현을 진행하지 말라고 결정했다. 기존 문서는 향후 구현 계획으로만 유지한다.
+- RDS, DocumentDB, ElastiCache 관리형 백업 보존기간은 15일로 확정했다.
+- 전용 S3의 내보내기/증거물 보존기간은 별도 결정이 있을 때까지 미정으로 유지하며 만료 정책을 정하지 않는다.

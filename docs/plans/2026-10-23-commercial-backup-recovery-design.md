@@ -37,10 +37,10 @@ AWS 관리형 백업이 서비스 소유의 S3 저장소를 사용하더라도, 
 - 백업 전용 버킷을 Terraform state 버킷과 분리하고, 퍼블릭 액세스를 모두 차단한다.
 - 기본 서버 측 암호화, 버전 관리, TLS 전송 강제, 최소 권한 IAM을 적용한다. KMS 고객 관리형 키 사용은 키 회전·복구 권한 및 비용을 포함해 적용 전 검토한다.
 - 객체 경로는 환경·서비스·UTC 날짜·백업 식별자로 구분한다. 매니페스트에는 원본, snapshot 식별자, 시각, checksum, 앱/스키마 버전, RPO/RTO 검증 결과를 기록하고 인증정보나 개인정보를 넣지 않는다.
-- AWS 관리형 백업은 우선 35일 이내의 설정 가능 범위에서 보존기간을 구성한다. RDS, DocumentDB의 실제 설정값은 Terraform 변수로 관리한다. ElastiCache snapshot 보존 역시 비용·요구사항 확인 후 값을 정한다.
+- AWS 관리형 RDS·DocumentDB 자동 백업/PITR과 ElastiCache 자동 snapshot의 보존기간은 15일로 확정한다. Terraform 변수와 운영 검증은 향후 구현 시 모두 15일을 사용한다.
 - S3 export/증거물의 보존기간과 Object Lock 사용 여부는 고객 계약·비용 정책과 연결되므로 현재 확정하지 않는다. 구현 전 만료 규칙과 삭제 책임자를 결정해야 한다.
 
-RDS와 DocumentDB는 1–35일 범위의 자동 백업/PITR을 제공한다. RDS 자동 백업은 지정한 보존기간 중 시점 복구가 가능하고, DocumentDB는 연속 백업을 AWS 관리형 S3에 보관하며 해당 백업 파일은 고객이 직접 접근할 수 없다. ElastiCache의 Redis snapshot은 별도 retention/window를 구성해야 한다. 세부 설정은 AWS 공식 문서를 따른다.
+RDS와 DocumentDB는 1–35일 범위의 자동 백업/PITR을 제공하며, 선택한 15일 값은 해당 범위 안에 있다. RDS 자동 백업은 지정한 보존기간 중 시점 복구가 가능하고, DocumentDB는 연속 백업을 AWS 관리형 S3에 보관하며 해당 백업 파일은 고객이 직접 접근할 수 없다. ElastiCache의 Redis snapshot은 별도 retention/window를 구성해야 하며, 보존기간은 15일로 설정한다. 세부 설정은 AWS 공식 문서를 따른다.
 
 ## 실행 및 복구 흐름
 
