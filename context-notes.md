@@ -666,3 +666,13 @@
 - OrbStack Kubernetes initially refused the API connection immediately after startup, then served the `orbstack` context after 15 seconds; the retry distinguishes startup delay from the earlier TLS handshake timeout.
 - The live release gate reached `discovery-service` rollout and failed closed after 90 seconds because the Deployment remained 0/1 Ready. Gateway smoke, Ingress, NetworkPolicy, and rollback evidence remain blocked by unhealthy workloads.
 - `.env.local` contains none of the Twilio provider, credential, sender, or Messaging Service settings, and no recipient was supplied. No Twilio API request or SMS was sent; the required settings and actual receipt remain external prerequisites.
+# 2026-10-23 상업 운영 백업·복구 설계 승인
+
+- 사용자는 AWS S3와 관리형 데이터 저장소 백업을 함께 쓰는 방향을 승인했다.
+- Kafka 과거 메시지 본문 장기 보관은 요구하지 않는다. MySQL에 남은 미발행 notification/delivery-result Outbox의 Kafka 재발행을 복구 보장으로 삼는다.
+- notification-service의 `PUBLISHED` Outbox는 기본 90일 뒤 정리되고, `PENDING`은 dispatcher가 재발행한다. 따라서 문서에서 과거 발행 완료 메시지의 replay를 약속하지 않는다.
+- 기존 RPO 24시간/RTO 60분을 상업 운영 목표로 유지한다. 단, 현재 측정된 6초 backup/17초 restore는 Compose 격리 리허설 결과이며 AWS 운영 증거가 아니다.
+- `terraform/aws/`는 아직 apply되지 않았다. 이 변경은 설계·계획 문서만 작성하며 실제 계정/리전/예산/retention 결정을 대신하지 않는다.
+- AWS 관리형 RDS/DocumentDB 백업의 저장소는 고객 소유 S3 객체와 다를 수 있다. 전용 S3는 manifest·검증 증거와 승인된 portable export용이며 관리형 백업을 대체하지 않는다.
+- Redis snapshot 복원 후 quota와 idempotency 상태의 정합성을 검증해야 한다. KMS 고객 관리형 키, 장기 export 보존, 교차 리전 복사는 비용/운영책임 승인 게이트로 남긴다.
+- 조사 중인 OrbStack 상태는 시작 전 중지 상태였고 조사 후 다시 중지했다. 10월 10일 90초 rollout timeout은 discovery readiness probe의 240초 지연보다 짧아 timeout 설정이 부족했던 사실은 확인했지만, workload 불안정의 근본 원인은 과거 로그 부재로 확정하지 못했다.
