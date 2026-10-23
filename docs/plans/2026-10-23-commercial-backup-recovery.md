@@ -15,11 +15,11 @@
 **파일:** `terraform/aws/variables.tf`, `terraform/aws/modules/rds/`, `terraform/aws/modules/documentdb/`, `terraform/aws/modules/elasticache/`
 
 1. 현재 provider 버전과 module 입력/호출 구조를 확인한다.
-2. 환경별 백업 retention 및 UTC backup window를 명시적 Terraform 변수로 정의한다. 기본값은 무백업을 허용하지 않고 상업 운영 정책에 맞는 7일 이상을 제안하되, 최대치/비용 선택은 승인 게이트에서 확인한다.
+2. RDS·DocumentDB·ElastiCache의 자동 백업 retention을 명시적 Terraform 변수로 정의하고 모두 15일로 설정한다. UTC backup window는 리전과 부하를 고려해 구현 시 지정한다.
 3. RDS의 automated backup retention과 window, DocumentDB의 retention/window, ElastiCache의 snapshot retention/window에 변수를 연결한다.
 4. Terraform validation 또는 정적 테스트로 범위와 필수값을 검증한다.
 
-**완료 기준:** Terraform validate 및 계획 테스트가 통과하고, `0` 또는 서비스 제한 밖 보존값이 거부된다.
+**완료 기준:** Terraform validate 및 계획 테스트가 통과하고, 세 관리형 저장소의 보존기간이 모두 15일이며 `0` 또는 서비스 제한 밖 값이 거부된다.
 
 ## Task 2: 전용 S3 백업 증거 버킷 구성
 
@@ -39,11 +39,11 @@
 
 1. 백업 retention/window를 실제 AWS provider schema에 맞춰 추가한다.
 2. RDS deletion protection, final snapshot 동작을 유지하고 identifier와 태그로 환경을 식별한다.
-3. DocumentDB PITR 설정과 ElastiCache snapshot retention을 명시적으로 검증한다.
+3. RDS·DocumentDB PITR과 ElastiCache snapshot retention이 모두 15일인지 명시적으로 검증한다.
 4. static Terraform test 또는 validate로 환경별 설정이 누락되지 않았음을 확인한다.
 5. `terraform plan`은 비운영 입력으로만 검토한다. 사용자 승인 없이 `terraform apply`하지 않는다.
 
-**완료 기준:** RDS·DocumentDB·Redis의 보존정책이 plan에 나타나며 비운영 plan 외 실제 AWS 리소스 변화가 없다.
+**완료 기준:** RDS·DocumentDB·Redis 각각 15일 보존정책이 plan에 나타나며 비운영 plan 외 실제 AWS 리소스 변화가 없다.
 
 ## Task 4: 매니페스트와 백업 상태 경보
 
