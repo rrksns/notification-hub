@@ -74,6 +74,15 @@
 
 # SMS/PUSH Delivery Checklist
 
+## Kubernetes Live Gate Local HPA Recovery
+
+- [x] Confirm OrbStack Kubernetes control plane was stopped and restart it.
+- [x] Confirm HPA-driven 10-replica startup load and the 90-second gate timeout conflict with 240-second readiness delay.
+- [x] Record original HPA limits and apply local-only two-replica limits.
+- [x] Verify six application Deployments become Ready within a 600-second rollout budget.
+- [x] Execute the live release gate with local Ingress values.
+- [x] Restore original HPA limits and record the gate result.
+
 ## Phase 0: Design and Planning
 
 - [x] Confirm SMS Provider as Twilio.

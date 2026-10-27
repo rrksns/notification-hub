@@ -687,3 +687,14 @@
 
 - 사용자는 AWS 계정·리전·예산 확정, 백업 구현 체크리스트 항목, 추가 상업화 우선순위 분석을 모두 보류했다.
 - 백업 계획 문서에 재개 지시 전 실행하지 말라는 상태를 명시했다. 체크리스트 항목은 미완료로 유지하면서 보류로 표시한다.
+
+## 2026-10-27 Kubernetes live gate local HPA recovery
+
+- OrbStack was running while its Kubernetes control plane was stopped, so the active `orbstack` context returned connection refused at `127.0.0.1:26443`. `orbctl start k8s` restored API availability.
+- `user-service-hpa` and `notification-service-hpa` were both at their maximum 10 replicas. The single OrbStack node reported 86% CPU usage, while every JVM Pod was unready.
+- `discovery-service` took about 94 seconds after container start to emit its first Spring Boot startup log under this load. Its readiness probe waits 240 seconds, so the previous 90-second live-gate budget could not succeed even with a healthy eventual startup.
+- The approved recovery is local-only. It will temporarily cap both HPAs at two replicas, use a 600-second rollout budget, run the existing live gate, and restore the original HPA limits without changing the repository HPA manifests.
+- Both HPA resources were capped at two replicas and their Deployments scaled down from 10 Pods to 2. Node CPU fell from 86% to 7-9%, and all six application Deployments became Ready within the 600-second budget.
+- The first gate retry then exposed an expired local Ingress certificate. `notification-hub-ingress-tls` was a self-signed certificate valid only from 2026-09-28 through 2026-09-30. The local Secret was replaced with a 30-day self-signed certificate for `notification-hub.local`, including a DNS SAN.
+- The gate passed with OrbStack local address `127.0.0.1`, NodePorts 31193 and 31856, and a CA file derived locally from the Kubernetes TLS Secret. It verified all six rollouts, HTTPS health, HTTP 308 redirect, Gateway debug Pod access, and untrusted Pod denial.
+- The HPA values were restored to their original minimum 2 and maximum 10 replicas. Both HPA resources initially remained at 2 replicas because CPU utilization was below the 70% target. The gate cleanup left its short-lived debug Pods in terminating state, which Kubernetes will remove asynchronously.

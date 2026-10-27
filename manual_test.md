@@ -1016,6 +1016,20 @@ docker compose up -d grafana prometheus
 | 게이트 결과 | `Live Kubernetes release gate passed.` |
 | 남은 별도 증적 | rollback, release smoke, separate-environment backup restore 및 RPO/RTO 측정 |
 
+### Kubernetes live release gate 복구 검증 (2026-10-27)
+
+| 항목 | 결과 |
+|------|------|
+| 초기 원인 | OrbStack Kubernetes control plane 중지, user·notification HPA의 10-replica 확장, 90초 gate timeout과 240초 readiness delay 불일치 |
+| 로컬 격리 | 실행 중인 user·notification HPA만 2/2로 임시 제한. 저장소 매니페스트는 변경하지 않음 |
+| 자원 회복 | OrbStack 노드 CPU 사용률 86%에서 7-9%로 하락 |
+| rollout | discovery, gateway, user, notification, delivery, analytics Deployment 모두 Ready |
+| TLS 복구 | 만료된 local self-signed `notification-hub-ingress-tls`를 `notification-hub.local` DNS SAN 포함 30일 인증서로 교체 |
+| 실행 명령 | `INGRESS_ADDRESS=127.0.0.1 INGRESS_HTTP_PORT=31193 INGRESS_HTTPS_PORT=31856 INGRESS_CA_CERT=<Secret에서 로컬 생성> ROLLOUT_TIMEOUT=600s bash scripts/release/live-release-gate.sh` |
+| 게이트 결과 | `Live Kubernetes release gate passed.` |
+| NetworkPolicy | Gateway debug Pod 내부 health 접근 성공, untrusted debug Pod 접근 차단 확인 |
+| 원복 | 두 HPA를 원래 min 2, max 10으로 복원. Gate debug Pod는 종료 cleanup 대상 |
+
 ### Separate-environment backup restore rehearsal 준비 검증 (2026-09-29)
 
 | 항목 | 결과 |
