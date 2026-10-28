@@ -698,3 +698,10 @@
 - The first gate retry then exposed an expired local Ingress certificate. `notification-hub-ingress-tls` was a self-signed certificate valid only from 2026-09-28 through 2026-09-30. The local Secret was replaced with a 30-day self-signed certificate for `notification-hub.local`, including a DNS SAN.
 - The gate passed with OrbStack local address `127.0.0.1`, NodePorts 31193 and 31856, and a CA file derived locally from the Kubernetes TLS Secret. It verified all six rollouts, HTTPS health, HTTP 308 redirect, Gateway debug Pod access, and untrusted Pod denial.
 - The HPA values were restored to their original minimum 2 and maximum 10 replicas. Both HPA resources initially remained at 2 replicas because CPU utilization was below the 70% target. The gate cleanup left its short-lived debug Pods in terminating state, which Kubernetes will remove asynchronously.
+
+## 2026-10-28 Local Twilio integration-test design
+
+- 실제 Twilio 계정, 수신 번호, 비용 없이 SMS adapter의 Spring 설정과 HTTP 계약을 검증하기로 했다.
+- 새 테스트 라이브러리를 추가하지 않고 Java 17 `HttpServer`를 loopback 가짜 Twilio 서버로 사용한다.
+- 범위는 `TwilioSmsSender` 선택, `twilio.*` 속성 바인딩, Messages API 경로·Basic Auth·폼 본문·201 응답 처리다.
+- Kafka, 데이터베이스, Retry·Circuit Breaker, 실제 문자 수신, 상태 콜백은 범위 밖으로 둔다.

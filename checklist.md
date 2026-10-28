@@ -638,3 +638,9 @@
 - [ ] **보류** 비운영 AWS에 Terraform 백업 정책과 S3 bucket 구성.
 - [ ] **보류** 복구 검증 경보 및 운영 runbook 구현.
 - [ ] **보류** AWS 격리 복구 리허설로 RPO 24시간/RTO 60분 검증.
+
+## Local Twilio Integration Test
+
+- [x] 실제 SMS 없이 loopback HTTP를 사용하는 통합 테스트 설계를 승인한다.
+- [ ] 가짜 Twilio 서버 통합 테스트를 TDD로 구현한다.
+- [ ] delivery-service와 전체 Maven 검증을 실행한다.
