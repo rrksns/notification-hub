@@ -643,4 +643,4 @@
 
 - [x] 실제 SMS 없이 loopback HTTP를 사용하는 통합 테스트 설계를 승인한다.
 - [x] 가짜 Twilio 서버 통합 테스트를 TDD로 구현한다.
-- [ ] delivery-service와 전체 Maven 검증을 실행한다.
+- [x] delivery-service와 전체 Maven 검증을 실행한다.

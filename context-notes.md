@@ -712,3 +712,11 @@
 - 테스트는 POST 경로, Basic Auth, form URL-encoded `To`·`Body`·`From`, `201 Created` 응답을 검증한다.
 - 가짜 서버는 `127.0.0.1`의 임의 포트에만 바인딩한다. 실제 Twilio 자격 증명·수신 번호·외부 네트워크를 사용하지 않는다.
 - `mvn test -pl delivery-service -am`은 common 6개와 delivery-service 50개 테스트를 통과했다. 전체 reactor `mvn test`는 Testcontainers E2E가 최종 요약 없이 장시간 대기해 중지했으므로 별도 환경 진단이 필요하다.
+
+## 2026-10-29 Testcontainers E2E resource diagnosis
+
+- 최초 E2E 실패는 `confluentinc/cp-kafka:7.6.1`이 `KafkaServer started` 로그를 144초 안에 내지 못한 컨테이너 startup timeout이었다.
+- 당시 단일 OrbStack Kubernetes 노드에서 user-service와 notification-service HPA가 각각 최대 10개 Pod로 확장됐고, 총 20개 JVM Pod가 `0/1 Ready`와 재시작 상태였다.
+- 두 HPA의 상한을 로컬에서만 2로 임시 제한해 Pod를 4개로 줄인 뒤 Kafka E2E가 정상 기동했다. 테스트 종료 후 HPA 상한은 원래 10으로 복구했다.
+- E2E 실행 환경 변수 `JWT_SECRET`은 `JwtTokenProvider`가 Base64로 해석하므로 유효한 Base64 테스트 값을 사용해야 한다. raw 문자열은 별도 `Illegal base64 character` 설정 오류를 만든다.
+- 유효한 Base64 테스트 JWT와 HPA 제한 조건에서 전체 `mvn test`는 10개 모듈과 3개 Testcontainers E2E를 2분 13초에 통과했다.
