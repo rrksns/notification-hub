@@ -170,6 +170,16 @@ Messaging Service를 사용하는 경우 `From` 대신 `MessagingServiceSid`를 
 
 `201 Created`를 성공으로 처리합니다. Twilio 4xx/5xx 응답, 네트워크 오류, 필수 설정 누락은 `SmsDeliveryException`으로 감싸져 기존 delivery 실패 흐름으로 전달됩니다.
 
+실제 계정 없이 HTTP 계약을 확인하려면 다음 테스트를 실행합니다.
+
+```bash
+JWT_SECRET=local-test-jwt-secret-must-be-at-least-32-characters \
+  mvn test -pl delivery-service -am -Dtest=TwilioSmsSenderIntegrationTest \
+  -Dsurefire.failIfNoSpecifiedTests=false
+```
+
+이 테스트는 `127.0.0.1` loopback 가짜 서버에만 요청을 보내므로 Twilio 자격 증명, 실제 전화번호, 비용이 필요하지 않습니다. 통신사 또는 실제 단말 수신을 증명하지는 않습니다.
+
 ---
 
 ## FCM Provider 설정

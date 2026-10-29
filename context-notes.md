@@ -705,3 +705,10 @@
 - 새 테스트 라이브러리를 추가하지 않고 Java 17 `HttpServer`를 loopback 가짜 Twilio 서버로 사용한다.
 - 범위는 `TwilioSmsSender` 선택, `twilio.*` 속성 바인딩, Messages API 경로·Basic Auth·폼 본문·201 응답 처리다.
 - Kafka, 데이터베이스, Retry·Circuit Breaker, 실제 문자 수신, 상태 콜백은 범위 밖으로 둔다.
+
+## 2026-10-29 Local Twilio integration-test implementation
+
+- `TwilioSmsSenderIntegrationTest`는 `ApplicationContextRunner`로 `sms.provider=twilio`과 `twilio.*` 속성을 적용하고, Java 17 `HttpServer`에 실제 loopback HTTP 요청을 보낸다.
+- 테스트는 POST 경로, Basic Auth, form URL-encoded `To`·`Body`·`From`, `201 Created` 응답을 검증한다.
+- 가짜 서버는 `127.0.0.1`의 임의 포트에만 바인딩한다. 실제 Twilio 자격 증명·수신 번호·외부 네트워크를 사용하지 않는다.
+- `mvn test -pl delivery-service -am`은 common 6개와 delivery-service 50개 테스트를 통과했다. 전체 reactor `mvn test`는 Testcontainers E2E가 최종 요약 없이 장시간 대기해 중지했으므로 별도 환경 진단이 필요하다.
