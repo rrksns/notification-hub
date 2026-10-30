@@ -728,3 +728,9 @@
 - 대상은 `notification-hub` namespace의 `user-service-hpa`, `notification-service-hpa` 및 같은 이름의 Deployment로 한정한다. 매니페스트, HPA 최소치, CPU target은 범위 밖이다.
 - 실행 전 최대 HPA replica와 Deployment desired replica를 기록한다. 2보다 큰 값만 2로 낮추고, `EXIT`, `INT`, `TERM`에서 실제로 변경한 값만 원래대로 복구한다.
 - 구현 전에는 가짜 `kubectl` 기반 Bash 테스트로 성공, 검증 실패, 입력 거부, 이미 제한된 리소스, signal 복구를 잠근다. 실제 local Maven 실행은 구현 단계에서만 수행한다.
+
+## 2026-10-31 Local HPA cap wrapper implementation
+
+- `scripts/with-local-hpa-cap.sh`는 `--context`를 필수로 받아 현재 kubectl context를 암묵적으로 사용하지 않는다. 대상 HPA와 Deployment는 notification-hub의 user-service와 notification-service로 고정했다.
+- fake kubectl 계약 테스트는 원래 HPA 최대치와 Deployment desired replica의 성공 복구, 검증 명령 실패 후 복구, 입력 오류의 무변경, 이미 2 이하인 값의 무변경, TERM 후 복구를 확인한다.
+- `bash scripts/test/with-local-hpa-cap-test.sh`와 `bash -n scripts/with-local-hpa-cap.sh scripts/test/with-local-hpa-cap-test.sh`가 통과했다. 실제 orbstack context의 HPA 변경과 전체 Maven 실행은 다음 검증 단계로 남겼다.

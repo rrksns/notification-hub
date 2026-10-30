@@ -863,6 +863,15 @@ kubectl apply -f k8s/notification-service/hpa.yaml -f k8s/user-service/hpa.yaml
 kubectl get hpa -n notification-hub
 ```
 
+로컬 OrbStack에서 Docker Testcontainers와 애플리케이션 Pod가 자원을 경쟁할 때는 아래 래퍼로 검증 명령만 감싼다.
+
+```bash
+JWT_SECRET=bm90aWZpY2F0aW9uLW91dGJveC1yZXBsaWNhLXRlc3Qtc2VjcmV0LTMyeA== \
+  ./scripts/with-local-hpa-cap.sh --context orbstack -- mvn test
+```
+
+래퍼는 `user-service-hpa`와 `notification-service-hpa`의 최대 replica 및 같은 이름 Deployment의 desired replica가 2를 초과할 때만 임시로 2까지 제한한다. 성공, 검증 실패, `INT`, `TERM` 뒤에도 기록한 값을 복구한다. HPA 최소치와 저장소의 매니페스트는 바꾸지 않으며, 복구 후 실제 Pod 수는 HPA가 다시 조정할 수 있다.
+
 ### Grafana 모니터링 (k8s 환경)
 
 ```bash

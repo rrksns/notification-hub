@@ -87,9 +87,9 @@
 
 - [x] Approve the generic command-wrapper design.
 - [x] Create the design document and implementation plan.
-- [ ] Write failing fake-kubectl Bash tests.
-- [ ] Implement `scripts/with-local-hpa-cap.sh`.
-- [ ] Document the operator command in README.
+- [x] Write failing fake-kubectl Bash tests.
+- [x] Implement `scripts/with-local-hpa-cap.sh`.
+- [x] Document the operator command in README.
 - [ ] Run wrapper-mediated full Maven verification and confirm restoration.
 - [ ] Commit the implementation separately.
 
