@@ -720,3 +720,11 @@
 - 두 HPA의 상한을 로컬에서만 2로 임시 제한해 Pod를 4개로 줄인 뒤 Kafka E2E가 정상 기동했다. 테스트 종료 후 HPA 상한은 원래 10으로 복구했다.
 - E2E 실행 환경 변수 `JWT_SECRET`은 `JwtTokenProvider`가 Base64로 해석하므로 유효한 Base64 테스트 값을 사용해야 한다. raw 문자열은 별도 `Illegal base64 character` 설정 오류를 만든다.
 - 유효한 Base64 테스트 JWT와 HPA 제한 조건에서 전체 `mvn test`는 10개 모듈과 3개 Testcontainers E2E를 2분 13초에 통과했다.
+
+## 2026-10-30 Local HPA cap wrapper design
+
+- 로컬 Testcontainers 검증 중 단일 OrbStack 노드의 Kubernetes JVM Pod와 Docker container가 경쟁하는 문제를 재현 가능하게 완화하기 위해, 임의 검증 명령을 감싸는 Bash 래퍼를 설계했다.
+- 호출은 `./scripts/with-local-hpa-cap.sh --context orbstack -- <command>`으로 고정한다. 명시 context를 요구해 현재 context 오조작으로 다른 cluster의 HPA를 제한하는 위험을 줄인다.
+- 대상은 `notification-hub` namespace의 `user-service-hpa`, `notification-service-hpa` 및 같은 이름의 Deployment로 한정한다. 매니페스트, HPA 최소치, CPU target은 범위 밖이다.
+- 실행 전 최대 HPA replica와 Deployment desired replica를 기록한다. 2보다 큰 값만 2로 낮추고, `EXIT`, `INT`, `TERM`에서 실제로 변경한 값만 원래대로 복구한다.
+- 구현 전에는 가짜 `kubectl` 기반 Bash 테스트로 성공, 검증 실패, 입력 거부, 이미 제한된 리소스, signal 복구를 잠근다. 실제 local Maven 실행은 구현 단계에서만 수행한다.

@@ -83,6 +83,16 @@
 - [x] Execute the live release gate with local Ingress values.
 - [x] Restore original HPA limits and record the gate result.
 
+## Local HPA Cap Wrapper
+
+- [x] Approve the generic command-wrapper design.
+- [x] Create the design document and implementation plan.
+- [ ] Write failing fake-kubectl Bash tests.
+- [ ] Implement `scripts/with-local-hpa-cap.sh`.
+- [ ] Document the operator command in README.
+- [ ] Run wrapper-mediated full Maven verification and confirm restoration.
+- [ ] Commit the implementation separately.
+
 ## Phase 0: Design and Planning
 
 - [x] Confirm SMS Provider as Twilio.
