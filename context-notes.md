@@ -734,3 +734,9 @@
 - `scripts/with-local-hpa-cap.sh`는 `--context`를 필수로 받아 현재 kubectl context를 암묵적으로 사용하지 않는다. 대상 HPA와 Deployment는 notification-hub의 user-service와 notification-service로 고정했다.
 - fake kubectl 계약 테스트는 원래 HPA 최대치와 Deployment desired replica의 성공 복구, 검증 명령 실패 후 복구, 입력 오류의 무변경, 이미 2 이하인 값의 무변경, TERM 후 복구를 확인한다.
 - `bash scripts/test/with-local-hpa-cap-test.sh`와 `bash -n scripts/with-local-hpa-cap.sh scripts/test/with-local-hpa-cap-test.sh`가 통과했다. 실제 orbstack context의 HPA 변경과 전체 Maven 실행은 다음 검증 단계로 남겼다.
+
+## 2026-10-31 Local HPA cap wrapper live verification
+
+- `--context orbstack -- true` 실행은 user-service와 notification-service HPA의 최대치를 10에서 2로, Deployment desired replica를 각각 6과 10에서 2로 제한한 뒤 원래 값으로 복구했다.
+- Base64 테스트 JWT로 `./scripts/with-local-hpa-cap.sh --context orbstack -- mvn test`를 실행했다. 전체 Surefire 리포트는 172개 테스트, 실패 0, 오류 0, skip 0을 기록했고 Testcontainers E2E 세 건도 모두 통과했다.
+- 래퍼 종료 뒤 HPA는 모두 min 2, max 10으로 복구됐고 Deployment desired replica도 user-service 6, notification-service 10으로 복구됐다. HPA가 다시 조정한 현재 replica는 각각 6과 10이다.

@@ -90,8 +90,8 @@
 - [x] Write failing fake-kubectl Bash tests.
 - [x] Implement `scripts/with-local-hpa-cap.sh`.
 - [x] Document the operator command in README.
-- [ ] Run wrapper-mediated full Maven verification and confirm restoration.
-- [ ] Commit the implementation separately.
+- [x] Run wrapper-mediated full Maven verification and confirm restoration.
+- [x] Commit the implementation separately.
 
 ## Phase 0: Design and Planning
 
