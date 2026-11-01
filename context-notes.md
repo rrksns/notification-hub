@@ -740,3 +740,10 @@
 - `--context orbstack -- true` 실행은 user-service와 notification-service HPA의 최대치를 10에서 2로, Deployment desired replica를 각각 6과 10에서 2로 제한한 뒤 원래 값으로 복구했다.
 - Base64 테스트 JWT로 `./scripts/with-local-hpa-cap.sh --context orbstack -- mvn test`를 실행했다. 전체 Surefire 리포트는 172개 테스트, 실패 0, 오류 0, skip 0을 기록했고 Testcontainers E2E 세 건도 모두 통과했다.
 - 래퍼 종료 뒤 HPA는 모두 min 2, max 10으로 복구됐고 Deployment desired replica도 user-service 6, notification-service 10으로 복구됐다. HPA가 다시 조정한 현재 replica는 각각 6과 10이다.
+
+## 2026-11-01 Local HPA cap live-gate design
+
+- 사용자는 `--local-hpa-cap --context orbstack`의 명시적 opt-in 방식으로 live release gate와 HPA 래퍼를 연결하기로 승인했다.
+- 일반 gate는 현재 동작을 유지한다. local cap에는 context가 필수이며, context 없는 호출은 Kubernetes 변경 전에 실패해야 한다.
+- gate의 모든 kubectl 호출도 명시 context를 사용해야 한다. 이 계약이 없으면 HPA 제한 cluster와 실제 rollout·Ingress·NetworkPolicy 검증 cluster가 달라질 수 있다.
+- HPA 복구 책임은 기존 래퍼에만 남긴다. gate는 debug Pod cleanup만 맡고, 내부 실행 환경 표식으로 중첩 래핑을 피한다.

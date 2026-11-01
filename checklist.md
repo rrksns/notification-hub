@@ -93,6 +93,16 @@
 - [x] Run wrapper-mediated full Maven verification and confirm restoration.
 - [x] Commit the implementation separately.
 
+## Local HPA Cap Live Gate Integration
+
+- [x] Approve the explicit local opt-in design.
+- [x] Create the design document and implementation plan.
+- [ ] Write failing live-gate CLI contract tests.
+- [ ] Add context propagation and the `--local-hpa-cap` gate option.
+- [ ] Document the local opt-in command and production exclusion.
+- [ ] Run the opt-in OrbStack live gate and confirm HPA restoration.
+- [ ] Commit the implementation separately.
+
 ## Phase 0: Design and Planning
 
 - [x] Confirm SMS Provider as Twilio.
