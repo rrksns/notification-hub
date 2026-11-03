@@ -872,6 +872,20 @@ JWT_SECRET=bm90aWZpY2F0aW9uLW91dGJveC1yZXBsaWNhLXRlc3Qtc2VjcmV0LTMyeA== \
 
 래퍼는 `user-service-hpa`와 `notification-service-hpa`의 최대 replica 및 같은 이름 Deployment의 desired replica가 2를 초과할 때만 임시로 2까지 제한한다. 성공, 검증 실패, `INT`, `TERM` 뒤에도 기록한 값을 복구한다. HPA 최소치와 저장소의 매니페스트는 바꾸지 않으며, 복구 후 실제 Pod 수는 HPA가 다시 조정할 수 있다.
 
+로컬 OrbStack에서만 live release gate 전체를 같은 제한으로 실행하려면 context를 명시하고 `--local-hpa-cap`을 opt-in한다. 이 옵션은 실행 중인 HPA 상한과 Deployment desired replica를 일시적으로 변경하므로 상용·원격 cluster에서는 사용하지 않는다.
+
+```bash
+INGRESS_ADDRESS=127.0.0.1 \
+INGRESS_HTTP_PORT=31193 \
+INGRESS_HTTPS_PORT=31856 \
+INGRESS_CA_CERT=<(kubectl --context orbstack get secret notification-hub-ingress-tls \
+  -n notification-hub -o jsonpath='{.data.tls\.crt}' | base64 --decode) \
+ROLLOUT_TIMEOUT=600s \
+bash scripts/release/live-release-gate.sh --local-hpa-cap --context orbstack
+```
+
+외부 gate 프로세스는 HPA 래퍼를 한 번만 실행한다. 내부 gate에는 `LOCAL_HPA_CAP_ACTIVE=true` 표식이 전달되며, 이 표식은 운영자가 직접 설정할 옵션이 아니다. 실행 전후에는 두 HPA의 `maxReplicas`와 두 Deployment의 `spec.replicas`가 시작 값으로 복구됐는지 확인한다.
+
 ### Grafana 모니터링 (k8s 환경)
 
 ```bash

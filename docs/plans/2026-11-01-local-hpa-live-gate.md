@@ -4,7 +4,7 @@
 
 **Goal:** 명시적으로 opt-in한 OrbStack live release gate만 기존 HPA 제한 래퍼로 감싸고, 성공·실패·중단 뒤 원래 상태를 복구한다.
 
-**Architecture:** `live-release-gate.sh`가 선택 context를 모든 kubectl 호출에 전달한다. `--local-hpa-cap --context NAME`의 외부 실행만 기존 래퍼를 `exec`하고, `LOCAL_HPA_CAP_ACTIVE=1`인 내부 실행은 중첩 없이 gate 본문을 수행한다.
+**Architecture:** `live-release-gate.sh`가 선택 context를 모든 kubectl 호출에 전달한다. `--local-hpa-cap --context NAME`의 외부 실행만 기존 래퍼를 `exec`하고, `LOCAL_HPA_CAP_ACTIVE=true`인 내부 실행은 중첩 없이 gate 본문을 수행한다.
 
 **Tech Stack:** Bash, kubectl, Kubernetes HPA, fake command shell tests.
 
@@ -27,7 +27,7 @@
 
 **Step 3: opt-in과 fail-closed 경로를 실패하도록 작성한다.**
 
-`--local-hpa-cap`만으로는 exit 2와 빈 wrapper 로그를 요구한다. `--local-hpa-cap --context fake`는 wrapper를 한 번 호출하고 내부 gate에 같은 context를 전달해야 한다. `LOCAL_HPA_CAP_ACTIVE=1` 경로는 wrapper 재호출이 없어야 한다.
+`--local-hpa-cap`만으로는 exit 2와 빈 wrapper 로그를 요구한다. `--local-hpa-cap --context fake`는 wrapper를 한 번 호출하고 내부 gate에 같은 context를 전달해야 한다. `LOCAL_HPA_CAP_ACTIVE=true` 경로는 wrapper 재호출이 없어야 한다.
 
 **Step 4: RED를 확인한다.**
 

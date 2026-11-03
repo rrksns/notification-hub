@@ -19,7 +19,7 @@ bash scripts/release/live-release-gate.sh \
 
 `live-release-gate.sh`는 `--context NAME`을 선택적으로 받아 모든 `kubectl` 호출에 동일한 context를 적용한다. `--local-hpa-cap`과 함께 쓰이면 첫 번째 gate 프로세스는 `scripts/with-local-hpa-cap.sh --context NAME --namespace "$NAMESPACE"`로 자신을 한 번만 감싼다.
 
-래퍼가 실행하는 내부 gate 프로세스는 `LOCAL_HPA_CAP_ACTIVE=1` 환경 표식을 전달받는다. 표식이 있는 내부 프로세스는 다시 래퍼를 시작하지 않고, 명시 context로 rollout·Ingress·NetworkPolicy 검증을 수행한다. HPA와 Deployment의 기록·제한·복구는 기존 래퍼만 책임지고, live gate는 기존 debug Pod cleanup 책임만 유지한다.
+래퍼가 실행하는 내부 gate 프로세스는 `LOCAL_HPA_CAP_ACTIVE=true` 환경 표식을 전달받는다. 표식이 있는 내부 프로세스는 다시 래퍼를 시작하지 않고, 명시 context로 rollout·Ingress·NetworkPolicy 검증을 수행한다. HPA와 Deployment의 기록·제한·복구는 기존 래퍼만 책임지고, live gate는 기존 debug Pod cleanup 책임만 유지한다.
 
 흐름은 다음과 같다.
 
@@ -37,7 +37,7 @@ bash scripts/release/live-release-gate.sh \
 | `live-release-gate.sh --context NAME` | 모든 kubectl 호출을 NAME context로 고정한다. HPA는 제한하지 않는다. |
 | `live-release-gate.sh --local-hpa-cap --context NAME` | NAME context에서 HPA 제한 래퍼로 gate 전체를 감싼다. |
 | `live-release-gate.sh --local-hpa-cap` | usage와 exit 2로 거부한다. |
-| `live-release-gate.sh --local-hpa-cap --context NAME`와 `LOCAL_HPA_CAP_ACTIVE=1` | 내부 실행 경로다. 중첩 래핑 없이 gate 본문을 실행한다. |
+| `live-release-gate.sh --local-hpa-cap --context NAME`와 `LOCAL_HPA_CAP_ACTIVE=true` | 내부 실행 경로다. 중첩 래핑 없이 gate 본문을 실행한다. |
 
 `--context`는 HPA 래퍼와 live gate 양쪽에 같은 값으로 전달한다. `NAMESPACE`는 기존 환경변수를 유지하고 래퍼의 `--namespace`에도 전달한다.
 
@@ -58,7 +58,7 @@ bash scripts/release/live-release-gate.sh \
 2. `--context fake`는 모든 kubectl 호출에 `--context fake`를 포함한다.
 3. `--local-hpa-cap`만 준 호출은 wrapper와 kubectl 변경 전에 exit 2로 실패한다.
 4. `--local-hpa-cap --context fake`는 `with-local-hpa-cap.sh --context fake --namespace notification-hub`를 한 번만 호출하고, 내부 gate에 같은 context를 전달한다.
-5. `LOCAL_HPA_CAP_ACTIVE=1` 내부 실행은 wrapper를 다시 호출하지 않는다.
+5. `LOCAL_HPA_CAP_ACTIVE=true` 내부 실행은 wrapper를 다시 호출하지 않는다.
 
 기존 `scripts/test/with-local-hpa-cap-test.sh`는 HPA 자체의 변경·복구 계약을 계속 검증한다.
 
