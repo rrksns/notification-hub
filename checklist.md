@@ -97,11 +97,11 @@
 
 - [x] Approve the explicit local opt-in design.
 - [x] Create the design document and implementation plan.
-- [ ] Write failing live-gate CLI contract tests.
-- [ ] Add context propagation and the `--local-hpa-cap` gate option.
-- [ ] Document the local opt-in command and production exclusion.
-- [ ] Run the opt-in OrbStack live gate and confirm HPA restoration.
-- [ ] Commit the implementation separately.
+- [x] Write failing live-gate CLI contract tests.
+- [x] Add context propagation and the `--local-hpa-cap` gate option.
+- [x] Document the local opt-in command and production exclusion.
+- [x] Run the opt-in OrbStack live gate, confirm fail-closed rollout behavior, and confirm HPA restoration.
+- [x] Commit the implementation separately.
 
 ## Phase 0: Design and Planning
 

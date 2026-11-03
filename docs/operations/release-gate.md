@@ -133,6 +133,20 @@ bash scripts/release/live-release-gate.sh
 
 `INGRESS_ADDRESS`가 없거나 Kubernetes API에 연결할 수 없으면 live gate는 통과하지 않는다. 명령의 전체 출력과 커밋 SHA를 `manual_test.md` 또는 release ticket에 보관한다. 이 스크립트는 rollback이나 backup restore를 자동으로 수행하지 않으므로 해당 증적은 별도 운영 절차로 기록한다.
 
+단일 노드 OrbStack에서만 Docker Testcontainers와 Kubernetes workload의 자원 경합을 줄여야 하면, 명시적으로 local HPA cap을 opt-in한다. 이 옵션은 상용·원격 cluster에서 사용하지 않는다.
+
+```bash
+INGRESS_ADDRESS=127.0.0.1 \
+INGRESS_HTTP_PORT=31193 \
+INGRESS_HTTPS_PORT=31856 \
+INGRESS_CA_CERT=<(kubectl --context orbstack get secret notification-hub-ingress-tls \
+  -n notification-hub -o jsonpath='{.data.tls\.crt}' | base64 --decode) \
+ROLLOUT_TIMEOUT=600s \
+bash scripts/release/live-release-gate.sh --local-hpa-cap --context orbstack
+```
+
+이 실행은 `user-service-hpa`, `notification-service-hpa`의 `maxReplicas`와 두 Deployment의 desired replica를 2로 임시 제한한다. 성공, 실패, `INT`, `TERM` 종료 뒤에 시작 값을 복구한다. 내부 재호출 방지 표식은 `LOCAL_HPA_CAP_ACTIVE=true`이며, 사용자가 직접 설정하지 않는다. Gate가 rollout 전에 실패해도 HPA·Deployment 복구 결과는 별도로 확인해 release ticket에 남긴다.
+
 ## 5. Rollback
 
 새 ReplicaSet이 health check나 smoke test를 통과하지 못하면 해당 release를 중단하고 이전 revision으로 되돌린다.

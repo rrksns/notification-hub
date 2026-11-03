@@ -747,3 +747,12 @@
 - 일반 gate는 현재 동작을 유지한다. local cap에는 context가 필수이며, context 없는 호출은 Kubernetes 변경 전에 실패해야 한다.
 - gate의 모든 kubectl 호출도 명시 context를 사용해야 한다. 이 계약이 없으면 HPA 제한 cluster와 실제 rollout·Ingress·NetworkPolicy 검증 cluster가 달라질 수 있다.
 - HPA 복구 책임은 기존 래퍼에만 남긴다. gate는 debug Pod cleanup만 맡고, 내부 실행 환경 표식으로 중첩 래핑을 피한다.
+
+## 2026-11-03 Local HPA cap live-gate verification
+
+- `--local-hpa-cap --context orbstack` 실행 전 두 HPA의 `maxReplicas`와 두 Deployment의 desired replica는 모두 10이었다.
+- `INGRESS_ADDRESS=127.0.0.1`, NodePort `31193`/`31856`, TLS Secret에서 메모리로 유도한 CA bundle, `ROLLOUT_TIMEOUT=15s`로 실제 OrbStack gate를 실행했다.
+- 래퍼는 두 HPA 상한과 두 Deployment desired replica를 2로 제한했다. gate는 `discovery-service`가 `0 of 1 updated replicas are available` 상태에서 15초 timeout으로 종료 코드 1을 반환했다.
+- 실패 뒤 trap이 두 HPA의 `maxReplicas`와 두 Deployment desired replica를 모두 10으로 복구했다. 이 실행은 HPA 복구 증적이며, TLS health, HTTP redirect, Gateway 허용, NetworkPolicy 차단 검증에는 도달하지 못했다.
+- 복구 값을 읽은 뒤의 추가 Kubernetes API 확인은 `apiserver not ready`와 `ServiceUnavailable`로 실패했다. 이 상태의 원인은 이번 범위에서 확정하지 않았으며, API가 안정된 뒤 full 600초 gate를 다시 실행해야 한다.
+- 내부 재호출 방지 표식의 실제 값은 `LOCAL_HPA_CAP_ACTIVE=true`다. 기존 설계·계획의 `=1` 표기는 코드와 테스트에 맞춰 `=true`로 정정한다.
